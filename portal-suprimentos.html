@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal de Suprimentos — MpH Engenharia</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & TEMA ===== */
+:root{
+  --red:#EF3236;--red-light:#FEE2E2;--red-dark:#C41F22;
+  --green:#16A34A;--green-light:#DCFCE7;
+  --yellow:#D97706;--yellow-light:#FEF3C7;
+  --blue:#2563EB;--blue-light:#DBEAFE;
+  --purple:#7C3AED;--purple-light:#EDE9FE;
+  --orange:#EA580C;--orange-light:#FFEDD5;
+  --gray:#6B7280;--gray-light:#F3F4F6;
+  --dark-header:#2C2C2C;
+}
+body.light{--bg:#EBEBEB;--surface:#FFFFFF;--surface2:#F5F5F5;--border:#E0E0E0;--text:#1A1A1A;--text-muted:#6B6B6B;--shadow:0 2px 8px rgba(0,0,0,.09);}
+body.dark{--bg:#0D0F18;--surface:#161927;--surface2:#1E2235;--border:#2A2F45;--text:#E8EAF0;--text-muted:#7A80A0;--shadow:0 2px 8px rgba(0,0,0,.4);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .2s,color .2s;}
+
+/* ===== HEADER ===== */
+header{background:var(--dark-header);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:300;border-bottom:3px solid var(--red);}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer;}
+.logo-mph{font-size:22px;font-weight:800;letter-spacing:1.5px;color:#F0F0F0;line-height:1;}
+.logo-bar{width:3px;height:26px;background:var(--red);border-radius:2px;flex-shrink:0;}
+.logo-sub{font-size:11px;color:#9CA3AF;font-weight:400;letter-spacing:.3px;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.theme-btn{background:#3E3E3E;border:1px solid #555;border-radius:20px;padding:4px 13px;cursor:pointer;font-size:12px;color:#F0F0F0;font-family:inherit;}
+.back-btn{background:transparent;border:1px solid #555;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:12px;color:#D1D5DB;font-family:inherit;display:none;align-items:center;gap:6px;}
+.back-btn.show{display:flex;}
+.back-btn:hover{background:#3E3E3E;}
+
+/* ===== VIEWS ===== */
+.view{display:none;animation:fadeIn .2s ease;}
+.view.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* ===== HOME ===== */
+.home-wrap{max-width:1200px;margin:0 auto;padding:40px 28px;}
+.home-greeting{margin-bottom:36px;}
+.home-greeting h1{font-size:26px;font-weight:700;margin-bottom:4px;}
+.home-greeting p{font-size:14px;color:var(--text-muted);}
+.modules-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.module-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:28px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;gap:0;position:relative;overflow:hidden;
+}
+.module-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;border-radius:14px 14px 0 0;}
+.module-card.mc::before{background:var(--blue);}
+.module-card.proj::before{background:var(--purple);}
+.module-card.nf::before{background:var(--orange);}
+.module-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.14);}
+.module-icon{font-size:36px;margin-bottom:14px;}
+.module-title{font-size:18px;font-weight:700;margin-bottom:6px;}
+.module-desc{font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:20px;flex:1;}
+.module-stats{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.mstat{background:var(--surface2);border-radius:8px;padding:8px 12px;text-align:center;min-width:60px;}
+.mstat-val{font-size:22px;font-weight:700;line-height:1;}
+.mstat-lbl{font-size:10px;color:var(--text-muted);margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
+.module-btn{
+  width:100%;padding:10px;border:none;border-radius:8px;font-family:inherit;
+  font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s;
+}
+.module-card.mc .module-btn{background:var(--blue);color:#fff;}
+.module-card.proj .module-btn{background:var(--purple);color:#fff;}
+.module-card.nf .module-btn{background:var(--orange);color:#fff;}
+.module-btn:hover{opacity:.88;}
+
+/* DASHBOARD MINI na home */
+.home-dash{margin-top:32px;}
+.home-dash-title{font-size:15px;font-weight:700;margin-bottom:16px;color:var(--text-muted);}
+.team-row{display:flex;gap:10px;flex-wrap:wrap;}
+.team-mini{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);flex:1;min-width:160px;}
+.av-big{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.team-mini-info .tname{font-size:13px;font-weight:600;}
+.team-mini-info .tstats{font-size:11px;color:var(--text-muted);margin-top:3px;}
+
+/* ===== INNER MODULE WRAPPER ===== */
+.module-wrap{max-width:1400px;margin:0 auto;padding:24px 28px;}
+.module-header{display:flex;align-items:center;gap:14px;margin-bottom:24px;}
+.module-header-icon{font-size:28px;}
+.module-header h2{font-size:20px;font-weight:700;}
+.module-header p{font-size:13px;color:var(--text-muted);margin-top:2px;}
+
+/* ===== CARDS GENÉRICO ===== */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);}
+.card-head{background:var(--dark-header);color:#F0F0F0;padding:11px 18px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.card-head .dot{width:7px;height:7px;background:var(--red);border-radius:50%;}
+.card-body{padding:18px;}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+.stat-c{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:13px 16px;box-shadow:var(--shadow);}
+.stat-c .sl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted);}
+.stat-c .sv{font-size:26px;font-weight:700;margin-top:3px;}
+.sv.red{color:var(--red);}.sv.green{color:var(--green);}.sv.yellow{color:var(--yellow);}.sv.blue{color:var(--blue);}.sv.dk{color:var(--text);}
+
+/* LAYOUT 2 COL */
+.two-col{display:grid;grid-template-columns:310px 1fr;gap:18px;align-items:start;}
+
+/* FORM */
+.form-body{padding:18px;display:flex;flex-direction:column;gap:12px;}
+.f label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted);margin-bottom:4px;}
+.f input,.f select,.f textarea{width:100%;border:1.5px solid var(--border);border-radius:6px;padding:8px 11px;font-family:inherit;font-size:13px;color:var(--text);background:var(--surface);transition:border-color .15s;}
+.f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:var(--red);}
+.f textarea{resize:vertical;min-height:60px;}
+.f select:disabled{-webkit-appearance:none;-moz-appearance:none;appearance:none;cursor:default;opacity:.9;}
+.deadline-box{background:var(--surface2);border:1.5px solid var(--border);border-radius:6px;padding:9px 11px;display:flex;justify-content:space-between;align-items:center;min-height:38px;}
+.dl-label{font-size:11px;color:var(--text-muted);}
+.dl-date{font-size:13px;font-weight:700;}
+.btn-submit{background:var(--red);color:#fff;border:none;border-radius:7px;padding:11px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;width:100%;}
+.btn-submit:hover{opacity:.86;}
+.btn-submit.blue{background:var(--blue);}
+.btn-submit.purple{background:var(--purple);}
+.btn-submit.orange{background:var(--orange);}
+
+/* TABLE */
+.tbl-head{padding:11px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.tbl-head-title{font-size:13px;font-weight:600;}
+.filters{display:flex;gap:7px;flex-wrap:wrap;}
+.fsel,.fsearch{border:1.5px solid var(--border);border-radius:6px;padding:6px 10px;font-family:inherit;font-size:12px;color:var(--text);background:var(--surface);}
+.fsel:focus,.fsearch:focus{outline:none;border-color:var(--red);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{background:var(--surface2);padding:9px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted);border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:hover{background:var(--surface2);}
+tbody tr:last-child{border-bottom:none;}
+td{padding:10px 14px;vertical-align:middle;}
+.fw{font-weight:700;}
+
+/* BADGES */
+.badge{display:inline-block;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap;}
+.sbadge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:600;white-space:nowrap;}
+.sbadge::before{content:'';width:6px;height:6px;border-radius:50%;}
+.s-vencido{background:var(--red-light);color:#B91C1C;}.s-vencido::before{background:#B91C1C;}
+.s-critico{background:var(--red-light);color:var(--red);}.s-critico::before{background:var(--red);}
+.s-atencao{background:var(--yellow-light);color:var(--yellow);}.s-atencao::before{background:var(--yellow);}
+.s-ok{background:var(--green-light);color:var(--green);}.s-ok::before{background:var(--green);}
+.s-concluido{background:var(--gray-light);color:var(--gray);}.s-concluido::before{background:var(--gray);}
+.s-andamento{background:var(--blue-light);color:var(--blue);}.s-andamento::before{background:var(--blue);}
+.s-pausado{background:var(--yellow-light);color:var(--yellow);}.s-pausado::before{background:var(--yellow);}
+.s-cancelado{background:var(--red-light);color:var(--red);}.s-cancelado::before{background:var(--red);}
+.s-aberta{background:var(--orange-light);color:var(--orange);}.s-aberta::before{background:var(--orange);}
+.s-resolvida{background:var(--green-light);color:var(--green);}.s-resolvida::before{background:var(--green);}
+.p-alta{background:var(--red-light);color:var(--red);}
+.p-media{background:var(--yellow-light);color:var(--yellow);}
+.p-baixa{background:var(--green-light);color:var(--green);}
+
+/* AVATAR */
+.avc{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;}
+.av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;}
+
+/* URGENCY BAR */
+.ubar{display:flex;align-items:center;gap:7px;}
+.ud{font-size:12px;font-weight:700;min-width:50px;text-align:right;}
+.btrack{flex:1;height:5px;background:var(--border);border-radius:99px;overflow:hidden;min-width:50px;}
+.bfill{height:100%;border-radius:99px;}
+
+/* EMPTY */
+.empty{padding:50px;text-align:center;color:var(--text-muted);}
+.empty-icon{font-size:38px;margin-bottom:10px;}
+
+/* ACTION BUTTONS */
+.acts{display:flex;gap:3px;}
+.abt{background:var(--surface2);border:1px solid var(--border);border-radius:5px;width:27px;height:27px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .15s;}
+.abt:hover{background:var(--border);}
+.abt.danger:hover{background:var(--red-light);border-color:var(--red);}
+.abt.ok:hover{background:var(--green-light);border-color:var(--green);}
+
+/* NF - ATUALIZAÇÕES */
+.updates-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.update-item{background:var(--surface2);border-left:3px solid var(--blue);border-radius:0 6px 6px 0;padding:8px 12px;font-size:12px;}
+.update-meta{font-size:10px;color:var(--text-muted);margin-top:4px;}
+
+/* PROJETOS KANBAN MINI */
+.proj-board{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:4px;}
+.proj-col{background:var(--surface2);border-radius:10px;padding:12px;}
+.proj-col-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.proj-col-count{background:var(--border);border-radius:10px;padding:1px 7px;font-size:11px;color:var(--text);}
+.proj-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 12px;margin-bottom:8px;cursor:pointer;transition:all .15s;box-shadow:var(--shadow);}
+.proj-item:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.12);}
+.proj-item-title{font-size:13px;font-weight:600;margin-bottom:5px;}
+.proj-item-meta{font-size:11px;color:var(--text-muted);display:flex;flex-wrap:wrap;gap:5px;align-items:center;}
+.proj-item-footer{margin-top:8px;display:flex;align-items:center;justify-content:space-between;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:400;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:14px;width:520px;max-width:96vw;max-height:88vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.35);}
+.modal-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-head h3{font-size:15px;font-weight:700;}
+.modal-x{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);line-height:1;}
+.modal-body{padding:22px;display:flex;flex-direction:column;gap:12px;}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
+.btn-sec{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 16px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:var(--text);}
+.btn-pri{background:var(--red);border:none;border-radius:6px;padding:8px 16px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;color:#fff;}
+.btn-pri.blue{background:var(--blue);}
+.btn-pri.purple{background:var(--purple);}
+.btn-pri.orange{background:var(--orange);}
+.btn-del{background:#DC2626;border:none;border-radius:6px;padding:8px 16px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;color:#fff;}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--dark-header);color:#fff;padding:11px 16px;border-radius:8px;font-size:13px;font-weight:500;z-index:500;display:none;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.toast.show{display:flex;animation:slideUp .2s ease;}
+.toast.success{border-left:4px solid var(--green);}
+.toast.error{border-left:4px solid var(--red);}
+@keyframes slideUp{from{transform:translateY(14px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+/* NF detail panel */
+.nf-detail{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px;}
+.nf-detail-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
+.nf-num{font-size:16px;font-weight:700;}
+.nf-info{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;}
+.nf-info-item{font-size:12px;color:var(--text-muted);}
+.nf-info-item strong{color:var(--text);display:block;font-size:13px;}
+.add-update-form{background:var(--surface2);border-radius:8px;padding:12px;margin-top:10px;}
+.add-update-form textarea{width:100%;border:1.5px solid var(--border);border-radius:6px;padding:8px;font-family:inherit;font-size:13px;resize:vertical;min-height:70px;background:var(--surface);color:var(--text);}
+.add-update-form textarea:focus{outline:none;border-color:var(--blue);}
+
+@media(max-width:900px){
+  .modules-grid{grid-template-columns:1fr;}
+  .two-col{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .proj-board{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body class="light">
+
+<!-- HEADER -->
+<header>
+  <div class="logo" onclick="goHome()">
+    <span class="logo-mph">MpH</span>
+    <span class="logo-bar"></span>
+    <span class="logo-sub">Portal de Suprimentos</span>
+  </div>
+  <div class="header-right">
+    <button class="back-btn" id="backBtn" onclick="goHome()">← Início</button>
+    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+  </div>
+</header>
+
+<!-- ===================== VIEW: HOME ===================== -->
+<div class="view active" id="view-home">
+  <div class="home-wrap">
+    <div class="home-greeting">
+      <h1>Bom dia, Suprimentos 👋</h1>
+      <p>Selecione um módulo para começar ou acompanhe o resumo da equipe abaixo.</p>
+    </div>
+
+    <div class="modules-grid">
+      <!-- MAPAS -->
+      <div class="module-card mc" onclick="openModule('mc')">
+        <div class="module-icon">📋</div>
+        <div class="module-title">Mapas de Cotação</div>
+        <div class="module-desc">Registre e acompanhe os mapas de cotação da equipe. Calcule prazos automaticamente por tipo de material ou serviço e monitore o status em tempo real.</div>
+        <div class="module-stats" id="home-mc-stats">
+          <div class="mstat"><div class="mstat-val" id="hmc-total">—</div><div class="mstat-lbl">Total</div></div>
+          <div class="mstat"><div class="mstat-val" style="color:var(--red)" id="hmc-crit">—</div><div class="mstat-lbl">Críticos</div></div>
+          <div class="mstat"><div class="mstat-val" style="color:var(--green)" id="hmc-ok">—</div><div class="mstat-lbl">Em dia</div></div>
+        </div>
+        <button class="module-btn">Acessar Mapas →</button>
+      </div>
+
+      <!-- PROJETOS -->
+      <div class="module-card proj" onclick="openModule('proj')">
+        <div class="module-icon">📁</div>
+        <div class="module-title">Projetos</div>
+        <div class="module-desc">Gerencie projetos internos de qualquer natureza — obras, melhorias de processo, RH, orçamentos, TI e mais. Acompanhe prioridade, prazo e status de cada iniciativa.</div>
+        <div class="module-stats">
+          <div class="mstat"><div class="mstat-val" id="hproj-total">—</div><div class="mstat-lbl">Total</div></div>
+          <div class="mstat"><div class="mstat-val" style="color:var(--blue)" id="hproj-and">—</div><div class="mstat-lbl">Andamento</div></div>
+          <div class="mstat"><div class="mstat-val" style="color:var(--yellow)" id="hproj-atr">—</div><div class="mstat-lbl">Atrasados</div></div>
+        </div>
+        <button class="module-btn">Acessar Projetos →</button>
+      </div>
+
+      <!-- NF -->
+      <div class="module-card nf" onclick="openModule('nf')">
+        <div class="module-icon">🧾</div>
+        <div class="module-title">Pendências de NF</div>
+        <div class="module-desc">Controle notas fiscais que precisam de resolução. A coordenação registra a pendência e o comprador responsável atualiza o andamento — previsão de pagamento, situação atual e mais.</div>
+        <div class="module-stats">
+          <div class="mstat"><div class="mstat-val" id="hnf-total">—</div><div class="mstat-lbl">Total</div></div>
+          <div class="mstat"><div class="mstat-val" style="color:var(--orange)" id="hnf-aber">—</div><div class="mstat-lbl">Abertas</div></div>
+          <div class="mstat"><div class="mstat-val" style="color:var(--green)" id="hnf-res">—</div><div class="mstat-lbl">Resolvidas</div></div>
+        </div>
+        <button class="module-btn">Acessar NFs →</button>
+      </div>
+    </div>
+
+    <!-- TEAM STRIP -->
+    <div class="home-dash">
+      <div class="home-dash-title">Visão rápida da equipe</div>
+      <div class="team-row" id="homeTeamRow"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== VIEW: MAPAS ===================== -->
+<div class="view" id="view-mc">
+  <div class="module-wrap">
+    <div class="module-header">
+      <div class="module-header-icon">📋</div>
+      <div>
+        <h2>Mapas de Cotação</h2>
+        <p>Registro e acompanhamento de mapas da equipe</p>
+      </div>
+    </div>
+    <div class="stats-row" id="mc-stats"></div>
+    <div class="two-col">
+      <!-- FORM -->
+      <div class="card" style="position:sticky;top:80px;">
+        <div class="card-head"><span class="dot"></span>Novo Mapa</div>
+        <div class="form-body">
+          <div class="f"><label>Nº do Mapa</label><input type="text" id="fNumero" placeholder="Ex: MC-2025-001"></div>
+          <div class="f"><label>Obra</label><select id="fObra" onchange="onObraChange()"><option value="">— Selecionar obra —</option></select></div>
+          <div class="f"><label>Tipo</label><select id="fTipo" onchange="calcDeadline()"><option value="">— Selecionar tipo —</option></select></div>
+          <div class="f"><label>Descrição</label><input type="text" id="fDescricao" placeholder="Ex: Argamassa AC-III"></div>
+          <div class="f"><label>Responsável</label>
+            <select id="fResponsavel">
+              <option value="Andressa">Andressa</option>
+              <option value="Gustavo">Gustavo</option>
+              <option value="Gisele">Gisele</option>
+              <option value="Novaes">Novaes</option>
+              <option value="Henrique">Henrique</option>
+            </select>
+          </div>
+          <div class="f"><label>Data de Solicitação</label><input type="date" id="fDataSolicitacao" onchange="calcDeadline()"></div>
+          <div class="f">
+            <label>Prazo (calculado)</label>
+            <div class="deadline-box"><span class="dl-label" id="dlLabel">Selecione tipo e data</span><span class="dl-date" id="dlDate">—</span></div>
+          </div>
+          <div class="f"><label>Observação</label><textarea id="fObs" placeholder="Urgente, observações..."></textarea></div>
+          <button class="btn-submit" onclick="addMapa()">+ Registrar Mapa</button>
+        </div>
+      </div>
+      <!-- TABLE -->
+      <div class="card">
+        <div class="tbl-head">
+          <span class="tbl-head-title" id="mc-table-title">Todos os Mapas</span>
+          <div class="filters">
+            <input class="fsearch" type="text" id="mcSearch" placeholder="🔍 Buscar..." oninput="renderMapas()">
+            <select class="fsel" id="mcFResp" onchange="renderMapas()">
+              <option value="">Todos</option>
+              <option value="Andressa">Andressa</option>
+              <option value="Gustavo">Gustavo</option>
+              <option value="Gisele">Gisele</option>
+              <option value="Novaes">Novaes</option>
+              <option value="Henrique">Henrique</option>
+            </select>
+            <select class="fsel" id="mcFStatus" onchange="renderMapas()">
+              <option value="">Todos status</option>
+              <option value="vencido">Vencidos</option>
+              <option value="critico">Hoje</option>
+              <option value="atencao">Atenção</option>
+              <option value="ok">Em dia</option>
+              <option value="concluido">Concluídos</option>
+            </select>
+            <select class="fsel" id="mcFTipo" onchange="renderMapas()"><option value="">Todos tipos</option></select>
+          </div>
+        </div>
+        <div id="mcTableContainer"></div>
+      </div>
+    </div>
+
+    <!-- OBRAS & PRAZOS como sub-seções -->
+    <div style="margin-top:28px;display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+      <!-- OBRAS -->
+      <div class="card">
+        <div class="card-head"><span class="dot"></span>Obras Cadastradas</div>
+        <div class="tbl-head">
+          <input class="fsearch" type="text" id="obraSearch" placeholder="🔍 Buscar..." oninput="renderObras()">
+          <button class="btn-submit blue" style="width:auto;padding:7px 14px;font-size:12px" onclick="openModalObra()">+ Nova Obra</button>
+        </div>
+        <div id="obrasContainer"></div>
+      </div>
+      <!-- PRAZOS -->
+      <div class="card">
+        <div class="card-head"><span class="dot"></span>Tipos e Prazos</div>
+        <div class="tbl-head">
+          <span style="font-size:12px;color:var(--text-muted)">Gerencie tipos e prazos por categoria</span>
+          <button class="btn-submit blue" style="width:auto;padding:7px 14px;font-size:12px" onclick="openModalTipo()">+ Novo Tipo</button>
+        </div>
+        <div id="prazosContainer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== VIEW: PROJETOS ===================== -->
+<div class="view" id="view-proj">
+  <div class="module-wrap">
+    <div class="module-header">
+      <div class="module-header-icon">📁</div>
+      <div>
+        <h2>Projetos</h2>
+        <p>Projetos internos da equipe de Suprimentos</p>
+      </div>
+    </div>
+    <div class="stats-row" id="proj-stats"></div>
+    <div class="two-col">
+      <!-- FORM -->
+      <div class="card" style="position:sticky;top:80px;">
+        <div class="card-head"><span class="dot"></span>Novo Projeto</div>
+        <div class="form-body">
+          <div class="f"><label>Nome do Projeto</label><input type="text" id="pNome" placeholder="Ex: Melhoria do processo de cotação"></div>
+          <div class="f"><label>Categoria</label>
+            <select id="pCategoria">
+              <option value="Obra">🏗️ Obra</option>
+              <option value="Processo Interno">⚙️ Processo Interno</option>
+              <option value="RH">👥 RH</option>
+              <option value="Orçamentos">💰 Orçamentos</option>
+              <option value="TI">💻 TI</option>
+              <option value="Fornecedores">🤝 Fornecedores</option>
+              <option value="Outros">📌 Outros</option>
+            </select>
+          </div>
+          <div class="f"><label>Responsável</label>
+            <select id="pResponsavel">
+              <option value="Andressa">Andressa</option>
+              <option value="Gustavo">Gustavo</option>
+              <option value="Gisele">Gisele</option>
+              <option value="Novaes">Novaes</option>
+              <option value="Henrique">Henrique</option>
+            </select>
+          </div>
+          <div class="f"><label>Prioridade</label>
+            <select id="pPrioridade">
+              <option value="Alta">🔴 Alta</option>
+              <option value="Média">🟡 Média</option>
+              <option value="Baixa">🟢 Baixa</option>
+            </select>
+          </div>
+          <div class="f"><label>Data de Início</label><input type="date" id="pInicio"></div>
+          <div class="f"><label>Prazo Previsto</label><input type="date" id="pPrazo"></div>
+          <div class="f"><label>Descrição / Objetivo</label><textarea id="pDescricao" placeholder="Descreva o objetivo do projeto..."></textarea></div>
+          <button class="btn-submit purple" onclick="addProjeto()">+ Criar Projeto</button>
+        </div>
+      </div>
+      <!-- BOARD / TABLE -->
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="tbl-head">
+            <span class="tbl-head-title">Quadro de Projetos</span>
+            <div class="filters">
+              <input class="fsearch" type="text" id="projSearch" placeholder="🔍 Buscar..." oninput="renderProjetos()">
+              <select class="fsel" id="projFResp" onchange="renderProjetos()">
+                <option value="">Todos</option>
+                <option value="Andressa">Andressa</option>
+                <option value="Gustavo">Gustavo</option>
+                <option value="Gisele">Gisele</option>
+                <option value="Novaes">Novaes</option>
+                <option value="Henrique">Henrique</option>
+              </select>
+              <select class="fsel" id="projFCat" onchange="renderProjetos()">
+                <option value="">Todas categorias</option>
+                <option value="Obra">Obra</option>
+                <option value="Processo Interno">Processo Interno</option>
+                <option value="RH">RH</option>
+                <option value="Orçamentos">Orçamentos</option>
+                <option value="TI">TI</option>
+                <option value="Fornecedores">Fornecedores</option>
+                <option value="Outros">Outros</option>
+              </select>
+              <select class="fsel" id="projFView" onchange="renderProjetos()">
+                <option value="board">Quadro</option>
+                <option value="list">Lista</option>
+              </select>
+            </div>
+          </div>
+          <div style="padding:14px;" id="projContainer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== VIEW: NF ===================== -->
+<div class="view" id="view-nf">
+  <div class="module-wrap">
+    <div class="module-header">
+      <div class="module-header-icon">🧾</div>
+      <div>
+        <h2>Pendências de NF</h2>
+        <p>Controle de notas fiscais que precisam de resolução</p>
+      </div>
+    </div>
+    <div class="stats-row" id="nf-stats"></div>
+    <div class="two-col">
+      <!-- FORM -->
+      <div class="card" style="position:sticky;top:80px;">
+        <div class="card-head"><span class="dot"></span>Registrar Pendência</div>
+        <div class="form-body">
+          <div class="f"><label>Nº da NF</label><input type="text" id="nfNumero" placeholder="Ex: 9051"></div>
+          <div class="f"><label>Fornecedor</label><input type="text" id="nfFornecedor" placeholder="Ex: Protecard"></div>
+          <div class="f"><label>Valor (R$)</label><input type="text" id="nfValor" placeholder="Ex: 5.200,00"></div>
+          <div class="f"><label>Responsável por resolver</label>
+            <select id="nfResponsavel">
+              <option value="Andressa">Andressa</option>
+              <option value="Gustavo">Gustavo</option>
+              <option value="Gisele">Gisele</option>
+              <option value="Novaes">Novaes</option>
+              <option value="Henrique">Henrique</option>
+            </select>
+          </div>
+          <div class="f"><label>Descrição do Problema</label><textarea id="nfDescricao" placeholder="Ex: NF vencida, pagamento pendente de aprovação..."></textarea></div>
+          <div class="f"><label>Data de Vencimento da NF</label><input type="date" id="nfVencimento"></div>
+          <button class="btn-submit orange" onclick="addNF()">+ Registrar Pendência</button>
+        </div>
+      </div>
+      <!-- LIST -->
+      <div>
+        <div class="card">
+          <div class="tbl-head">
+            <span class="tbl-head-title">Pendências</span>
+            <div class="filters">
+              <input class="fsearch" type="text" id="nfSearch" placeholder="🔍 NF ou fornecedor..." oninput="renderNFs()">
+              <select class="fsel" id="nfFResp" onchange="renderNFs()">
+                <option value="">Todos</option>
+                <option value="Andressa">Andressa</option>
+                <option value="Gustavo">Gustavo</option>
+                <option value="Gisele">Gisele</option>
+                <option value="Novaes">Novaes</option>
+                <option value="Henrique">Henrique</option>
+              </select>
+              <select class="fsel" id="nfFStatus" onchange="renderNFs()">
+                <option value="">Todos status</option>
+                <option value="aberta">Abertas</option>
+                <option value="resolvida">Resolvidas</option>
+              </select>
+            </div>
+          </div>
+          <div style="padding:14px;" id="nfContainer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAIS ========== -->
+<!-- Editar Mapa -->
+<div class="modal-overlay" id="modalEditMapa">
+  <div class="modal">
+    <div class="modal-head"><h3>Editar Mapa</h3><button class="modal-x" onclick="closeModal('modalEditMapa')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="eMId">
+      <div class="f"><label>Nº do Mapa</label><input type="text" id="eMNumero"></div>
+      <div class="f"><label>Obra</label><select id="eMObra"></select></div>
+      <div class="f"><label>Tipo</label><select id="eMTipo" onchange="calcEditDeadline()"></select></div>
+      <div class="f"><label>Descrição</label><input type="text" id="eMDesc"></div>
+      <div class="f"><label>Responsável</label>
+        <select id="eMResp">
+          <option value="Andressa">Andressa</option><option value="Gustavo">Gustavo</option>
+          <option value="Gisele">Gisele</option><option value="Novaes">Novaes</option>
+          <option value="Henrique">Henrique</option>
+        </select>
+      </div>
+      <div class="f"><label>Data Solicitação</label><input type="date" id="eMData" onchange="calcEditDeadline()"></div>
+      <div class="f"><label>Prazo</label><input type="date" id="eMPrazo"></div>
+      <div class="f"><label>Observação</label><textarea id="eMObs"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-sec" onclick="closeModal('modalEditMapa')">Cancelar</button>
+      <button class="btn-pri" onclick="saveEditMapa()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Editar Projeto -->
+<div class="modal-overlay" id="modalEditProj">
+  <div class="modal">
+    <div class="modal-head"><h3>Editar Projeto</h3><button class="modal-x" onclick="closeModal('modalEditProj')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="ePId">
+      <div class="f"><label>Nome</label><input type="text" id="ePNome"></div>
+      <div class="f"><label>Categoria</label>
+        <select id="ePCat">
+          <option value="Obra">🏗️ Obra</option><option value="Processo Interno">⚙️ Processo Interno</option>
+          <option value="RH">👥 RH</option><option value="Orçamentos">💰 Orçamentos</option>
+          <option value="TI">💻 TI</option><option value="Fornecedores">🤝 Fornecedores</option>
+          <option value="Outros">📌 Outros</option>
+        </select>
+      </div>
+      <div class="f"><label>Responsável</label>
+        <select id="ePResp">
+          <option value="Andressa">Andressa</option><option value="Gustavo">Gustavo</option>
+          <option value="Gisele">Gisele</option><option value="Novaes">Novaes</option>
+          <option value="Henrique">Henrique</option>
+        </select>
+      </div>
+      <div class="f"><label>Status</label>
+        <select id="ePStatus">
+          <option value="andamento">Em andamento</option><option value="pausado">Pausado</option>
+          <option value="concluido">Concluído</option><option value="cancelado">Cancelado</option>
+        </select>
+      </div>
+      <div class="f"><label>Prioridade</label>
+        <select id="ePPrior">
+          <option value="Alta">🔴 Alta</option><option value="Média">🟡 Média</option><option value="Baixa">🟢 Baixa</option>
+        </select>
+      </div>
+      <div class="f"><label>Data de Início</label><input type="date" id="ePInicio"></div>
+      <div class="f"><label>Prazo Previsto</label><input type="date" id="ePPrazo"></div>
+      <div class="f"><label>Descrição</label><textarea id="ePDesc"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-sec" onclick="closeModal('modalEditProj')">Cancelar</button>
+      <button class="btn-del" onclick="delProjeto()">Excluir</button>
+      <button class="btn-pri purple" onclick="saveEditProj()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Atualizar NF -->
+<div class="modal-overlay" id="modalNFUpdate">
+  <div class="modal">
+    <div class="modal-head"><h3 id="nfModalTitle">Atualizar Pendência</h3><button class="modal-x" onclick="closeModal('modalNFUpdate')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="eNFId">
+      <div id="nfDetailPanel"></div>
+      <div class="add-update-form">
+        <label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted);display:block;margin-bottom:6px;">Adicionar atualização</label>
+        <textarea id="nfUpdateText" placeholder="Ex: Aguardando aprovação do diretor. Previsão de pagamento 20/06..."></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
+          <select class="fsel" id="nfUpdateStatus" style="flex:1">
+            <option value="">Manter status atual</option>
+            <option value="aberta">Manter aberta</option>
+            <option value="resolvida">Marcar como resolvida ✅</option>
+          </select>
+          <button class="btn-pri orange" onclick="addNFUpdate()" style="white-space:nowrap">Registrar</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-sec" onclick="closeModal('modalNFUpdate')">Fechar</button>
+      <button class="btn-del" onclick="delNF()">Excluir pendência</button>
+    </div>
+  </div>
+</div>
+
+<!-- Obra -->
+<div class="modal-overlay" id="modalObra">
+  <div class="modal">
+    <div class="modal-head"><h3 id="obraModalTitle">Nova Obra</h3><button class="modal-x" onclick="closeModal('modalObra')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="eObraId">
+      <div class="f"><label>Nome da Obra</label><input type="text" id="eObraNome" placeholder="Ex: Residencial Iporanga Fase 2"></div>
+      <div class="f"><label>Comprador Responsável</label>
+        <select id="eObraComp">
+          <option value="Andressa">Andressa</option><option value="Gustavo">Gustavo</option>
+          <option value="Gisele">Gisele</option><option value="Novaes">Novaes</option>
+          <option value="Henrique">Henrique</option>
+        </select>
+      </div>
+      <div class="f"><label>Observação</label><textarea id="eObraObs"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-sec" onclick="closeModal('modalObra')">Cancelar</button>
+      <button class="btn-del" id="obraDelBtn" onclick="delObra()" style="display:none">Excluir</button>
+      <button class="btn-pri blue" onclick="saveObra()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tipo -->
+<div class="modal-overlay" id="modalTipo">
+  <div class="modal">
+    <div class="modal-head"><h3 id="tipoModalTitle">Novo Tipo</h3><button class="modal-x" onclick="closeModal('modalTipo')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="eTipoId">
+      <div class="f"><label>Nome do Tipo</label><input type="text" id="eTipoNome" placeholder="Ex: Material Básico"></div>
+      <div class="f"><label>Prazo (dias úteis)</label><input type="number" id="eTipoDias" min="1" value="3"></div>
+      <div class="f"><label>Cor</label>
+        <select id="eTipoCor">
+          <option value="blue">Azul</option><option value="green">Verde</option>
+          <option value="yellow">Amarelo</option><option value="red">Vermelho</option>
+          <option value="purple">Roxo</option><option value="gray">Cinza</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-sec" onclick="closeModal('modalTipo')">Cancelar</button>
+      <button class="btn-del" id="tipoDelBtn" onclick="delTipo()" style="display:none">Excluir</button>
+      <button class="btn-pri" onclick="saveTipo()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== CONSTANTES =====
+const TEAM=[
+  {name:'Andressa',role:'Comprador Pleno',color:'#EF3236'},
+  {name:'Gustavo', role:'Comprador Pleno',color:'#2563EB'},
+  {name:'Gisele',  role:'Comprador Pleno',color:'#16A34A'},
+  {name:'Novaes',  role:'Comprador Pleno',color:'#7C3AED'},
+  {name:'Henrique',role:'Comprador Sênior',color:'#D97706'},
+];
+const COR_MAP={
+  blue:{cor:'#2563EB',bg:'#DBEAFE'},green:{cor:'#16A34A',bg:'#DCFCE7'},
+  yellow:{cor:'#D97706',bg:'#FEF3C7'},red:{cor:'#EF3236',bg:'#FEE2E2'},
+  purple:{cor:'#7C3AED',bg:'#EDE9FE'},gray:{cor:'#6B7280',bg:'#F3F4F6'},
+};
+const DEFAULT_TIPOS=[
+  {id:1,nome:'Material Básico',      dias:3,corKey:'blue'},
+  {id:2,nome:'Material Especializado',dias:5,corKey:'purple'},
+  {id:3,nome:'Serviço Comum',        dias:5,corKey:'green'},
+  {id:4,nome:'Serviço Especializado', dias:7,corKey:'yellow'},
+  {id:5,nome:'Equipamento',          dias:7,corKey:'gray'},
+  {id:6,nome:'Locação',              dias:5,corKey:'red'},
+  {id:7,nome:'Urgente',              dias:1,corKey:'red'},
+];
+
+// ===== STATE =====
+let mapas    = JSON.parse(localStorage.getItem('mph_mapas')   ||'[]');
+let obras    = JSON.parse(localStorage.getItem('mph_obras')   ||'[]');
+let tipos    = JSON.parse(localStorage.getItem('mph_tipos')   ||JSON.stringify(DEFAULT_TIPOS));
+let projetos = JSON.parse(localStorage.getItem('mph_projetos')||'[]');
+let nfs      = JSON.parse(localStorage.getItem('mph_nfs')     ||'[]');
+let darkMode = localStorage.getItem('mph_dark')==='1';
+
+function save(){
+  localStorage.setItem('mph_mapas',   JSON.stringify(mapas));
+  localStorage.setItem('mph_obras',   JSON.stringify(obras));
+  localStorage.setItem('mph_tipos',   JSON.stringify(tipos));
+  localStorage.setItem('mph_projetos',JSON.stringify(projetos));
+  localStorage.setItem('mph_nfs',     JSON.stringify(nfs));
+}
+
+// ===== THEME =====
+function applyTheme(){
+  document.body.className=darkMode?'dark':'light';
+  document.getElementById('themeBtn').textContent=darkMode?'☀️ Claro':'🌙 Dark';
+  localStorage.setItem('mph_dark',darkMode?'1':'0');
+}
+function toggleTheme(){darkMode=!darkMode;applyTheme();}
+
+// ===== NAVIGATION =====
+let currentView='home';
+function openModule(mod){
+  currentView=mod;
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+mod).classList.add('active');
+  document.getElementById('backBtn').classList.add('show');
+  if(mod==='mc'){renderMapas();renderMCStats();renderObras();renderPrazos();}
+  if(mod==='proj'){renderProjetos();renderProjStats();}
+  if(mod==='nf'){renderNFs();renderNFStats();}
+}
+function goHome(){
+  currentView='home';
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-home').classList.add('active');
+  document.getElementById('backBtn').classList.remove('show');
+  updateHome();
+}
+
+// ===== DATE UTILS =====
+function toISO(d){return d.toISOString().split('T')[0];}
+function todayStr(){return toISO(new Date());}
+function addBizDays(dateStr,days){
+  const d=new Date(dateStr+'T12:00:00');let added=0;
+  while(added<days){d.setDate(d.getDate()+1);const w=d.getDay();if(w&&w!==6)added++;}
+  return toISO(d);
+}
+function bizDaysRemain(deadlineStr){
+  const today=new Date();today.setHours(0,0,0,0);
+  const dl=new Date(deadlineStr+'T12:00:00');
+  if(dl<today){let d=new Date(dl),c=0;while(d<today){d.setDate(d.getDate()+1);if(d.getDay()&&d.getDay()!==6)c++;}return -c;}
+  let d=new Date(today),c=0;while(d<dl){d.setDate(d.getDate()+1);if(d.getDay()&&d.getDay()!==6)c++;}return c;
+}
+function fmtBR(s){if(!s)return'—';try{const[y,m,d]=s.split('-');return`${d}/${m}/${y}`;}catch{return s;}}
+function daysAgo(isoStr){
+  if(!isoStr)return'';
+  const d=Math.floor((Date.now()-new Date(isoStr))/86400000);
+  return d===0?'hoje':d===1?'1 dia atrás':`${d} dias atrás`;
+}
+
+// ===== HELPERS =====
+function getTipo(nome){return tipos.find(t=>t.nome===nome);}
+function getCor(corKey){return COR_MAP[corKey]||COR_MAP.blue;}
+function avColor(name){return TEAM.find(t=>t.name===name)?.color||'#888';}
+function initials(name){return name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();}
+function avc(name){return`<div class="avc"><div class="av" style="background:${avColor(name)}">${initials(name)}</div><span>${name}</span></div>`;}
+
+// ===== MAPA STATUS =====
+function getMStatus(m){
+  if(m.concluido)return'concluido';
+  const d=bizDaysRemain(m.prazo);
+  if(d<0)return'vencido';if(d===0)return'critico';if(d<=2)return'atencao';return'ok';
+}
+const MS_LABEL={vencido:'Vencido',critico:'Vence hoje',atencao:'Atenção',ok:'Em dia',concluido:'Concluído'};
+
+// ===== POPULATE SELECTS =====
+function populateTipoSelects(){
+  ['fTipo','eMTipo','mcFTipo'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const prev=el.value;
+    el.innerHTML=id==='mcFTipo'?'<option value="">Todos tipos</option>':'<option value="">— Selecionar —</option>';
+    tipos.forEach(t=>{
+      const o=document.createElement('option');
+      o.value=t.nome;o.textContent=id==='mcFTipo'?t.nome:`${t.nome} (${t.dias}d úteis)`;el.appendChild(o);
+    });
+    if(prev)el.value=prev;
+  });
+}
+function populateObraSelects(){
+  ['fObra','eMObra'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const prev=el.value;
+    el.innerHTML='<option value="">— Selecionar obra —</option>';
+    obras.forEach(o=>{const opt=document.createElement('option');opt.value=o.nome;opt.textContent=o.nome;el.appendChild(opt);});
+    if(prev)el.value=prev;
+  });
+}
+
+// ===== OBRA → RESPONSAVEL =====
+function onObraChange(){
+  const obraNome=document.getElementById('fObra').value;
+  const sel=document.getElementById('fResponsavel');
+  if(!obraNome){sel.disabled=false;return;}
+  const obra=obras.find(o=>o.nome===obraNome);
+  if(obra){sel.value=obra.comprador;sel.disabled=true;}else sel.disabled=false;
+}
+
+// ===== DEADLINE MAPA =====
+function calcDeadline(){
+  const tipo=document.getElementById('fTipo').value;
+  const data=document.getElementById('fDataSolicitacao').value;
+  const t=getTipo(tipo);
+  if(!t||!data){document.getElementById('dlLabel').textContent='Selecione tipo e data';document.getElementById('dlDate').textContent='—';return null;}
+  const prazo=addBizDays(data,t.dias);
+  const rem=bizDaysRemain(prazo);
+  document.getElementById('dlLabel').textContent=`${t.dias} dias úteis →`;
+  const el=document.getElementById('dlDate');
+  el.textContent=fmtBR(prazo);
+  el.style.color=rem<=0?'var(--red)':rem<=2?'var(--yellow)':'var(--green)';
+  return prazo;
+}
+function calcEditDeadline(){
+  const tipo=document.getElementById('eMTipo').value;
+  const data=document.getElementById('eMData').value;
+  const t=getTipo(tipo);if(!t||!data)return;
+  document.getElementById('eMPrazo').value=addBizDays(data,t.dias);
+}
+
+// ===== HOME =====
+function updateHome(){
+  // MC stats
+  const active=mapas.filter(m=>!m.concluido);
+  document.getElementById('hmc-total').textContent=mapas.length;
+  document.getElementById('hmc-crit').textContent=active.filter(m=>getMStatus(m)==='vencido'||getMStatus(m)==='critico').length;
+  document.getElementById('hmc-ok').textContent=active.filter(m=>getMStatus(m)==='ok').length;
+  // Proj stats
+  const activeP=projetos.filter(p=>p.status==='andamento');
+  document.getElementById('hproj-total').textContent=projetos.length;
+  document.getElementById('hproj-and').textContent=activeP.length;
+  const atrasados=activeP.filter(p=>p.prazo&&new Date(p.prazo+'T12:00:00')<new Date());
+  document.getElementById('hproj-atr').textContent=atrasados.length;
+  // NF stats
+  document.getElementById('hnf-total').textContent=nfs.length;
+  document.getElementById('hnf-aber').textContent=nfs.filter(n=>n.status==='aberta').length;
+  document.getElementById('hnf-res').textContent=nfs.filter(n=>n.status==='resolvida').length;
+  // Team row
+  const row=document.getElementById('homeTeamRow');
+  row.innerHTML=TEAM.map(m=>{
+    const mM=mapas.filter(x=>x.responsavel===m.name&&!x.concluido).length;
+    const mP=projetos.filter(x=>x.responsavel===m.name&&x.status==='andamento').length;
+    const mN=nfs.filter(x=>x.responsavel===m.name&&x.status==='aberta').length;
+    return`<div class="team-mini">
+      <div class="av-big" style="background:${m.color}">${initials(m.name)}</div>
+      <div class="team-mini-info">
+        <div class="tname">${m.name}</div>
+        <div class="tstats">${mM} mapa${mM!==1?'s':''} · ${mP} projeto${mP!==1?'s':''} · ${mN} NF${mN!==1?'s':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== MAPAS =====
+function addMapa(){
+  const numero=document.getElementById('fNumero').value.trim();
+  const obra=document.getElementById('fObra').value;
+  const tipo=document.getElementById('fTipo').value;
+  const descricao=document.getElementById('fDescricao').value.trim();
+  const responsavel=document.getElementById('fResponsavel').value;
+  const dataSolicitacao=document.getElementById('fDataSolicitacao').value;
+  const obs=document.getElementById('fObs').value.trim();
+  if(!numero||!obra||!tipo||!dataSolicitacao){toast('Preencha Nº, Obra, Tipo e Data','error');return;}
+  const prazo=calcDeadline();if(!prazo)return;
+  mapas.unshift({id:Date.now(),numero,obra,tipo,descricao,responsavel,dataSolicitacao,prazo,obs,concluido:false,criadoEm:new Date().toISOString()});
+  save();renderMapas();renderMCStats();
+  toast(`Mapa ${numero} registrado!`);
+  ['fNumero','fDescricao','fObs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fTipo').value='';document.getElementById('fObra').value='';
+  document.getElementById('fResponsavel').disabled=false;
+  document.getElementById('fDataSolicitacao').value=todayStr();
+  document.getElementById('dlLabel').textContent='Selecione tipo e data';
+  document.getElementById('dlDate').textContent='—';
+}
+function renderMCStats(){
+  const active=mapas.filter(m=>!m.concluido);
+  const conc=mapas.filter(m=>m.concluido).length;
+  const venc=active.filter(m=>getMStatus(m)==='vencido').length;
+  const crit=active.filter(m=>getMStatus(m)==='critico').length;
+  const atenc=active.filter(m=>getMStatus(m)==='atencao').length;
+  const ok=active.filter(m=>getMStatus(m)==='ok').length;
+  document.getElementById('mc-stats').innerHTML=`
+    <div class="stat-c"><div class="sl">Total</div><div class="sv dk">${mapas.length}</div></div>
+    <div class="stat-c"><div class="sl">🔴 Vencidos/Hoje</div><div class="sv red">${venc+crit}</div></div>
+    <div class="stat-c"><div class="sl">⚠️ Atenção</div><div class="sv yellow">${atenc}</div></div>
+    <div class="stat-c"><div class="sl">✅ Em dia</div><div class="sv green">${ok}</div></div>
+    <div class="stat-c"><div class="sl">✔ Concluídos</div><div class="sv blue">${conc}</div></div>`;
+}
+function renderMapas(){
+  const search=document.getElementById('mcSearch').value.toLowerCase();
+  const fResp=document.getElementById('mcFResp').value;
+  const fStatus=document.getElementById('mcFStatus').value;
+  const fTipo=document.getElementById('mcFTipo').value;
+  let filtered=mapas.filter(m=>{
+    if(search&&!`${m.numero} ${m.obra} ${m.descricao} ${m.responsavel} ${m.tipo}`.toLowerCase().includes(search))return false;
+    if(fResp&&m.responsavel!==fResp)return false;
+    if(fTipo&&m.tipo!==fTipo)return false;
+    if(fStatus&&getMStatus(m)!==fStatus)return false;
+    return true;
+  });
+  const order={vencido:0,critico:1,atencao:2,ok:3,concluido:4};
+  filtered.sort((a,b)=>{const sa=getMStatus(a),sb=getMStatus(b);if(order[sa]!==order[sb])return order[sa]-order[sb];return new Date(a.prazo)-new Date(b.prazo);});
+  const c=document.getElementById('mcTableContainer');
+  if(!filtered.length){c.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div>Nenhum mapa encontrado</div></div>';return;}
+  c.innerHTML=`<table><thead><tr>
+    <th>Nº</th><th>Obra</th><th>Tipo</th><th>Responsável</th>
+    <th>Solicitado</th><th>Prazo</th><th>Restante</th><th>Status</th><th></th>
+  </tr></thead><tbody>${filtered.map(m=>{
+    const s=getMStatus(m);const days=m.concluido?null:bizDaysRemain(m.prazo);
+    const t=getTipo(m.tipo);const cor=t?getCor(t.corKey):COR_MAP.blue;
+    const totalD=t?t.dias:5;
+    let bp=0,bc='#22C55E';
+    if(!m.concluido&&days!==null){bp=Math.max(0,Math.min(100,(days/totalD)*100));if(days<=0){bc='#EF3236';bp=100;}else if(days<=1)bc='#EF3236';else if(days<=2)bc='#F59E0B';}
+    const dt=m.concluido?'—':days<0?`${Math.abs(days)}d atrás`:days===0?'Hoje!':days===1?'1 dia':`${days} dias`;
+    const dc=m.concluido?'var(--text-muted)':days<=0?'var(--red)':days<=2?'var(--yellow)':'var(--green)';
+    return`<tr>
+      <td><span class="fw">${m.numero}</span></td>
+      <td style="font-size:12px;max-width:130px" title="${m.obra}">${m.obra.length>20?m.obra.substring(0,20)+'…':m.obra}</td>
+      <td><span class="badge" style="color:${cor.cor};background:${cor.bg}">${m.tipo}</span></td>
+      <td>${avc(m.responsavel)}</td>
+      <td style="font-size:12px;color:var(--text-muted)">${fmtBR(m.dataSolicitacao)}</td>
+      <td style="font-size:12px;font-weight:600">${fmtBR(m.prazo)}</td>
+      <td>${m.concluido?'<span style="font-size:12px;color:var(--gray)">Concluído</span>':`
+        <div class="ubar"><span class="ud" style="color:${dc}">${dt}</span>
+        <div class="btrack"><div class="bfill" style="width:${bp}%;background:${bc}"></div></div></div>`}</td>
+      <td><span class="sbadge s-${s}">${MS_LABEL[s]}</span></td>
+      <td><div class="acts">
+        ${!m.concluido?`<button class="abt ok" onclick="toggleMapa(${m.id})" title="Concluir">✅</button>`:`<button class="abt" onclick="toggleMapa(${m.id})" title="Reabrir" style="font-size:10px">↩</button>`}
+        <button class="abt" onclick="editMapa(${m.id})" title="Editar">✏️</button>
+        <button class="abt danger" onclick="delMapa(${m.id})" title="Excluir">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join('')}</tbody></table>`;
+}
+function toggleMapa(id){
+  const m=mapas.find(x=>x.id===id);if(!m)return;
+  m.concluido=!m.concluido;save();renderMapas();renderMCStats();
+  toast(m.concluido?`Mapa ${m.numero} concluído!`:`Mapa ${m.numero} reaberto`);
+}
+function delMapa(id){
+  if(!confirm('Excluir este mapa?'))return;
+  mapas=mapas.filter(x=>x.id!==id);save();renderMapas();renderMCStats();toast('Mapa excluído');
+}
+function editMapa(id){
+  const m=mapas.find(x=>x.id===id);if(!m)return;
+  document.getElementById('eMId').value=id;
+  document.getElementById('eMNumero').value=m.numero;
+  document.getElementById('eMObra').value=m.obra;
+  document.getElementById('eMTipo').value=m.tipo;
+  document.getElementById('eMDesc').value=m.descricao||'';
+  document.getElementById('eMResp').value=m.responsavel;
+  document.getElementById('eMData').value=m.dataSolicitacao;
+  document.getElementById('eMPrazo').value=m.prazo;
+  document.getElementById('eMObs').value=m.obs||'';
+  openModal('modalEditMapa');
+}
+function saveEditMapa(){
+  const id=parseInt(document.getElementById('eMId').value);
+  const m=mapas.find(x=>x.id===id);if(!m)return;
+  m.numero=document.getElementById('eMNumero').value.trim();
+  m.obra=document.getElementById('eMObra').value;
+  m.tipo=document.getElementById('eMTipo').value;
+  m.descricao=document.getElementById('eMDesc').value.trim();
+  m.responsavel=document.getElementById('eMResp').value;
+  m.dataSolicitacao=document.getElementById('eMData').value;
+  m.prazo=document.getElementById('eMPrazo').value;
+  m.obs=document.getElementById('eMObs').value.trim();
+  save();closeModal('modalEditMapa');renderMapas();renderMCStats();toast('Mapa atualizado!');
+}
+
+// ===== OBRAS =====
+function openModalObra(){
+  document.getElementById('eObraId').value='';
+  document.getElementById('eObraNome').value='';
+  document.getElementById('eObraObs').value='';
+  document.getElementById('obraModalTitle').textContent='Nova Obra';
+  document.getElementById('obraDelBtn').style.display='none';
+  openModal('modalObra');
+}
+function saveObra(){
+  const id=document.getElementById('eObraId').value;
+  const nome=document.getElementById('eObraNome').value.trim();
+  const comprador=document.getElementById('eObraComp').value;
+  const obs=document.getElementById('eObraObs').value.trim();
+  if(!nome){toast('Informe o nome da obra','error');return;}
+  if(id){
+    const o=obras.find(x=>x.id===parseInt(id));if(o){o.nome=nome;o.comprador=comprador;o.obs=obs;}
+  } else {
+    if(obras.find(o=>o.nome.toLowerCase()===nome.toLowerCase())){toast('Obra já cadastrada!','error');return;}
+    obras.push({id:Date.now(),nome,comprador,obs});
+  }
+  save();closeModal('modalObra');populateObraSelects();renderObras();toast(id?'Obra atualizada!':'Obra cadastrada!');
+}
+function delObra(){
+  const id=parseInt(document.getElementById('eObraId').value);
+  if(!confirm('Excluir esta obra?'))return;
+  obras=obras.filter(x=>x.id!==id);
+  save();closeModal('modalObra');populateObraSelects();renderObras();toast('Obra excluída');
+}
+function editObra(id){
+  const o=obras.find(x=>x.id===id);if(!o)return;
+  document.getElementById('eObraId').value=id;
+  document.getElementById('eObraNome').value=o.nome;
+  document.getElementById('eObraComp').value=o.comprador;
+  document.getElementById('eObraObs').value=o.obs||'';
+  document.getElementById('obraModalTitle').textContent='Editar Obra';
+  document.getElementById('obraDelBtn').style.display='inline-block';
+  openModal('modalObra');
+}
+function renderObras(){
+  const search=document.getElementById('obraSearch').value.toLowerCase();
+  const filtered=obras.filter(o=>!search||o.nome.toLowerCase().includes(search)||o.comprador.toLowerCase().includes(search));
+  const c=document.getElementById('obrasContainer');
+  if(!filtered.length){c.innerHTML='<div class="empty" style="padding:24px"><div>Nenhuma obra cadastrada</div></div>';return;}
+  c.innerHTML=`<table><thead><tr><th>Obra</th><th>Comprador</th><th>Mapas</th><th></th></tr></thead><tbody>
+    ${filtered.map(o=>{
+      const q=mapas.filter(m=>m.obra===o.nome).length;
+      return`<tr>
+        <td style="font-weight:600;font-size:13px">${o.nome}</td>
+        <td>${avc(o.comprador)}</td>
+        <td><span class="badge" style="background:var(--blue-light);color:var(--blue)">${q} mapa${q!==1?'s':''}</span></td>
+        <td><div class="acts"><button class="abt" onclick="editObra(${o.id})">✏️</button></div></td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+// ===== PRAZOS =====
+function openModalTipo(){
+  document.getElementById('eTipoId').value='';
+  document.getElementById('eTipoNome').value='';
+  document.getElementById('eTipoDias').value='3';
+  document.getElementById('eTipoCor').value='blue';
+  document.getElementById('tipoModalTitle').textContent='Novo Tipo';
+  document.getElementById('tipoDelBtn').style.display='none';
+  openModal('modalTipo');
+}
+function saveTipo(){
+  const id=document.getElementById('eTipoId').value;
+  const nome=document.getElementById('eTipoNome').value.trim();
+  const dias=parseInt(document.getElementById('eTipoDias').value);
+  const corKey=document.getElementById('eTipoCor').value;
+  if(!nome||isNaN(dias)||dias<1){toast('Preencha nome e prazo','error');return;}
+  if(id){
+    const t=tipos.find(x=>x.id===parseInt(id));if(t){t.nome=nome;t.dias=dias;t.corKey=corKey;}
+  } else {
+    if(tipos.find(t=>t.nome.toLowerCase()===nome.toLowerCase())){toast('Tipo já existe!','error');return;}
+    tipos.push({id:Date.now(),nome,dias,corKey});
+  }
+  save();closeModal('modalTipo');populateTipoSelects();renderPrazos();renderMapas();toast(id?'Tipo atualizado!':'Tipo adicionado!');
+}
+function delTipo(){
+  const id=parseInt(document.getElementById('eTipoId').value);
+  if(!confirm('Excluir este tipo?'))return;
+  tipos=tipos.filter(x=>x.id!==id);
+  save();closeModal('modalTipo');populateTipoSelects();renderPrazos();renderMapas();toast('Tipo excluído');
+}
+function editTipo(id){
+  const t=tipos.find(x=>x.id===id);if(!t)return;
+  document.getElementById('eTipoId').value=id;
+  document.getElementById('eTipoNome').value=t.nome;
+  document.getElementById('eTipoDias').value=t.dias;
+  document.getElementById('eTipoCor').value=t.corKey;
+  document.getElementById('tipoModalTitle').textContent='Editar Tipo';
+  document.getElementById('tipoDelBtn').style.display='inline-block';
+  openModal('modalTipo');
+}
+function renderPrazos(){
+  const c=document.getElementById('prazosContainer');
+  if(!tipos.length){c.innerHTML='<div class="empty" style="padding:24px"><div>Nenhum tipo cadastrado</div></div>';return;}
+  c.innerHTML=`<table><thead><tr><th>Tipo</th><th>Prazo</th><th></th></tr></thead><tbody>
+    ${tipos.map(t=>{const cor=getCor(t.corKey);return`<tr>
+      <td><span class="badge" style="color:${cor.cor};background:${cor.bg}">${t.nome}</span></td>
+      <td style="font-weight:600">${t.dias} d.u.</td>
+      <td><div class="acts"><button class="abt" onclick="editTipo(${t.id})">✏️</button></div></td>
+    </tr>`;}).join('')}</tbody></table>`;
+}
+
+// ===== PROJETOS =====
+const PROJ_STATUS_LABEL={andamento:'Em andamento',pausado:'Pausado',concluido:'Concluído',cancelado:'Cancelado'};
+const PROJ_STATUS_CSS={andamento:'s-andamento',pausado:'s-pausado',concluido:'s-concluido',cancelado:'s-cancelado'};
+const PROJ_COLS=[
+  {key:'andamento',label:'🔵 Em andamento'},
+  {key:'pausado',  label:'⏸ Pausado'},
+  {key:'concluido',label:'✅ Concluído'},
+  {key:'cancelado',label:'❌ Cancelado'},
+];
+
+function addProjeto(){
+  const nome=document.getElementById('pNome').value.trim();
+  if(!nome){toast('Informe o nome do projeto','error');return;}
+  const p={
+    id:Date.now(),nome,
+    categoria:document.getElementById('pCategoria').value,
+    responsavel:document.getElementById('pResponsavel').value,
+    prioridade:document.getElementById('pPrioridade').value,
+    status:'andamento',
+    inicio:document.getElementById('pInicio').value,
+    prazo:document.getElementById('pPrazo').value,
+    descricao:document.getElementById('pDescricao').value.trim(),
+    criadoEm:new Date().toISOString(),
+  };
+  projetos.unshift(p);save();renderProjetos();renderProjStats();toast(`Projeto "${nome}" criado!`);
+  document.getElementById('pNome').value='';document.getElementById('pDescricao').value='';
+}
+function renderProjStats(){
+  const tot=projetos.length;
+  const and=projetos.filter(p=>p.status==='andamento').length;
+  const conc=projetos.filter(p=>p.status==='concluido').length;
+  const atr=projetos.filter(p=>p.status==='andamento'&&p.prazo&&new Date(p.prazo+'T12:00:00')<new Date()).length;
+  document.getElementById('proj-stats').innerHTML=`
+    <div class="stat-c"><div class="sl">Total</div><div class="sv dk">${tot}</div></div>
+    <div class="stat-c"><div class="sl">🔵 Andamento</div><div class="sv blue">${and}</div></div>
+    <div class="stat-c"><div class="sl">⚠️ Atrasados</div><div class="sv red">${atr}</div></div>
+    <div class="stat-c"><div class="sl">✅ Concluídos</div><div class="sv green">${conc}</div></div>
+    <div class="stat-c"><div class="sl">Total da equipe</div><div class="sv dk">${TEAM.length}</div></div>`;
+}
+function renderProjetos(){
+  const search=document.getElementById('projSearch').value.toLowerCase();
+  const fResp=document.getElementById('projFResp').value;
+  const fCat=document.getElementById('projFCat').value;
+  const view=document.getElementById('projFView').value;
+  let filtered=projetos.filter(p=>{
+    if(search&&!`${p.nome} ${p.responsavel} ${p.categoria}`.toLowerCase().includes(search))return false;
+    if(fResp&&p.responsavel!==fResp)return false;
+    if(fCat&&p.categoria!==fCat)return false;
+    return true;
+  });
+  const c=document.getElementById('projContainer');
+  if(!filtered.length){c.innerHTML='<div class="empty"><div class="empty-icon">📁</div><div>Nenhum projeto encontrado</div></div>';return;}
+
+  if(view==='board'){
+    c.innerHTML=`<div class="proj-board">${PROJ_COLS.map(col=>{
+      const items=filtered.filter(p=>p.status===col.key);
+      return`<div class="proj-col">
+        <div class="proj-col-title">${col.label}<span class="proj-col-count">${items.length}</span></div>
+        ${items.map(p=>{
+          const isAtr=p.status==='andamento'&&p.prazo&&new Date(p.prazo+'T12:00:00')<new Date();
+          const pCor=p.prioridade==='Alta'?'p-alta':p.prioridade==='Média'?'p-media':'p-baixa';
+          return`<div class="proj-item" onclick="editProjeto(${p.id})">
+            <div class="proj-item-title">${p.nome}</div>
+            <div class="proj-item-meta">
+              <span class="badge ${pCor}" style="font-size:10px">${p.prioridade}</span>
+              <span style="font-size:10px;color:var(--text-muted)">${p.categoria}</span>
+              ${isAtr?'<span style="color:var(--red);font-size:10px">⚠️ Atrasado</span>':''}
+            </div>
+            <div class="proj-item-footer">
+              <div class="av" style="background:${avColor(p.responsavel)};width:20px;height:20px;font-size:8px">${initials(p.responsavel)}</div>
+              <span style="font-size:10px;color:var(--text-muted)">${p.prazo?fmtBR(p.prazo):'Sem prazo'}</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }).join('')}</div>`;
+  } else {
+    c.innerHTML=`<table><thead><tr>
+      <th>Projeto</th><th>Categoria</th><th>Responsável</th>
+      <th>Prioridade</th><th>Prazo</th><th>Status</th><th></th>
+    </tr></thead><tbody>${filtered.map(p=>{
+      const isAtr=p.status==='andamento'&&p.prazo&&new Date(p.prazo+'T12:00:00')<new Date();
+      const pCor=p.prioridade==='Alta'?'p-alta':p.prioridade==='Média'?'p-media':'p-baixa';
+      return`<tr>
+        <td><span class="fw">${p.nome}</span>${isAtr?'<span style="color:var(--red);font-size:10px;margin-left:6px">⚠️ Atrasado</span>':''}</td>
+        <td style="font-size:12px;color:var(--text-muted)">${p.categoria}</td>
+        <td>${avc(p.responsavel)}</td>
+        <td><span class="badge ${pCor}">${p.prioridade}</span></td>
+        <td style="font-size:12px;font-weight:600">${fmtBR(p.prazo)}</td>
+        <td><span class="sbadge ${PROJ_STATUS_CSS[p.status]}">${PROJ_STATUS_LABEL[p.status]}</span></td>
+        <td><div class="acts"><button class="abt" onclick="editProjeto(${p.id})">✏️</button></div></td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+  }
+}
+function editProjeto(id){
+  const p=projetos.find(x=>x.id===id);if(!p)return;
+  document.getElementById('ePId').value=id;
+  document.getElementById('ePNome').value=p.nome;
+  document.getElementById('ePCat').value=p.categoria;
+  document.getElementById('ePResp').value=p.responsavel;
+  document.getElementById('ePStatus').value=p.status;
+  document.getElementById('ePPrior').value=p.prioridade;
+  document.getElementById('ePInicio').value=p.inicio||'';
+  document.getElementById('ePPrazo').value=p.prazo||'';
+  document.getElementById('ePDesc').value=p.descricao||'';
+  openModal('modalEditProj');
+}
+function saveEditProj(){
+  const id=parseInt(document.getElementById('ePId').value);
+  const p=projetos.find(x=>x.id===id);if(!p)return;
+  p.nome=document.getElementById('ePNome').value.trim();
+  p.categoria=document.getElementById('ePCat').value;
+  p.responsavel=document.getElementById('ePResp').value;
+  p.status=document.getElementById('ePStatus').value;
+  p.prioridade=document.getElementById('ePPrior').value;
+  p.inicio=document.getElementById('ePInicio').value;
+  p.prazo=document.getElementById('ePPrazo').value;
+  p.descricao=document.getElementById('ePDesc').value.trim();
+  save();closeModal('modalEditProj');renderProjetos();renderProjStats();toast('Projeto atualizado!');
+}
+function delProjeto(){
+  const id=parseInt(document.getElementById('ePId').value);
+  if(!confirm('Excluir este projeto?'))return;
+  projetos=projetos.filter(x=>x.id!==id);
+  save();closeModal('modalEditProj');renderProjetos();renderProjStats();toast('Projeto excluído');
+}
+
+// ===== NFs =====
+function addNF(){
+  const numero=document.getElementById('nfNumero').value.trim();
+  const fornecedor=document.getElementById('nfFornecedor').value.trim();
+  if(!numero||!fornecedor){toast('Preencha Nº da NF e Fornecedor','error');return;}
+  const nf={
+    id:Date.now(),numero,fornecedor,
+    valor:document.getElementById('nfValor').value.trim(),
+    responsavel:document.getElementById('nfResponsavel').value,
+    descricao:document.getElementById('nfDescricao').value.trim(),
+    vencimento:document.getElementById('nfVencimento').value,
+    status:'aberta',
+    updates:[],
+    criadoEm:new Date().toISOString(),
+  };
+  nfs.unshift(nf);save();renderNFs();renderNFStats();toast(`NF ${numero} registrada!`);
+  ['nfNumero','nfFornecedor','nfValor','nfDescricao'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('nfVencimento').value='';
+}
+function renderNFStats(){
+  document.getElementById('nf-stats').innerHTML=`
+    <div class="stat-c"><div class="sl">Total</div><div class="sv dk">${nfs.length}</div></div>
+    <div class="stat-c"><div class="sl">🟠 Abertas</div><div class="sv" style="color:var(--orange)">${nfs.filter(n=>n.status==='aberta').length}</div></div>
+    <div class="stat-c"><div class="sl">✅ Resolvidas</div><div class="sv green">${nfs.filter(n=>n.status==='resolvida').length}</div></div>
+    <div class="stat-c"><div class="sl">Sem atualização</div><div class="sv yellow">${nfs.filter(n=>n.status==='aberta'&&!n.updates.length).length}</div></div>
+    <div class="stat-c"><div class="sl">Equipe</div><div class="sv dk">${TEAM.length}</div></div>`;
+}
+function renderNFs(){
+  const search=document.getElementById('nfSearch').value.toLowerCase();
+  const fResp=document.getElementById('nfFResp').value;
+  const fStatus=document.getElementById('nfFStatus').value;
+  let filtered=nfs.filter(n=>{
+    if(search&&!`${n.numero} ${n.fornecedor} ${n.responsavel}`.toLowerCase().includes(search))return false;
+    if(fResp&&n.responsavel!==fResp)return false;
+    if(fStatus&&n.status!==fStatus)return false;
+    return true;
+  });
+  filtered.sort((a,b)=>{if(a.status==='aberta'&&b.status!=='aberta')return -1;if(b.status==='aberta'&&a.status!=='aberta')return 1;return new Date(b.criadoEm)-new Date(a.criadoEm);});
+  const c=document.getElementById('nfContainer');
+  if(!filtered.length){c.innerHTML='<div class="empty"><div class="empty-icon">🧾</div><div>Nenhuma pendência encontrada</div></div>';return;}
+  c.innerHTML=filtered.map(n=>{
+    const lastUpdate=n.updates.length?n.updates[n.updates.length-1]:null;
+    const semAtt=n.status==='aberta'&&!n.updates.length;
+    return`<div class="nf-detail" style="${n.status==='aberta'?'border-left:3px solid var(--orange)':''}">
+      <div class="nf-detail-head">
+        <div>
+          <div class="nf-num">NF ${n.numero} — ${n.fornecedor}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Registrada ${daysAgo(n.criadoEm)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="sbadge ${n.status==='aberta'?'s-aberta':'s-resolvida'}">${n.status==='aberta'?'Aberta':'Resolvida'}</span>
+          <button class="abt" onclick="openNFModal(${n.id})" title="Atualizar">✏️</button>
+        </div>
+      </div>
+      <div class="nf-info">
+        <div class="nf-info-item"><strong>${n.valor||'—'}</strong>Valor</div>
+        <div class="nf-info-item"><strong>${fmtBR(n.vencimento)}</strong>Vencimento NF</div>
+        <div class="nf-info-item" style="grid-column:1/-1">${avc(n.responsavel)}</div>
+      </div>
+      ${n.descricao?`<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;padding:8px;background:var(--surface2);border-radius:6px">${n.descricao}</div>`:''}
+      ${semAtt?'<div style="font-size:12px;color:var(--orange);font-weight:500">⚠️ Sem atualização ainda</div>':''}
+      ${lastUpdate?`<div class="update-item"><div>${lastUpdate.texto}</div><div class="update-meta">Última atualização · ${daysAgo(lastUpdate.data)}</div></div>`:''}
+      ${n.updates.length>1?`<div style="font-size:11px;color:var(--text-muted);cursor:pointer;margin-top:4px" onclick="openNFModal(${n.id})">Ver todas as ${n.updates.length} atualizações →</div>`:''}
+    </div>`;
+  }).join('');
+}
+function openNFModal(id){
+  const n=nfs.find(x=>x.id===id);if(!n)return;
+  document.getElementById('eNFId').value=id;
+  document.getElementById('nfModalTitle').textContent=`NF ${n.numero} — ${n.fornecedor}`;
+  document.getElementById('nfUpdateText').value='';
+  document.getElementById('nfUpdateStatus').value='';
+  // Render detail
+  document.getElementById('nfDetailPanel').innerHTML=`
+    <div style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        ${avc(n.responsavel)}
+        <span class="sbadge ${n.status==='aberta'?'s-aberta':'s-resolvida'}">${n.status==='aberta'?'Aberta':'Resolvida'}</span>
+      </div>
+      ${n.descricao?`<div style="font-size:12px;color:var(--text-muted);padding:8px;background:var(--surface2);border-radius:6px;margin-bottom:8px">${n.descricao}</div>`:''}
+      <div class="updates-list">
+        ${n.updates.length===0?'<div style="font-size:12px;color:var(--text-muted)">Nenhuma atualização ainda.</div>':
+          [...n.updates].reverse().map(u=>`<div class="update-item">
+            <div>${u.texto}</div>
+            <div class="update-meta">${daysAgo(u.data)}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  openModal('modalNFUpdate');
+}
+function addNFUpdate(){
+  const id=parseInt(document.getElementById('eNFId').value);
+  const n=nfs.find(x=>x.id===id);if(!n)return;
+  const texto=document.getElementById('nfUpdateText').value.trim();
+  const status=document.getElementById('nfUpdateStatus').value;
+  if(!texto){toast('Escreva uma atualização','error');return;}
+  n.updates.push({texto,data:new Date().toISOString()});
+  if(status)n.status=status;
+  save();openNFModal(id);renderNFs();renderNFStats();toast('Atualização registrada!');
+}
+function delNF(){
+  const id=parseInt(document.getElementById('eNFId').value);
+  if(!confirm('Excluir esta pendência?'))return;
+  nfs=nfs.filter(x=>x.id!==id);
+  save();closeModal('modalNFUpdate');renderNFs();renderNFStats();toast('Pendência excluída');
+}
+
+// ===== MODAL =====
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('click',function(e){if(e.target===this)closeModal(this.id);}));
+
+// ===== TOAST =====
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=(type==='success'?'✅ ':'⚠️ ')+msg;
+  t.className=`toast show ${type}`;
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ===== INIT =====
+window.onload=()=>{
+  applyTheme();
+  populateTipoSelects();
+  populateObraSelects();
+  document.getElementById('fDataSolicitacao').value=todayStr();
+  document.getElementById('pInicio').value=todayStr();
+  updateHome();
+};
+</script>
+</body>
+</html>
