@@ -517,6 +517,7 @@ td{padding:10px 14px;vertical-align:middle;}
     <div class="f"><label>Nº da NF</label><input id="nfNum" placeholder="Ex: 9051"></div>
     <div class="f"><label>Fornecedor</label><input id="nfForn" placeholder="Ex: Protecard"></div>
     <div class="f"><label>Valor (R$)</label><input id="nfVal" placeholder="Ex: 5.200,00"></div>
+    <div class="f"><label>Obra</label><select id="nfObra" onchange="onNFObraChange()"><option value="">— Selecionar obra —</option></select></div>
     <div class="f"><label>Responsável</label><select id="nfResp"><option>Andressa</option><option>Gustavo</option><option>Gisele</option><option>Novaes</option><option>Henrique</option></select></div>
     <div class="f"><label>Descrição do Problema</label><textarea id="nfDesc"></textarea></div>
     <div class="f"><label>Vencimento da NF</label><input type="date" id="nfVenc"></div>
@@ -738,10 +739,10 @@ function popTipos(){
   });
 }
 function popObras(){
-  ['fObra','eMObra'].forEach(id=>{
+  ['fObra','eMObra','nfObra'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
     const v=el.value;
-    el.innerHTML='<option value="">— Selecionar —</option>';
+    el.innerHTML=id==='nfObra'?'<option value="">— Selecionar obra —</option>':'<option value="">— Selecionar —</option>';
     obras.forEach(o=>{const op=document.createElement('option');op.value=o.nome;op.textContent=o.nome;el.appendChild(op);});
     if(v)el.value=v;
   });
@@ -763,6 +764,14 @@ function calcEditDl(){
   const t=getTipo(document.getElementById('eMTipo').value);
   const d=document.getElementById('eMData').value;
   if(t&&d)document.getElementById('eMPrazo').value=addBiz(d,t.dias);
+}
+function onNFObraChange(){
+  const obraNome=document.getElementById('nfObra').value;
+  const sel=document.getElementById('nfResp');
+  if(!obraNome){sel.disabled=false;return;}
+  const obra=obras.find(o=>o.nome===obraNome);
+  if(obra){sel.value=obra.comprador;sel.disabled=true;}
+  else sel.disabled=false;
 }
 function onObraChange(){
   const o=obras.find(x=>x.nome===document.getElementById('fObra').value);
@@ -1270,6 +1279,7 @@ function renderNFs(){
         <div style="display:flex;align-items:center;gap:8px;"><span class="sbadge ${n.status==='resolvida'?'s-resolvida':n.status==='aguardando_pagamento'?'s-atencao':n.status==='aguardando_retorno'?'s-andamento':'s-aberta'}">${{aguardando_retorno:'⏳ Aguardando retorno',aguardando_pagamento:'💳 Aguardando pagamento',resolvida:'✅ Resolvido',aberta:'🟠 Aberta'}[n.status]||n.status}</span><button class="abt" onclick="openNFUpd(${n.id})">✏️</button></div>
       </div>
       <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px;font-size:12px;">
+        ${n.obra?`<span><span style="color:var(--muted)">Obra: </span><strong>${n.obra}</strong></span>`:''}
         <span><span style="color:var(--muted)">Valor: </span><strong>${n.valor||'—'}</strong></span>
         <span><span style="color:var(--muted)">Vence: </span><strong>${fmtBR(n.vencimento)}</strong></span>
         <div class="avc">${avEl(n.responsavel)}${n.responsavel}</div>
@@ -1284,12 +1294,15 @@ function renderNFs(){
 async function addNF(){
   const num=document.getElementById('nfNum').value.trim();
   const forn=document.getElementById('nfForn').value.trim();
-  if(!num||!forn){toast('Preencha NF e Fornecedor','err');return;}
-  const b={id:Date.now(),numero:num,fornecedor:forn,valor:document.getElementById('nfVal').value.trim(),responsavel:document.getElementById('nfResp').value,descricao:document.getElementById('nfDesc').value.trim(),vencimento:document.getElementById('nfVenc').value,status:'aberta',updates:[]};
+  const obra=document.getElementById('nfObra').value;
+  if(!num||!forn||!obra){toast('Preencha Nº da NF, Fornecedor e Obra','err');return;}
+  const b={id:Date.now(),numero:num,fornecedor:forn,obra:document.getElementById('nfObra').value,valor:document.getElementById('nfVal').value.trim(),responsavel:document.getElementById('nfResp').value,descricao:document.getElementById('nfDesc').value.trim(),vencimento:document.getElementById('nfVenc').value,status:'aberta',updates:[]};
   const n=await sb.post('nfs',b);nfs.unshift(n[0]);
   closeOv('ovNF');renderNFs();renderNFStats();toast(`NF ${num} registrada!`);
   ['nfNum','nfForn','nfVal','nfDesc'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('nfVenc').value='';
+  document.getElementById('nfObra').value='';
+  document.getElementById('nfResp').disabled=false;
 }
 function openNFUpd(id){
   const n=nfs.find(x=>x.id===id);if(!n)return;
