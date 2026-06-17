@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -375,12 +376,12 @@ td{padding:10px 14px;vertical-align:middle;}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px;">
     <div class="card">
       <div class="card-head"><span class="dot"></span>Obras</div>
-      <div class="tbl-head"><input class="fsearch" id="obraSearch" placeholder="🔍" oninput="renderObras()" style="flex:1"><button class="btn-pri blue" style="padding:6px 12px;font-size:12px;" onclick="openObraForm()">+ Nova</button></div>
+      <div class="tbl-head"><input class="fsearch" id="obraSearch" placeholder="🔍" oninput="renderObras()" style="flex:1"><button class="btn-pri blue" id="btnNovaObra" style="padding:6px 12px;font-size:12px;" onclick="openObraForm()">+ Nova</button></div>
       <div id="obrasTable"></div>
     </div>
     <div class="card">
       <div class="card-head"><span class="dot"></span>Tipos e Prazos</div>
-      <div class="tbl-head"><span style="font-size:12px;color:var(--muted)">Categorias de materiais</span><button class="btn-pri blue" style="padding:6px 12px;font-size:12px;" onclick="openTipoForm()">+ Novo</button></div>
+      <div class="tbl-head"><span style="font-size:12px;color:var(--muted)">Categorias de materiais</span><button class="btn-pri blue" id="btnNovoTipo" style="padding:6px 12px;font-size:12px;" onclick="openTipoForm()">+ Novo</button></div>
       <div id="tiposTable"></div>
     </div>
   </div>
@@ -401,7 +402,7 @@ td{padding:10px 14px;vertical-align:middle;}
       <div class="filters">
         <input class="fsearch" id="projSearch" placeholder="🔍 Buscar..." oninput="renderProjetos()">
         <select class="fsel" id="projFResp" onchange="renderProjetos()"><option value="">Todos</option><option>Andressa</option><option>Gustavo</option><option>Gisele</option><option>Novaes</option><option>Henrique</option></select>
-        <select class="fsel" id="projFCat" onchange="renderProjetos()"><option value="">Todas categorias</option><option>Obra</option><option>Processo Interno</option><option>RH</option><option>Orçamentos</option><option>TI</option><option>Fornecedores</option><option>Outros</option></select>
+        <select class="fsel" id="projFCat" onchange="renderProjetos()"><option value="">Todas categorias</option><option>Obra</option><option>Processo Interno</option><option>RH</option><option>Orçamentos</option><option>TI</option><option>Fornecedores</option><option>Contínuo</option><option>Outros</option></select>
         <select class="fsel" id="projFView" onchange="renderProjetos()"><option value="board">Quadro</option><option value="list">Lista</option></select>
       </div>
     </div>
@@ -424,7 +425,7 @@ td{padding:10px 14px;vertical-align:middle;}
       <div class="filters">
         <input class="fsearch" id="nfSearch" placeholder="🔍 NF ou fornecedor..." oninput="renderNFs()">
         <select class="fsel" id="nfFResp" onchange="renderNFs()"><option value="">Todos</option><option>Andressa</option><option>Gustavo</option><option>Gisele</option><option>Novaes</option><option>Henrique</option></select>
-        <select class="fsel" id="nfFStatus" onchange="renderNFs()"><option value="">Todos</option><option value="aberta">Abertas</option><option value="resolvida">Resolvidas</option></select>
+        <select class="fsel" id="nfFStatus" onchange="renderNFs()"><option value="">Todos</option><option value="aberta">Abertas</option><option value="aguardando_retorno">Aguardando retorno</option><option value="aguardando_pagamento">Aguardando pagamento</option><option value="resolvida">Resolvidas</option></select>
       </div>
     </div>
     <div style="padding:14px;" id="nfContainer"></div>
@@ -477,18 +478,18 @@ td{padding:10px 14px;vertical-align:middle;}
     </div>
     <div id="motivoWrap" style="display:none;margin-top:8px;"><div class="f"><label>Motivo *</label><textarea id="motivoTxt" placeholder="Ex: Aguardando aprovação orçamentária..."></textarea></div></div>
   </div>
-  <div class="modal-foot"><button class="btn-sec" onclick="closeOv('ovEtapa')">Cancelar</button><button class="btn-pri" onclick="saveEtapa()">Salvar</button></div>
+  <div class="modal-foot"><button class="btn-sec" onclick="closeOv('ovEtapa')">Cancelar</button><button class="btn-pri" id="etapaSalvarBtn" onclick="saveEtapa()" style="display:none">Confirmar suspensão</button></div>
 </div></div>
 
 <div class="overlay" id="ovProj"><div class="modal">
   <div class="modal-head"><h3>📁 Novo Projeto</h3><button class="modal-x" onclick="closeOv('ovProj')">×</button></div>
   <div class="modal-body">
     <div class="f"><label>Nome</label><input id="pNome" placeholder="Ex: Melhoria de processo"></div>
-    <div class="f"><label>Categoria</label><select id="pCat"><option>Obra</option><option>Processo Interno</option><option>RH</option><option>Orçamentos</option><option>TI</option><option>Fornecedores</option><option>Outros</option></select></div>
+    <div class="f"><label>Categoria</label><select id="pCat"><option>Obra</option><option>Processo Interno</option><option>RH</option><option>Orçamentos</option><option>TI</option><option>Fornecedores</option><option>Contínuo</option><option>Outros</option></select></div>
     <div class="f"><label>Responsável</label><select id="pResp"><option>Andressa</option><option>Gustavo</option><option>Gisele</option><option>Novaes</option><option>Henrique</option></select></div>
     <div class="f"><label>Prioridade</label><select id="pPrior"><option>Alta</option><option>Média</option><option>Baixa</option></select></div>
-    <div class="f"><label>Data de Início</label><input type="date" id="pInicio"></div>
-    <div class="f"><label>Prazo Previsto</label><input type="date" id="pPrazo"></div>
+    <div class="f" id="pInicioWrap"><label>Data de Início</label><input type="date" id="pInicio"></div>
+    <div class="f" id="pPrazoWrap"><label>Prazo Previsto <span style="font-size:10px;color:var(--muted)">(deixe vazio para projeto contínuo)</span></label><input type="date" id="pPrazo"></div>
     <div class="f"><label>Descrição</label><textarea id="pDesc"></textarea></div>
   </div>
   <div class="modal-foot"><button class="btn-sec" onclick="closeOv('ovProj')">Cancelar</button><button class="btn-pri purple" onclick="addProj()">Criar</button></div>
@@ -499,9 +500,9 @@ td{padding:10px 14px;vertical-align:middle;}
   <div class="modal-body">
     <input type="hidden" id="ePId">
     <div class="f"><label>Nome</label><input id="ePNome"></div>
-    <div class="f"><label>Categoria</label><select id="ePCat"><option>Obra</option><option>Processo Interno</option><option>RH</option><option>Orçamentos</option><option>TI</option><option>Fornecedores</option><option>Outros</option></select></div>
+    <div class="f"><label>Categoria</label><select id="ePCat"><option>Obra</option><option>Processo Interno</option><option>RH</option><option>Orçamentos</option><option>TI</option><option>Fornecedores</option><option>Contínuo</option><option>Outros</option></select></div>
     <div class="f"><label>Responsável</label><select id="ePResp"><option>Andressa</option><option>Gustavo</option><option>Gisele</option><option>Novaes</option><option>Henrique</option></select></div>
-    <div class="f"><label>Status</label><select id="ePSt"><option value="andamento">Em andamento</option><option value="pausado">Pausado</option><option value="concluido">Concluído</option><option value="cancelado">Cancelado</option></select></div>
+    <div class="f"><label>Status</label><select id="ePSt"><option value="andamento">Em andamento</option><option value="continuo">Contínuo (sem prazo)</option><option value="pausado">Pausado</option><option value="concluido">Concluído</option><option value="cancelado">Cancelado</option></select></div>
     <div class="f"><label>Prioridade</label><select id="ePPr"><option>Alta</option><option>Média</option><option>Baixa</option></select></div>
     <div class="f"><label>Início</label><input type="date" id="ePIni"></div>
     <div class="f"><label>Prazo</label><input type="date" id="ePPrazo"></div>
@@ -531,7 +532,7 @@ td{padding:10px 14px;vertical-align:middle;}
     <div style="background:var(--surface2);border-radius:8px;padding:12px;margin-top:8px;">
       <div class="f"><label>Nova Atualização</label><textarea id="nfUpdTxt" placeholder="Ex: Aguardando aprovação. Previsão 20/06..."></textarea></div>
       <div style="display:flex;gap:8px;margin-top:8px;">
-        <select class="fsel" id="nfUpdSt" style="flex:1"><option value="">Manter status</option><option value="aberta">Manter aberta</option><option value="resolvida">Marcar resolvida ✅</option></select>
+        <select class="fsel" id="nfUpdSt" style="flex:1"><option value="aguardando_retorno">Aguardando retorno</option><option value="aguardando_pagamento">Aguardando pagamento</option><option value="resolvida">Resolvido ✅</option></select>
         <button class="btn-pri orange" onclick="addNFUpd()">Registrar</button>
       </div>
     </div>
@@ -666,8 +667,8 @@ const ETAPA={
   suspenso:{label:'Suspenso',icon:'🚫',css:'e-suspenso'},
 };
 const MS={vencido:'Vencido',critico:'Vence hoje',atencao:'Atenção',ok:'Em dia',concluido:'Concluído'};
-const PS={andamento:'Em andamento',pausado:'Pausado',concluido:'Concluído',cancelado:'Cancelado'};
-const PS_CSS={andamento:'s-andamento',pausado:'s-pausado',concluido:'s-concluido2',cancelado:'s-cancelado'};
+const PS={andamento:'Em andamento',continuo:'Contínuo',pausado:'Pausado',concluido:'Concluído',cancelado:'Cancelado'};
+const PS_CSS={andamento:'s-andamento',continuo:'s-ok',pausado:'s-pausado',concluido:'s-concluido2',cancelado:'s-cancelado'};
 
 // ── STATE ──
 let mapas=[],obras=[],tipos=[],projetos=[],nfs=[];
@@ -1034,13 +1035,41 @@ function openEtapa(id){
   const el=document.getElementById('eop-'+curEtapa);if(el)el.classList.add('selected');
   document.getElementById('motivoWrap').style.display=curEtapa==='suspenso'?'block':'none';
   document.getElementById('motivoTxt').value=m.motivo_suspenso||'';
+  document.getElementById('etapaSalvarBtn').style.display=m.etapa==='suspenso'?'inline-block':'none';
   openOv('ovEtapa');
 }
-function selEtapa(v){
+async function selEtapa(v){
+  // Se for suspenso, mostra campo de motivo mas não salva ainda
+  if(v==='suspenso'){
+    curEtapa=v;
+    document.querySelectorAll('.etapa-opt').forEach(e=>e.classList.remove('selected'));
+    document.getElementById('eop-'+v).classList.add('selected');
+    document.getElementById('motivoWrap').style.display='block';
+    document.getElementById('etapaSalvarBtn').style.display='inline-block';
+    return;
+  }
+  // Para outros status: salva imediatamente
+  const id=parseInt(document.getElementById('etapaId').value);
+  const m=mapas.find(x=>x.id===id);if(!m)return;
   curEtapa=v;
   document.querySelectorAll('.etapa-opt').forEach(e=>e.classList.remove('selected'));
   document.getElementById('eop-'+v).classList.add('selected');
-  document.getElementById('motivoWrap').style.display=v==='suspenso'?'block':'none';
+  document.getElementById('motivoWrap').style.display='none';
+  try{
+    await sb.patch('mapas',id,{etapa:v,motivo_suspenso:''});
+    m.etapa=v;m.motivo_suspenso='';
+    closeOv('ovEtapa');
+    renderMapas();
+    toast('Etapa atualizada!');
+  }catch(e){
+    // Coluna pode não existir — tenta criar via SQL hint
+    console.error('Erro ao salvar etapa:',e.message);
+    if(e.message.includes('etapa')||e.message.includes('column')){
+      toast('Execute o SQL no Supabase para adicionar a coluna etapa','err');
+    }else{
+      toast('Erro ao salvar etapa: '+e.message.substring(0,60),'err');
+    }
+  }
 }
 async function saveEtapa(){
   const id=parseInt(document.getElementById('etapaId').value);
@@ -1059,7 +1088,7 @@ async function saveEtapa(){
 
 // ── OBRAS ──
 function openObrasModal(){openOv('ovObra');document.getElementById('obraId').value='';document.getElementById('obraNome').value='';document.getElementById('obraObs').value='';document.getElementById('obraTit').textContent='Nova Obra';document.getElementById('obraDelBtn').style.display='none';}
-function openObraForm(){openObrasModal();}
+function openObraForm(){if(!isAdmin){toast('Apenas administradores podem cadastrar obras','err');return;}openObrasModal();}
 async function saveObra(){
   const idV=document.getElementById('obraId').value;
   const nome=document.getElementById('obraNome').value.trim();
@@ -1088,11 +1117,11 @@ function renderObras(){
   c.innerHTML=f.length===0?'<div class="empty" style="padding:20px">Nenhuma obra</div>':
     `<table><thead><tr><th>Obra</th><th>Comprador</th><th>Mapas</th><th></th></tr></thead><tbody>${f.map(o=>{
       const q=mapas.filter(m=>m.obra===o.nome).length;
-      return`<tr><td style="font-weight:600">${o.nome}</td><td><div class="avc">${avEl(o.comprador)}${o.comprador}</div></td><td><span class="badge" style="background:var(--blue-light);color:var(--blue)">${q} mapa${q!==1?'s':''}</span></td><td><div class="acts"><button class="abt" onclick="editObra(${o.id})">✏️</button></div></td></tr>`;
+      return`<tr><td style="font-weight:600">${o.nome}</td><td><div class="avc">${avEl(o.comprador)}${o.comprador}</div></td><td><span class="badge" style="background:var(--blue-light);color:var(--blue)">${q} mapa${q!==1?'s':''}</span></td><td>${isAdmin?`<div class="acts"><button class="abt" onclick="editObra(${o.id})">✏️</button></div>`:''}</td></tr>`;
     }).join('')}</tbody></table>`;
 }
 function openTiposModal(){openOv('ovTipo');document.getElementById('tipoId').value='';document.getElementById('tipoNome').value='';document.getElementById('tipoDias').value='3';document.getElementById('tipoCor').value='blue';document.getElementById('tipoTit').textContent='Novo Tipo';document.getElementById('tipoDelBtn').style.display='none';}
-function openTipoForm(){openTiposModal();}
+function openTipoForm(){if(!isAdmin){toast('Apenas administradores podem cadastrar tipos','err');return;}openTiposModal();}
 
 // ── TIPOS ──
 async function saveTipo(){
@@ -1121,7 +1150,7 @@ function renderTipos(){
   c.innerHTML=tipos.length===0?'<div class="empty" style="padding:20px">Nenhum tipo</div>':
     `<table><thead><tr><th>Tipo</th><th>Prazo</th><th></th></tr></thead><tbody>${tipos.map(t=>{
       const cor=getCor(t.cor_key);
-      return`<tr><td><span class="badge" style="color:${cor.c};background:${cor.bg}">${t.nome}</span></td><td style="font-weight:600">${t.dias} d.u.</td><td><div class="acts"><button class="abt" onclick="editTipo(${t.id})">✏️</button></div></td></tr>`;
+      return`<tr><td><span class="badge" style="color:${cor.c};background:${cor.bg}">${t.nome}</span></td><td style="font-weight:600">${t.dias} d.u.</td><td>${isAdmin?`<div class="acts"><button class="abt" onclick="editTipo(${t.id})">✏️</button></div>`:''}</td></tr>`;
     }).join('')}</tbody></table>`;
 }
 
@@ -1157,7 +1186,7 @@ function renderProjetos(){
   });
   const c=document.getElementById('projContainer');
   if(!f.length){c.innerHTML='<div class="empty">Nenhum projeto</div>';return;}
-  const COLS=[{k:'andamento',l:'🔵 Em andamento'},{k:'pausado',l:'⏸ Pausado'},{k:'concluido',l:'✅ Concluído'},{k:'cancelado',l:'❌ Cancelado'}];
+  const COLS=[{k:'andamento',l:'🔵 Em andamento'},{k:'continuo',l:'🔄 Contínuos'},{k:'pausado',l:'⏸ Pausado'},{k:'concluido',l:'✅ Concluído'},{k:'cancelado',l:'❌ Cancelado'}];
   if(view==='board'){
     c.innerHTML=`<div class="proj-board">${COLS.map(col=>{
       const items=f.filter(p=>p.status===col.k);
@@ -1177,7 +1206,9 @@ function renderProjetos(){
 }
 async function addProj(){
   const nome=document.getElementById('pNome').value.trim();if(!nome){toast('Informe o nome','err');return;}
-  const b={id:Date.now(),nome,categoria:document.getElementById('pCat').value,responsavel:document.getElementById('pResp').value,prioridade:document.getElementById('pPrior').value,status:'andamento',inicio:document.getElementById('pInicio').value,prazo:document.getElementById('pPrazo').value,descricao:document.getElementById('pDesc').value.trim()};
+  const cat=document.getElementById('pCat').value;
+  const statusInicial=cat==='Contínuo'?'continuo':'andamento';
+  const b={id:Date.now(),nome,categoria:cat,responsavel:document.getElementById('pResp').value,prioridade:document.getElementById('pPrior').value,status:statusInicial,inicio:document.getElementById('pInicio').value,prazo:document.getElementById('pPrazo').value,descricao:document.getElementById('pDesc').value.trim()};
   const n=await sb.post('projetos',b);projetos.unshift(n[0]);
   closeOv('ovProj');renderProjetos();renderProjStats();toast(`"${nome}" criado!`);
   document.getElementById('pNome').value='';document.getElementById('pDesc').value='';
@@ -1236,7 +1267,7 @@ function renderNFs(){
     return`<div class="nf-card ${n.status==='aberta'?'aberta':''}">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
         <div><div style="font-size:15px;font-weight:700;">NF ${n.numero} — ${n.fornecedor}</div><div style="font-size:12px;color:var(--muted)">Registrada ${ago(n.criado_em)}</div></div>
-        <div style="display:flex;align-items:center;gap:8px;"><span class="sbadge ${n.status==='aberta'?'s-aberta':'s-resolvida'}">${n.status==='aberta'?'Aberta':'Resolvida'}</span><button class="abt" onclick="openNFUpd(${n.id})">✏️</button></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span class="sbadge ${n.status==='resolvida'?'s-resolvida':n.status==='aguardando_pagamento'?'s-atencao':n.status==='aguardando_retorno'?'s-andamento':'s-aberta'}">${{aguardando_retorno:'⏳ Aguardando retorno',aguardando_pagamento:'💳 Aguardando pagamento',resolvida:'✅ Resolvido',aberta:'🟠 Aberta'}[n.status]||n.status}</span><button class="abt" onclick="openNFUpd(${n.id})">✏️</button></div>
       </div>
       <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px;font-size:12px;">
         <span><span style="color:var(--muted)">Valor: </span><strong>${n.valor||'—'}</strong></span>
@@ -1269,7 +1300,7 @@ function openNFUpd(id){
   document.getElementById('nfUpdDetail').innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <div class="avc">${avEl(n.responsavel)}${n.responsavel}</div>
-      <span class="sbadge ${n.status==='aberta'?'s-aberta':'s-resolvida'}">${n.status==='aberta'?'Aberta':'Resolvida'}</span>
+      <span class="sbadge ${n.status==='resolvida'?'s-resolvida':n.status==='aguardando_pagamento'?'s-atencao':n.status==='aguardando_retorno'?'s-andamento':'s-aberta'}">${{aguardando_retorno:'⏳ Aguardando retorno',aguardando_pagamento:'💳 Aguardando pagamento',resolvida:'✅ Resolvido',aberta:'🟠 Aberta'}[n.status]||n.status}</span>
     </div>
     ${n.descricao?`<div style="font-size:12px;color:var(--muted);padding:8px;background:var(--surface2);border-radius:6px;margin-bottom:10px">${n.descricao}</div>`:''}
     <div style="display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;">${upd.length===0?'<div style="font-size:12px;color:var(--muted)">Nenhuma atualização ainda.</div>':[...upd].reverse().map(u=>`<div class="upd-item">${u.texto}<div style="font-size:10px;color:var(--muted);margin-top:3px">${ago(u.data)}</div></div>`).join('')}</div>`;
@@ -1279,10 +1310,11 @@ async function addNFUpd(){
   const id=parseInt(document.getElementById('nfUpdId').value);
   const n=nfs.find(x=>x.id===id);if(!n)return;
   const txt=document.getElementById('nfUpdTxt').value.trim();
-  if(!txt){toast('Escreva uma atualização','err');return;}
   const st=document.getElementById('nfUpdSt').value;
-  const upd=[...(n.updates||[]),{texto:txt,data:new Date().toISOString()}];
-  const newSt=st||n.status;
+  if(!txt&&!st){toast('Escreva uma atualização ou selecione um status','err');return;}
+  const textoFinal=txt||(st==='aguardando_retorno'?'Status: Aguardando retorno':st==='aguardando_pagamento'?'Status: Aguardando pagamento':'Status: Resolvido');
+  const upd=[...(n.updates||[]),{texto:textoFinal,data:new Date().toISOString()}];
+  const newSt=st==='resolvida'?'resolvida':st?'aberta':n.status;
   await sb.patch('nfs',id,{updates:upd,status:newSt});
   n.updates=upd;n.status=newSt;
   openNFUpd(id);renderNFs();renderNFStats();toast('Atualização registrada!');
@@ -1550,6 +1582,7 @@ async function gerarRelatorio(){
         <tbody>${abertas.map(n=>{
           const upd=n.updates||[];const last=upd.length?upd[upd.length-1]:null;
           const sem=!upd.length;
+    const stLabel={aguardando_retorno:'⏳ Aguardando retorno',aguardando_pagamento:'💳 Aguardando pagamento',resolvida:'✅ Resolvido',aberta:'🟠 Aberta'};
           return`<tr style="background:${sem?'#FEF3C7':'#fff'}"><td style="font-weight:bold">${n.numero}</td><td>${n.fornecedor}</td><td>${n.valor||'—'}</td><td>${n.responsavel}</td><td>${fmtBR(n.vencimento)}</td><td style="font-size:11px">${last?last.texto.substring(0,60)+'...':'⚠️ Sem atualização'}</td></tr>`;
         }).join('')}</tbody></table>`}
       </div>
