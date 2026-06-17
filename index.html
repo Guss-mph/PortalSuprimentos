@@ -1244,8 +1244,13 @@ async function delProj(){
 // ── NFs ──
 async function loadNF(){
   try{
-    const nfAll=await sb.get('nfs','?order=criado_em.desc')||[];
-    nfs=isAdmin?nfAll:nfAll.filter(n=>n.responsavel===currentUser);
+    const [nfAll,oRes]=await Promise.all([
+      sb.get('nfs','?order=criado_em.desc'),
+      obras.length?Promise.resolve(obras):sb.get('obras','?order=nome.asc'),
+    ]);
+    nfs=isAdmin?(nfAll||[]):(nfAll||[]).filter(n=>n.responsavel===currentUser);
+    if(!obras.length)obras=oRes||[];
+    popObras();
     renderNFs();renderNFStats();
   }catch(e){console.error('nf err:',e);document.getElementById('nfContainer').innerHTML='<div class="empty">Erro ao carregar</div>';}
 }
