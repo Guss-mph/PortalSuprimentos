@@ -84,6 +84,34 @@ td{padding:10px 14px;vertical-align:middle;}
 .p-alta{background:var(--red-light);color:var(--red);}.p-media{background:var(--yellow-light);color:var(--yellow);}.p-baixa{background:var(--green-light);color:var(--green);}
 .e-nao{background:#F3F4F6;color:var(--gray);}.e-cotacao{background:var(--blue-light);color:var(--blue);}.e-balizando{background:var(--yellow-light);color:var(--yellow);}.e-finalizado{background:var(--green-light);color:var(--green);}.e-suspenso{background:var(--red-light);color:var(--red);}
 .etapa-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:600;border:none;font-family:inherit;cursor:pointer;white-space:nowrap;}
+/* pills etapa */
+.etapa-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.etapa-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;border:0.5px solid;}
+.ep-gray{background:#F1EFE8;color:#5F5E5A;border-color:#D3D1C7;}
+.ep-blue{background:#DBEAFE;color:#1D4ED8;border-color:#93C5FD;}
+.ep-yellow{background:#FEF3C7;color:#92400E;border-color:#FCD34D;}
+.ep-green{background:#DCFCE7;color:#166534;border-color:#86EFAC;}
+.ep-red{background:#FEE2E2;color:#991B1B;border-color:#FCA5A5;}
+.ep-count{background:rgba(0,0,0,.1);border-radius:10px;padding:1px 7px;font-size:11px;}
+/* concluídos toggle */
+.concl-toggle{width:100%;padding:10px 18px;background:var(--surface2);border:none;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:12px;color:var(--muted);font-family:inherit;}
+.concl-toggle:hover{background:var(--border);}
+.concl-body{display:none;}
+.concl-body.open{display:block;}
+.concl-row td{opacity:.6;}
+/* NF barra lateral */
+.nf-card{border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;margin-bottom:10px;}
+.nf-bar{width:5px;flex-shrink:0;}
+.nf-bar.azul{background:#2563EB;}
+.nf-bar.amarelo{background:#D97706;}
+.nf-bar.verde{background:#16A34A;}
+.nf-bar.cinza{background:#9CA3AF;}
+.nf-content-wrap{padding:14px 16px;flex:1;}
+/* resolvidas toggle */
+.resol-toggle{width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;color:var(--muted);font-family:inherit;display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
+.resol-toggle:hover{background:var(--border);}
+.resol-body{display:none;margin-top:8px;}
+.resol-body.open{display:block;}
 
 /* AVATAR */
 .av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;}
@@ -141,7 +169,7 @@ td{padding:10px 14px;vertical-align:middle;}
 
 /* NF */
 .nf-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;}
-.nf-card.aberta{border-left:3px solid var(--orange);}
+
 .upd-item{background:var(--surface2);border-left:3px solid var(--blue);border-radius:0 6px 6px 0;padding:8px 12px;font-size:12px;margin-top:6px;}
 
 /* ETAPA OPTS */
@@ -360,6 +388,7 @@ td{padding:10px 14px;vertical-align:middle;}
     </div>
   </div>
   <div class="stats-row" id="mc-stats"></div>
+  <div id="etapaPills" class="etapa-pills"></div>
   <div class="card">
     <div class="tbl-head">
       <span style="font-size:13px;font-weight:600;">Todos os Mapas</span>
@@ -951,8 +980,22 @@ function renderMapas(){
   const ord={vencido:0,critico:1,atencao:2,ok:3,concluido:4};
   f.sort((a,b)=>{const sa=getMSt(a),sb=getMSt(b);if(ord[sa]!==ord[sb])return ord[sa]-ord[sb];return new Date(a.prazo)-new Date(b.prazo);});
   const c=document.getElementById('mcTable');
+  // Pills de etapa
+  const pillsEl=document.getElementById('etapaPills');
+  if(pillsEl){
+    const ec={nao_iniciado:0,em_cotacao:0,balizando:0,suspenso:0,finalizado:0};
+    mapas.filter(m=>!m.concluido).forEach(m=>{const e=m.etapa||'nao_iniciado';if(ec[e]!==undefined)ec[e]++;});
+    pillsEl.innerHTML=
+      (ec.nao_iniciado?`<span class="etapa-pill ep-gray">⬜ Não iniciado <span class="ep-count">${ec.nao_iniciado}</span></span>`:'')+
+      (ec.em_cotacao?`<span class="etapa-pill ep-blue">🔵 Em cotação <span class="ep-count">${ec.em_cotacao}</span></span>`:'')+
+      (ec.balizando?`<span class="etapa-pill ep-yellow">🟡 Balizando <span class="ep-count">${ec.balizando}</span></span>`:'')+
+      (ec.suspenso?`<span class="etapa-pill ep-red">🚫 Suspenso <span class="ep-count">${ec.suspenso}</span></span>`:'')+
+      (ec.finalizado?`<span class="etapa-pill ep-green">✅ Finalizado <span class="ep-count">${ec.finalizado}</span></span>`:'');
+  }
   if(!f.length){c.innerHTML='<div class="empty">Nenhum mapa encontrado</div>';return;}
-  c.innerHTML=`<table><thead><tr><th>Nº</th><th>Obra</th><th>Tipo</th><th>Responsável</th><th>Solicitado</th><th>Prazo</th><th>Restante</th><th>Status</th><th>Etapa</th><th></th></tr></thead><tbody>${f.map(m=>{
+  const emAnd=f.filter(m=>!m.concluido);
+  const concl=f.filter(m=>m.concluido);
+  c.innerHTML=`<table><thead><tr><th>Nº</th><th>Obra</th><th>Tipo</th><th>Responsável</th><th>Solicitado</th><th>Prazo</th><th>Restante</th><th>Status</th><th>Etapa</th><th></th></tr></thead><tbody>${emAnd.map(m=>{
     const s=getMSt(m);const d=m.concluido?null:bizLeft(m.prazo);
     const t=getTipo(m.tipo);const cor=t?getCor(t.cor_key):COR.blue;
     const td=t?t.dias:5;
@@ -976,7 +1019,30 @@ function renderMapas(){
         <button class="abt del" onclick="delMapa(${m.id})">🗑</button>
       </div></td>
     </tr>`;
-  }).join('')}</tbody></table>`;
+  }).join('')}
+  ${emAnd.length===0?'<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--muted)">Nenhum mapa em andamento</td></tr>':''}
+  </tbody></table>
+  ${concl.length>0?`<button class="concl-toggle" onclick="var b=this.nextElementSibling;b.classList.toggle('open');this.querySelector('span:last-child').textContent=b.classList.contains('open')?'▴':'▾'">
+    <span>🗂 Ver concluídos (${concl.length})</span><span style="transition:transform .2s">▾</span>
+  </button>
+  <div class="concl-body"><table><tbody>${concl.map(m=>{
+    const t2=getTipo(m.tipo);const cor2=t2?getCor(t2.cor_key):COR.blue;
+    const e2=ETAPA[m.etapa||'nao_iniciado']||ETAPA.nao_iniciado;
+    return '<tr class="concl-row">'
+      +'<td style="font-weight:700">'+m.numero+'</td>'
+      +'<td style="font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+m.obra+'</td>'
+      +'<td><span class="badge" style="color:'+cor2.c+';background:'+cor2.bg+'">'+m.tipo+'</span></td>'
+      +'<td><div class="avc">'+avEl(m.responsavel)+m.responsavel+'</div></td>'
+      +'<td style="font-size:12px;color:var(--muted)">'+fmtBR(m.data_solicitacao)+'</td>'
+      +'<td style="font-size:12px">'+fmtBR(m.prazo)+'</td>'
+      +'<td></td><td><span class="sbadge s-concluido">Concluído</span></td>'
+      +'<td><span class="etapa-badge '+e2.css+'" style="cursor:default">'+e2.icon+' '+e2.label+'</span></td>'
+      +'<td><div class="acts">'
+      +'<button class="abt" onclick="toggleMapa('+m.id+')" style="font-size:10px" title="Reabrir">↩</button>'
+      +'<button class="abt" onclick="editMapa('+m.id+')">✏️</button>'
+      +'<button class="abt del" onclick="delMapa('+m.id+')">🗑</button>'
+      +'</div></td></tr>';
+    }).join('')}</tbody></table></div>`:''}` ;
 }
 async function addMapa(){
   const num=document.getElementById('fNum').value.trim();
@@ -1276,25 +1342,46 @@ function renderNFs(){
   f.sort((a,b)=>{if(a.status==='aberta'&&b.status!=='aberta')return -1;if(b.status==='aberta')return 1;return new Date(b.criado_em)-new Date(a.criado_em);});
   const c=document.getElementById('nfContainer');
   if(!f.length){c.innerHTML='<div class="empty">Nenhuma pendência</div>';return;}
-  c.innerHTML=f.map(n=>{
-    const upd=n.updates||[];const last=upd.length?upd[upd.length-1]:null;const sem=n.status==='aberta'&&!upd.length;
-    return`<div class="nf-card ${n.status==='aberta'?'aberta':''}">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
-        <div><div style="font-size:15px;font-weight:700;">NF ${n.numero} — ${n.fornecedor}</div><div style="font-size:12px;color:var(--muted)">Registrada ${ago(n.criado_em)}</div></div>
-        <div style="display:flex;align-items:center;gap:8px;"><span class="sbadge ${n.status==='resolvida'?'s-resolvida':n.status==='aguardando_pagamento'?'s-atencao':n.status==='aguardando_retorno'?'s-andamento':'s-aberta'}">${{aguardando_retorno:'⏳ Aguardando retorno',aguardando_pagamento:'💳 Aguardando pagamento',resolvida:'✅ Resolvido',aberta:'🟠 Aberta'}[n.status]||n.status}</span><button class="abt" onclick="openNFUpd(${n.id})">✏️</button></div>
+  const abertas=f.filter(n=>n.status!=='resolvida');
+  const resolvidas=f.filter(n=>n.status==='resolvida');
+  const nfBarCor=s=>s==='aguardando_retorno'?'azul':s==='aguardando_pagamento'?'amarelo':s==='resolvida'?'verde':'cinza';
+  const nfBadge=s=>({
+    aguardando_retorno:'<span class="sbadge s-andamento">⏳ Aguardando retorno</span>',
+    aguardando_pagamento:'<span class="sbadge s-atencao">💳 Aguardando pagamento</span>',
+    resolvida:'<span class="sbadge s-resolvida">✅ Resolvido</span>',
+    aberta:'<span class="sbadge s-aberta">🟠 Aberta</span>'
+  }[s]||`<span class="sbadge s-aberta">${s}</span>`);
+  const renderNFCard=(n,dim=false)=>{
+    const upd=n.updates||[];const last=upd.length?upd[upd.length-1]:null;const sem=n.status!=='resolvida'&&!upd.length;
+    return`<div class="nf-card"${dim?' style="opacity:.65"':''}>
+      <div class="nf-bar ${nfBarCor(n.status)}"></div>
+      <div class="nf-content-wrap">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;">
+          <div><div style="font-size:14px;font-weight:700;">NF ${n.numero} — ${n.fornecedor}</div><div style="font-size:11px;color:var(--muted)">Registrada ${ago(n.criado_em)}</div></div>
+          <div style="display:flex;align-items:center;gap:8px;">${nfBadge(n.status)}${n.status!=='resolvida'?`<button class="abt" onclick="openNFUpd(${n.id})">✏️</button>`:''}</div>
+        </div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:6px;font-size:12px;">
+          ${n.obra?`<span><span style="color:var(--muted)">Obra: </span><strong>${n.obra}</strong></span>`:''}
+          <span><span style="color:var(--muted)">Valor: </span><strong>${n.valor||'—'}</strong></span>
+          <span><span style="color:var(--muted)">Vence: </span><strong>${fmtBR(n.vencimento)}</strong></span>
+          <div class="avc">${avEl(n.responsavel)}${n.responsavel}</div>
+        </div>
+        ${n.descricao?`<div style="font-size:12px;color:var(--muted);padding:7px 10px;background:var(--surface2);border-radius:6px;margin-bottom:6px">${n.descricao}</div>`:''}
+        ${sem?'<div style="font-size:12px;color:var(--orange);font-weight:500">⚠️ Sem atualização ainda</div>':''}
+        ${last?`<div class="upd-item">${last.texto}<div style="font-size:10px;color:var(--muted);margin-top:3px">Última atualização · ${ago(last.data)}</div></div>`:''}
+        ${upd.length>1?`<div style="font-size:11px;color:var(--muted);cursor:pointer;margin-top:4px" onclick="openNFUpd(${n.id})">Ver todas as ${upd.length} atualizações →</div>`:''}
       </div>
-      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px;font-size:12px;">
-        ${n.obra?`<span><span style="color:var(--muted)">Obra: </span><strong>${n.obra}</strong></span>`:''}
-        <span><span style="color:var(--muted)">Valor: </span><strong>${n.valor||'—'}</strong></span>
-        <span><span style="color:var(--muted)">Vence: </span><strong>${fmtBR(n.vencimento)}</strong></span>
-        <div class="avc">${avEl(n.responsavel)}${n.responsavel}</div>
-      </div>
-      ${n.descricao?`<div style="font-size:12px;color:var(--muted);padding:8px;background:var(--surface2);border-radius:6px;margin-bottom:8px">${n.descricao}</div>`:''}
-      ${sem?'<div style="font-size:12px;color:var(--orange);font-weight:500">⚠️ Sem atualização ainda</div>':''}
-      ${last?`<div class="upd-item">${last.texto}<div style="font-size:10px;color:var(--muted);margin-top:3px">Última atualização · ${ago(last.data)}</div></div>`:''}
-      ${upd.length>1?`<div style="font-size:11px;color:var(--muted);cursor:pointer;margin-top:6px" onclick="openNFUpd(${n.id})">Ver todas as ${upd.length} atualizações →</div>`:''}
     </div>`;
-  }).join('');
+  };
+  c.innerHTML=
+    (abertas.length===0?'<div class="empty">Nenhuma NF em aberto</div>':abertas.map(n=>renderNFCard(n)).join(''))+
+    (resolvidas.length>0?`
+      <button class="resol-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.rchev').style.transform=this.nextElementSibling.classList.contains('open')?'rotate(180deg)':''">
+        <span>✅ Ver resolvidas (${resolvidas.length})</span>
+        <span class="rchev" style="transition:transform .2s;display:inline-block">▾</span>
+      </button>
+      <div class="resol-body">${resolvidas.map(n=>renderNFCard(n,true)).join('')}</div>
+    `:'');
 }
 async function addNF(){
   const num=document.getElementById('nfNum').value.trim();
