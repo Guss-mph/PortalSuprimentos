@@ -196,20 +196,18 @@ td{padding:10px 14px;vertical-align:middle;}
 .rel-opcao-desc{font-size:12px;color:var(--muted);}
 
 @media print{
-  body *{visibility:hidden !important;}
-  #printArea,#printArea *{visibility:visible !important;}
-  #printArea{position:fixed;top:0;left:0;width:100%;height:auto;background:#fff;padding:28px;font-family:Arial,sans-serif;font-size:12px;color:#000;}
+  header,nav,.btn-back,.btn-theme,.fab,.toast,.overlay,#view-home,#view-mc,#view-proj,#view-nf,#loginScreen{display:none !important;}
+  #printArea{display:block !important;padding:28px;font-family:Arial,sans-serif;font-size:12px;color:#000;}
   #printArea table{width:100%;border-collapse:collapse;margin-top:12px;}
-  #printArea thead th{background:#EF3236;color:#fff;padding:8px 10px;text-align:left;font-size:11px;}
+  #printArea thead th{background:#EF3236 !important;color:#fff !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:8px 10px;text-align:left;font-size:11px;}
   #printArea tbody td{padding:7px 10px;border-bottom:1px solid #eee;font-size:12px;}
-  #printArea tbody tr:nth-child(even){background:#F9F9F9;}
+  #printArea tbody tr:nth-child(even){background:#F9F9F9 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   #printArea .print-header{border-bottom:3px solid #EF3236;padding-bottom:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-end;}
   #printArea .print-title{font-size:20px;font-weight:bold;color:#2C2C2C;}
   #printArea .print-sub{font-size:12px;color:#666;margin-top:4px;}
   #printArea .print-date{font-size:11px;color:#888;}
   #printArea .print-section{margin-bottom:24px;}
   #printArea .print-section-title{font-size:14px;font-weight:bold;color:#2C2C2C;margin-bottom:8px;padding:6px 0;border-bottom:1px solid #ddd;}
-  #printArea .badge-print{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:bold;}
 }
 
 /* LOGIN */
@@ -487,7 +485,7 @@ td{padding:10px 14px;vertical-align:middle;}
     <div class="f"><label>Tipo</label><select id="eMTipo" onchange="calcEditDl()"></select></div>
     <div class="f"><label>Descrição</label><input id="eMDesc"></div>
     <div class="f"><label>Responsável</label><select id="eMResp"><option>Andressa</option><option>Gustavo</option><option>Gisele</option><option>Novaes</option><option>Henrique</option></select></div>
-    <div class="f"><label>Data Solicitação</label><input type="date" id="eMData" onchange="calcEditDl()"></div>
+    <div class="f"><label>Data Solicitação <span id="eMDataLock" style="font-size:10px;color:var(--muted)"></span></label><input type="date" id="eMData" onchange="calcEditDl()"></div>
     <div class="f"><label>Prazo</label><input type="date" id="eMPrazo"></div>
     <div class="f"><label>Obs</label><textarea id="eMObs"></textarea></div>
   </div>
@@ -633,6 +631,37 @@ td{padding:10px 14px;vertical-align:middle;}
         <option value="Henrique">Henrique</option>
       </select>
     </div>
+
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:16px 0 10px;">3. Status</div>
+    <div class="f">
+      <!-- Opções de Mapas -->
+      <select id="relStatusMC">
+        <option value="todos">Todos os mapas</option>
+        <option value="nao_iniciado">Não iniciado</option>
+        <option value="em_cotacao">Em cotação</option>
+        <option value="balizando">Balizando</option>
+        <option value="finalizado">Concluído</option>
+        <option value="suspenso">Suspenso</option>
+        <option value="atrasado">Atrasados</option>
+      </select>
+      <!-- Opções de Projetos -->
+      <select id="relStatusProj" style="display:none;">
+        <option value="todos">Todos os projetos</option>
+        <option value="andamento">Em andamento</option>
+        <option value="continuo">Contínuos</option>
+        <option value="pausado">Pausado</option>
+        <option value="concluido">Concluído</option>
+        <option value="atrasado">Atrasados</option>
+      </select>
+      <!-- Opções de NF -->
+      <select id="relStatusNF" style="display:none;">
+        <option value="todos">Todas as pendências</option>
+        <option value="sem_atualizacao">Sem atualização</option>
+        <option value="aguardando_retorno">Aguardando retorno</option>
+        <option value="aguardando_pagamento">Aguardando pagamento</option>
+        <option value="resolvida">Resolvido</option>
+      </select>
+    </div>
   </div>
   <div class="modal-foot">
     <button class="btn-sec" onclick="closeOv('ovRelatorio')">Cancelar</button>
@@ -641,7 +670,7 @@ td{padding:10px 14px;vertical-align:middle;}
 </div></div>
 
 <!-- ÁREA DE IMPRESSÃO (invisível até print) -->
-<div id="printArea"></div>
+<div id="printArea" style="display:none;"></div>
 
 <button class="fab" id="fabBtn">+</button>
 <div class="toast" id="toast"></div>
@@ -995,28 +1024,28 @@ function renderMapas(){
   if(!f.length){c.innerHTML='<div class="empty">Nenhum mapa encontrado</div>';return;}
   const emAnd=f.filter(m=>!m.concluido);
   const concl=f.filter(m=>m.concluido);
-  c.innerHTML=`<table><thead><tr><th>Nº</th><th>Obra</th><th>Tipo</th><th>Responsável</th><th>Solicitado</th><th>Prazo</th><th>Restante</th><th>Status</th><th>Etapa</th><th></th></tr></thead><tbody>${emAnd.map(m=>{
+  c.innerHTML=`<table><thead><tr><th>Nº</th><th>Obra</th><th>Tipo</th><th>Responsável</th><th>Solicitado</th><th>Entrega</th><th>Status</th><th>Etapa</th><th></th></tr></thead><tbody>${emAnd.map(m=>{
     const s=getMSt(m);const d=m.concluido?null:bizLeft(m.prazo);
     const t=getTipo(m.tipo);const cor=t?getCor(t.cor_key):COR.blue;
     const td=t?t.dias:5;
     let bp=0,bc='#22C55E';
     if(!m.concluido&&d!==null){bp=Math.max(0,Math.min(100,(d/td)*100));if(d<=0){bc='#EF3236';bp=100;}else if(d<=1)bc='#EF3236';else if(d<=2)bc='#F59E0B';}
-    const dt=m.concluido?'—':d<0?`${Math.abs(d)}d atrás`:d===0?'Hoje!':d===1?'1 dia':`${d} dias`;
-    const dc=m.concluido?'var(--muted)':d<=0?'var(--red)':d<=2?'var(--yellow)':'var(--green)';
+    const stLabel=m.concluido?'Concluído':d<0||d===0?'Atrasado':'Em andamento';
+    const stCSS=m.concluido?'s-concluido':d<=0?'s-vencido':'s-ok';
+        const prazoColor=m.concluido?'var(--muted)':d<=0?'var(--red)':d<=2?'var(--yellow)':'var(--green)';
     return`<tr>
       <td style="font-weight:700">${m.numero}</td>
-      <td style="font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.obra}</td>
+      <td style="font-size:12px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${m.obra}">${m.obra}</td>
       <td><span class="badge" style="color:${cor.c};background:${cor.bg}">${m.tipo}</span></td>
       <td><div class="avc">${avEl(m.responsavel)}${m.responsavel}</div></td>
       <td style="font-size:12px;color:var(--muted)">${fmtBR(m.data_solicitacao)}</td>
-      <td style="font-size:12px;font-weight:600">${fmtBR(m.prazo)}</td>
-      <td>${m.concluido?'<span style="font-size:12px;color:var(--muted)">Concluído</span>':`<div class="ubar"><span class="ud" style="color:${dc}">${dt}</span><div class="btrack"><div class="bfill" style="width:${bp}%;background:${bc}"></div></div></div>`}</td>
-      <td><span class="sbadge s-${s}">${MS[s]}</span></td>
+      <td style="font-size:12px;font-weight:600;color:${prazoColor}">${fmtBR(m.prazo)}</td>
+      <td><span class="sbadge ${stCSS}">${stLabel}</span></td>
       <td>${etapaBadge(m)}</td>
       <td><div class="acts">
-        ${!m.concluido?`<button class="abt ok" onclick="toggleMapa(${m.id})" title="Concluir">✅</button>`:`<button class="abt" onclick="toggleMapa(${m.id})" style="font-size:10px">↩</button>`}
+        ${!m.concluido?`<button class="abt ok" onclick="toggleMapa(${m.id})" title="Concluir">✅</button>`:`<button class="abt" onclick="toggleMapa(${m.id})" style="font-size:10px" title="Reabrir">↩</button>`}
         <button class="abt" onclick="editMapa(${m.id})">✏️</button>
-        <button class="abt del" onclick="delMapa(${m.id})">🗑</button>
+        ${isAdmin?`<button class="abt del" onclick="delMapa(${m.id})">🗑</button>`:''}
       </div></td>
     </tr>`;
   }).join('')}
@@ -1035,12 +1064,12 @@ function renderMapas(){
       +'<td><div class="avc">'+avEl(m.responsavel)+m.responsavel+'</div></td>'
       +'<td style="font-size:12px;color:var(--muted)">'+fmtBR(m.data_solicitacao)+'</td>'
       +'<td style="font-size:12px">'+fmtBR(m.prazo)+'</td>'
-      +'<td></td><td><span class="sbadge s-concluido">Concluído</span></td>'
+      +'<td><span class="sbadge s-concluido">Concluído</span></td>'
       +'<td><span class="etapa-badge '+e2.css+'" style="cursor:default">'+e2.icon+' '+e2.label+'</span></td>'
       +'<td><div class="acts">'
       +'<button class="abt" onclick="toggleMapa('+m.id+')" style="font-size:10px" title="Reabrir">↩</button>'
       +'<button class="abt" onclick="editMapa('+m.id+')">✏️</button>'
-      +'<button class="abt del" onclick="delMapa('+m.id+')">🗑</button>'
+      +(isAdmin?'<button class="abt del" onclick="delMapa('+m.id+')">🗑</button>':'')
       +'</div></td></tr>';
     }).join('')}</tbody></table></div>`:''}` ;
 }
@@ -1081,6 +1110,7 @@ async function toggleMapa(id){
   renderMapas();renderMCStats();toast(m.concluido?`Mapa ${m.numero} concluído!`:`Mapa ${m.numero} reaberto`);
 }
 async function delMapa(id){
+  if(!isAdmin){toast('Apenas administradores podem excluir mapas','err');return;}
   if(!confirm('Excluir este mapa?'))return;
   await sb.del('mapas',id);mapas=mapas.filter(x=>x.id!==id);renderMapas();renderMCStats();toast('Mapa excluído');
 }
@@ -1090,11 +1120,29 @@ function editMapa(id){
   document.getElementById('eMObra').value=m.obra;document.getElementById('eMTipo').value=m.tipo;
   document.getElementById('eMDesc').value=m.descricao||'';document.getElementById('eMResp').value=m.responsavel;
   document.getElementById('eMData').value=m.data_solicitacao;document.getElementById('eMPrazo').value=m.prazo;
-  document.getElementById('eMObs').value=m.obs||'';openOv('ovEditMapa');
+  document.getElementById('eMObs').value=m.obs||'';
+  // Bloqueia data de solicitação para não-admin
+  const dataInput=document.getElementById('eMData');
+  const dataLock=document.getElementById('eMDataLock');
+  if(isAdmin){
+    dataInput.removeAttribute('readonly');
+    dataInput.style.opacity='1';
+    dataInput.style.cursor='';
+    dataLock.textContent='';
+  } else {
+    dataInput.setAttribute('readonly','readonly');
+    dataInput.style.opacity='.7';
+    dataInput.style.cursor='not-allowed';
+    dataLock.textContent='🔒 Apenas admins podem alterar';
+    dataLock.style.color='var(--red)';
+  }
+  openOv('ovEditMapa');
 }
 async function saveEditMapa(){
   const id=parseInt(document.getElementById('eMId').value);
-  const b={numero:document.getElementById('eMNum').value.trim(),obra:document.getElementById('eMObra').value,tipo:document.getElementById('eMTipo').value,descricao:document.getElementById('eMDesc').value.trim(),responsavel:document.getElementById('eMResp').value,data_solicitacao:document.getElementById('eMData').value,prazo:document.getElementById('eMPrazo').value,obs:document.getElementById('eMObs').value.trim()};
+  const mOrig=mapas.find(x=>x.id===parseInt(document.getElementById('eMId').value));
+  const dataSolicitacao=isAdmin?document.getElementById('eMData').value:(mOrig?mOrig.data_solicitacao:document.getElementById('eMData').value);
+  const b={numero:document.getElementById('eMNum').value.trim(),obra:document.getElementById('eMObra').value,tipo:document.getElementById('eMTipo').value,descricao:document.getElementById('eMDesc').value.trim(),responsavel:document.getElementById('eMResp').value,data_solicitacao:dataSolicitacao,prazo:document.getElementById('eMPrazo').value,obs:document.getElementById('eMObs').value.trim()};
   await sb.patch('mapas',id,b);const i=mapas.findIndex(x=>x.id===id);if(i>=0)mapas[i]={...mapas[i],...b};
   closeOv('ovEditMapa');renderMapas();renderMCStats();toast('Mapa atualizado!');
 }
@@ -1560,20 +1608,30 @@ function doLogout(){
 let relTipo='mc';
 function selRelTipo(tipo){
   relTipo=tipo;
-  ['mc','proj','nf'].forEach(t=>{
-    const el=document.getElementById('relOpc'+t.charAt(0).toUpperCase()+t.slice(1));
-    if(el)el.classList.toggle('sel',t===tipo);
-  });
-  // Fix capitalization for IDs
   document.getElementById('relOpcMC').classList.toggle('sel',tipo==='mc');
   document.getElementById('relOpcProj').classList.toggle('sel',tipo==='proj');
   document.getElementById('relOpcNF').classList.toggle('sel',tipo==='nf');
+  // Mostra o select de status correto
+  document.getElementById('relStatusMC').style.display=tipo==='mc'?'':'none';
+  document.getElementById('relStatusProj').style.display=tipo==='proj'?'':'none';
+  document.getElementById('relStatusNF').style.display=tipo==='nf'?'':'none';
 }
 
 async function gerarRelatorio(){
   const comp=document.getElementById('relComprador').value;
   const compLabel=comp||'Toda a equipe';
   const dataHoje=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  // Pega o status selecionado para o tipo atual
+  const relSt=relTipo==='mc'
+    ?document.getElementById('relStatusMC').value
+    :relTipo==='proj'
+    ?document.getElementById('relStatusProj').value
+    :document.getElementById('relStatusNF').value;
+  const relStLabel=relTipo==='mc'
+    ?({todos:'Todos os mapas',nao_iniciado:'Não iniciado',em_cotacao:'Em cotação',balizando:'Balizando',finalizado:'Concluído',suspenso:'Suspenso',atrasado:'Atrasados'}[relSt]||relSt)
+    :relTipo==='proj'
+    ?({todos:'Todos os projetos',andamento:'Em andamento',continuo:'Contínuos',pausado:'Pausado',concluido:'Concluído',atrasado:'Atrasados'}[relSt]||relSt)
+    :({todos:'Todas as pendências',sem_atualizacao:'Sem atualização',aguardando_retorno:'Aguardando retorno',aguardando_pagamento:'Aguardando pagamento',resolvida:'Resolvido'}[relSt]||relSt);
 
   // Carrega dados frescos
   let mRes=mapas,pRes=projetos,nRes=nfs;
@@ -1586,18 +1644,45 @@ async function gerarRelatorio(){
     mRes=mRes||[];pRes=pRes||[];nRes=nRes||[];
   }catch(e){console.warn('Usando dados em cache');}
 
-  // Filtra por comprador se selecionado
+  // Filtra por comprador
   if(comp){
     mRes=mRes.filter(m=>m.responsavel===comp);
     pRes=pRes.filter(p=>p.responsavel===comp);
     nRes=nRes.filter(n=>n.responsavel===comp);
   }
 
+  // Aplica filtro de status
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  if(relTipo==='mc'&&relSt!=='todos'){
+    if(relSt==='atrasado'){
+      mRes=mRes.filter(m=>!m.concluido&&new Date(m.prazo+'T12:00:00')<hoje);
+    }else{
+      mRes=mRes.filter(m=>{
+        if(relSt==='finalizado') return m.concluido||(m.etapa==='finalizado');
+        return (m.etapa||'nao_iniciado')===relSt;
+      });
+    }
+  }
+  if(relTipo==='proj'&&relSt!=='todos'){
+    if(relSt==='atrasado'){
+      pRes=pRes.filter(p=>p.status==='andamento'&&p.prazo&&new Date(p.prazo+'T12:00:00')<hoje);
+    }else{
+      pRes=pRes.filter(p=>p.status===relSt);
+    }
+  }
+  if(relTipo==='nf'&&relSt!=='todos'){
+    if(relSt==='sem_atualizacao'){
+      nRes=nRes.filter(n=>n.status!=='resolvida'&&(!n.updates||!n.updates.length));
+    }else{
+      nRes=nRes.filter(n=>n.status===relSt);
+    }
+  }
+
   let html='';
   const headerHtml=`<div class="print-header">
     <div>
       <div class="print-title">MpH Engenharia — Portal de Suprimentos</div>
-      <div class="print-sub">${relTipo==='mc'?'Relatório de Mapas de Cotação':relTipo==='proj'?'Relatório de Projetos':'Relatório de Pendências de NF'} — ${compLabel}</div>
+      <div class="print-sub">${relTipo==='mc'?'Relatório de Mapas de Cotação':relTipo==='proj'?'Relatório de Projetos':'Relatório de Pendências de NF'} — ${compLabel} — ${relStLabel}</div>
     </div>
     <div class="print-date">Gerado em ${dataHoje}</div>
   </div>`;
@@ -1606,6 +1691,8 @@ async function gerarRelatorio(){
     const ativos=mRes.filter(m=>!m.concluido);
     const conc=mRes.filter(m=>m.concluido);
     const STATUS_COLORS={vencido:'#FEE2E2',critico:'#FEE2E2',atencao:'#FEF3C7',ok:'#DCFCE7',concluido:'#F3F4F6'};
+    // Para filtro de Concluído, mostra só os concluídos; para outros, mostra ativos
+    const listagem=relSt==='finalizado'?conc:ativos;
     html=headerHtml+`
       <div class="print-section">
         <div class="print-section-title">Resumo — ${compLabel}</div>
@@ -1618,10 +1705,10 @@ async function gerarRelatorio(){
         </tr></tbody></table>
       </div>
       <div class="print-section">
-        <div class="print-section-title">Mapas em Andamento (${ativos.length})</div>
-        ${ativos.length===0?'<p style="color:#888;font-style:italic">Nenhum mapa em andamento.</p>':`
+        <div class="print-section-title">Mapas — ${relStLabel} (${listagem.length})</div>
+        ${listagem.length===0?'<p style="color:#888;font-style:italic">Nenhum mapa encontrado.</p>':`
         <table><thead><tr><th>Nº Mapa</th><th>Obra</th><th>Tipo</th><th>Responsável</th><th>Solicitado</th><th>Prazo</th><th>Dias Rest.</th><th>Status</th><th>Etapa</th></tr></thead>
-        <tbody>${ativos.sort((a,b)=>{const o={vencido:0,critico:1,atencao:2,ok:3};return(o[getMSt(a)]??3)-(o[getMSt(b)]??3);}).map(m=>{
+        <tbody>${listagem.sort((a,b)=>{const o={vencido:0,critico:1,atencao:2,ok:3,concluido:4};return(o[getMSt(a)]??3)-(o[getMSt(b)]??3);}).map(m=>{
           const s=getMSt(m);const d=bizLeft(m.prazo);
           const ei=ETAPA[m.etapa||'nao_iniciado']||ETAPA.nao_iniciado;
           const dt=d<0?Math.abs(d)+'d atrás':d===0?'Hoje!':d+'d';
@@ -1629,73 +1716,61 @@ async function gerarRelatorio(){
           return`<tr style="background:${bg}"><td style="font-weight:bold">${m.numero}</td><td>${m.obra}</td><td>${m.tipo}</td><td>${m.responsavel}</td><td>${fmtBR(m.data_solicitacao)}</td><td style="font-weight:bold">${fmtBR(m.prazo)}</td><td style="font-weight:bold">${dt}</td><td>${MS[s]}</td><td>${ei.label}</td></tr>`;
         }).join('')}</tbody></table>`}
       </div>
-      ${conc.length>0?`<div class="print-section">
+      ${relSt==='todos'&&conc.length>0?`<div class="print-section">
         <div class="print-section-title">Mapas Concluídos (${conc.length})</div>
         <table><thead><tr><th>Nº Mapa</th><th>Obra</th><th>Tipo</th><th>Responsável</th><th>Prazo</th></tr></thead>
         <tbody>${conc.map(m=>`<tr><td style="font-weight:bold">${m.numero}</td><td>${m.obra}</td><td>${m.tipo}</td><td>${m.responsavel}</td><td>${fmtBR(m.prazo)}</td></tr>`).join('')}</tbody></table>
       </div>`:''}`;
 
   }else if(relTipo==='proj'){
-    const ativos=pRes.filter(p=>p.status==='andamento');
-    const outros=pRes.filter(p=>p.status!=='andamento');
+    const priorColor=p=>p.prioridade==='Alta'?'#FEE2E2':p.prioridade==='Média'?'#FEF3C7':'#DCFCE7';
     html=headerHtml+`
       <div class="print-section">
         <div class="print-section-title">Resumo — ${compLabel}</div>
-        <table><thead><tr><th>Total</th><th>Em Andamento</th><th>Pausados</th><th>Concluídos</th><th>Cancelados</th></tr></thead>
+        <table><thead><tr><th>Total</th><th>Em Andamento</th><th>Contínuos</th><th>Pausados</th><th>Concluídos</th><th>Cancelados</th></tr></thead>
         <tbody><tr>
           <td>${pRes.length}</td>
           <td>${pRes.filter(p=>p.status==='andamento').length}</td>
+          <td>${pRes.filter(p=>p.status==='continuo').length}</td>
           <td>${pRes.filter(p=>p.status==='pausado').length}</td>
           <td>${pRes.filter(p=>p.status==='concluido').length}</td>
           <td>${pRes.filter(p=>p.status==='cancelado').length}</td>
         </tr></tbody></table>
       </div>
       <div class="print-section">
-        <div class="print-section-title">Projetos em Andamento (${ativos.length})</div>
-        ${ativos.length===0?'<p style="color:#888;font-style:italic">Nenhum projeto em andamento.</p>':`
+        <div class="print-section-title">Projetos — ${relStLabel} (${pRes.length})</div>
+        ${pRes.length===0?'<p style="color:#888;font-style:italic">Nenhum projeto encontrado.</p>':`
         <table><thead><tr><th>Projeto</th><th>Categoria</th><th>Responsável</th><th>Prioridade</th><th>Início</th><th>Prazo</th><th>Status</th></tr></thead>
-        <tbody>${ativos.map(p=>{
-          const atr=p.prazo&&new Date(p.prazo+'T12:00:00')<new Date();
-          const bg=p.prioridade==='Alta'?'#FEE2E2':p.prioridade==='Média'?'#FEF3C7':'#DCFCE7';
-          return`<tr style="background:${bg}"><td style="font-weight:bold">${p.nome}${atr?' ⚠️ ATRASADO':''}</td><td>${p.categoria}</td><td>${p.responsavel}</td><td>${p.prioridade}</td><td>${fmtBR(p.inicio)}</td><td style="font-weight:bold">${fmtBR(p.prazo)}</td><td>${PS[p.status]}</td></tr>`;
+        <tbody>${pRes.map(p=>{
+          const atr=p.status==='andamento'&&p.prazo&&new Date(p.prazo+'T12:00:00')<new Date();
+          return`<tr style="background:${priorColor(p)}"><td style="font-weight:bold">${p.nome}${atr?' ⚠️ ATRASADO':''}</td><td>${p.categoria}</td><td>${p.responsavel}</td><td>${p.prioridade}</td><td>${fmtBR(p.inicio)}</td><td style="font-weight:bold">${p.status==='continuo'?'Sem prazo':fmtBR(p.prazo)}</td><td>${PS[p.status]||p.status}</td></tr>`;
         }).join('')}</tbody></table>`}
-      </div>
-      ${outros.length>0?`<div class="print-section">
-        <div class="print-section-title">Outros Projetos (${outros.length})</div>
-        <table><thead><tr><th>Projeto</th><th>Categoria</th><th>Responsável</th><th>Status</th></tr></thead>
-        <tbody>${outros.map(p=>`<tr><td style="font-weight:bold">${p.nome}</td><td>${p.categoria}</td><td>${p.responsavel}</td><td>${PS[p.status]}</td></tr>`).join('')}</tbody></table>
-      </div>`:''}`;
+      </div>`;
 
   }else{
-    const abertas=nRes.filter(n=>n.status==='aberta');
-    const resolvidas=nRes.filter(n=>n.status==='resolvida');
     html=headerHtml+`
       <div class="print-section">
         <div class="print-section-title">Resumo — ${compLabel}</div>
-        <table><thead><tr><th>Total</th><th>Abertas</th><th>Resolvidas</th><th>Sem Atualização</th></tr></thead>
+        <table><thead><tr><th>Total filtrado</th><th>Sem Atualização</th><th>Ag. Retorno</th><th>Ag. Pagamento</th><th>Resolvidas</th></tr></thead>
         <tbody><tr>
           <td>${nRes.length}</td>
-          <td>${abertas.length}</td>
-          <td>${resolvidas.length}</td>
-          <td>${abertas.filter(n=>!n.updates||!n.updates.length).length}</td>
+          <td>${nRes.filter(n=>n.status!=='resolvida'&&(!n.updates||!n.updates.length)).length}</td>
+          <td>${nRes.filter(n=>n.status==='aguardando_retorno').length}</td>
+          <td>${nRes.filter(n=>n.status==='aguardando_pagamento').length}</td>
+          <td>${nRes.filter(n=>n.status==='resolvida').length}</td>
         </tr></tbody></table>
       </div>
       <div class="print-section">
-        <div class="print-section-title">NFs Abertas (${abertas.length})</div>
-        ${abertas.length===0?'<p style="color:#888;font-style:italic">Nenhuma NF em aberto.</p>':`
-        <table><thead><tr><th>NF</th><th>Fornecedor</th><th>Valor</th><th>Responsável</th><th>Vencimento</th><th>Última Atualização</th></tr></thead>
-        <tbody>${abertas.map(n=>{
+        <div class="print-section-title">NFs — ${relStLabel} (${nRes.length})</div>
+        ${nRes.length===0?'<p style="color:#888;font-style:italic">Nenhuma NF encontrada.</p>':`
+        <table><thead><tr><th>NF</th><th>Obra</th><th>Fornecedor</th><th>Valor</th><th>Responsável</th><th>Vencimento</th><th>Status</th><th>Última Atualização</th></tr></thead>
+        <tbody>${nRes.map(n=>{
           const upd=n.updates||[];const last=upd.length?upd[upd.length-1]:null;
-          const sem=!upd.length;
-    const stLabel={aguardando_retorno:'⏳ Aguardando retorno',aguardando_pagamento:'💳 Aguardando pagamento',resolvida:'✅ Resolvido',aberta:'🟠 Aberta'};
-          return`<tr style="background:${sem?'#FEF3C7':'#fff'}"><td style="font-weight:bold">${n.numero}</td><td>${n.fornecedor}</td><td>${n.valor||'—'}</td><td>${n.responsavel}</td><td>${fmtBR(n.vencimento)}</td><td style="font-size:11px">${last?last.texto.substring(0,60)+'...':'⚠️ Sem atualização'}</td></tr>`;
+          const sem=n.status!=='resolvida'&&!upd.length;
+          const stNF={aguardando_retorno:'⏳ Ag. Retorno',aguardando_pagamento:'💳 Ag. Pagamento',resolvida:'✅ Resolvido',aberta:'🟠 Aberta'};
+          return`<tr style="background:${sem?'#FEF3C7':n.status==='resolvida'?'#DCFCE7':'#fff'}"><td style="font-weight:bold">${n.numero}</td><td>${n.obra||'—'}</td><td>${n.fornecedor}</td><td>${n.valor||'—'}</td><td>${n.responsavel}</td><td>${fmtBR(n.vencimento)}</td><td>${stNF[n.status]||n.status}</td><td style="font-size:11px">${last?last.texto.substring(0,60)+'...':'⚠️ Sem atualização'}</td></tr>`;
         }).join('')}</tbody></table>`}
-      </div>
-      ${resolvidas.length>0?`<div class="print-section">
-        <div class="print-section-title">NFs Resolvidas (${resolvidas.length})</div>
-        <table><thead><tr><th>NF</th><th>Fornecedor</th><th>Valor</th><th>Responsável</th></tr></thead>
-        <tbody>${resolvidas.map(n=>`<tr><td style="font-weight:bold">${n.numero}</td><td>${n.fornecedor}</td><td>${n.valor||'—'}</td><td>${n.responsavel}</td></tr>`).join('')}</tbody></table>
-      </div>`:''}`;
+      </div>`;
   }
 
   document.getElementById('printArea').innerHTML=html;
