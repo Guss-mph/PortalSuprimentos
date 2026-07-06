@@ -810,7 +810,9 @@ function popObras(){
     const el=document.getElementById(id);if(!el)return;
     const v=el.value;
     el.innerHTML=id==='nfObra'?'<option value="">— Selecionar obra —</option>':'<option value="">— Selecionar —</option>';
-    obras.forEach(o=>{const op=document.createElement('option');op.value=o.nome;op.textContent=o.nome;el.appendChild(op);});
+    // Admin vê todas, usuário comum só vê as suas
+    const listaObras=isAdmin?obras:obras.filter(o=>o.comprador===currentUser);
+    listaObras.forEach(o=>{const op=document.createElement('option');op.value=o.nome;op.textContent=o.nome;el.appendChild(op);});
     if(v)el.value=v;
   });
 }
