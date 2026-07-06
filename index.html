@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -316,6 +315,7 @@ td{padding:10px 14px;vertical-align:middle;}
     <span id="hdrUser" style="font-size:12px;color:#9CA3AF;margin-right:4px;"></span>
     <button class="logout-btn" id="btnResetSenhas" onclick="openResetSenhas()" style="display:none;background:#2A2A2A;border-color:#555;color:#F59E0B;" title="Resetar senhas">🔑 Senhas</button>
     <button class="logout-btn" id="btnRelatorio" onclick="openOv('ovRelatorio')" style="display:none;background:#2A2A2A;border-color:#555;color:#22C55E;" title="Gerar relatório">📄 Relatório</button>
+    <button class="logout-btn" id="btnAcessos" onclick="openAcessos()" style="display:none;background:#2A2A2A;border-color:#555;color:#A78BFA;" title="Histórico de acessos">👁 Acessos</button>
     <button class="logout-btn" onclick="doLogout()">Sair</button>
     <button class="btn-back" id="backBtn" onclick="goHome()">Início</button>
     <button class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
@@ -671,6 +671,15 @@ td{padding:10px 14px;vertical-align:middle;}
 
 <!-- ÁREA DE IMPRESSÃO (invisível até print) -->
 <div id="printArea" style="display:none;"></div>
+
+<!-- MODAL ACESSOS -->
+<div class="overlay" id="ovAcessos"><div class="modal" style="width:580px;">
+  <div class="modal-head"><h3>👁 Histórico de Acessos</h3><button class="modal-x" onclick="closeOv('ovAcessos')">×</button></div>
+  <div class="modal-body">
+    <div id="acessosContent"><div style="text-align:center;padding:30px;color:var(--muted)">Carregando...</div></div>
+  </div>
+  <div class="modal-foot"><button class="btn-sec" onclick="closeOv('ovAcessos')">Fechar</button></div>
+</div></div>
 
 <button class="fab" id="fabBtn">+</button>
 <div class="toast" id="toast"></div>
@@ -1550,12 +1559,15 @@ function loginSuccess(user,admin){
   currentUser=user;isAdmin=admin;
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('hdrUser').textContent=user+(admin?' 👑':'');
-  // Mostra botão de senhas só para admins
+  // Mostra botões só para admins
   document.getElementById('btnResetSenhas').style.display=admin?'inline-block':'none';
   document.getElementById('btnRelatorio').style.display=admin?'inline-block':'none';
+  document.getElementById('btnAcessos').style.display=admin?'inline-block':'none';
   // Salva sessão
   sessionStorage.setItem('mph_user',user);
   sessionStorage.setItem('mph_admin',admin?'1':'0');
+  // Registra acesso no banco
+  sb.post('acessos',{id:Date.now(),usuario:user}).catch(e=>console.warn('Acesso:',e));
   loadDash();
 }
 
@@ -1778,6 +1790,69 @@ async function gerarRelatorio(){
   setTimeout(()=>window.print(),200);
 }
 
+// ── ACESSOS ──
+async function openAcessos(){
+  openOv('ovAcessos');
+  const el=document.getElementById('acessosContent');
+  el.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted)">Carregando...</div>';
+  try{
+    const data=await sb.get('acessos','?order=data_acesso.desc&limit=200');
+    if(!data||!data.length){
+      el.innerHTML='<div class="empty">Nenhum acesso registrado ainda.</div>';
+      return;
+    }
+    // Último acesso por usuário
+    const ultimos={};
+    const contagem={};
+    data.forEach(a=>{
+      if(!ultimos[a.usuario])ultimos[a.usuario]=a.data_acesso;
+      contagem[a.usuario]=(contagem[a.usuario]||0)+1;
+    });
+    // Cards por membro da equipe
+    const membros=['Gustavo','Gisele','Novaes','Andressa','Henrique'];
+    const cardsHtml=membros.map(nome=>{
+      const ultimo=ultimos[nome];
+      const total=contagem[nome]||0;
+      const tc=TEAM.find(t=>t.name===nome);
+      const cor=tc?tc.color:'#888';
+      const dtFmt=ultimo?new Date(ultimo).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'Nunca acessou';
+      return`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="av-md" style="background:${cor}">${ini(nome)}</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;">${nome}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;">Último acesso: <strong style="color:var(--text)">${dtFmt}</strong></div>
+          </div>
+        </div>
+        <div style="text-align:center;background:var(--surface2);border-radius:8px;padding:8px 14px;">
+          <div style="font-size:20px;font-weight:700;">${total}</div>
+          <div style="font-size:10px;color:var(--muted);">acessos</div>
+        </div>
+      </div>`;
+    }).join('');
+    // Histórico recente
+    const historicoHtml=data.slice(0,30).map(a=>{
+      const tc=TEAM.find(t=>t.name===a.usuario);
+      const cor=tc?tc.color:'#888';
+      const dt=new Date(a.data_acesso).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      return`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="av" style="background:${cor};width:22px;height:22px;font-size:9px;">${ini(a.usuario)}</div>
+          <span style="font-weight:500;">${a.usuario}</span>
+        </div>
+        <span style="color:var(--muted);">${dt}</span>
+      </div>`;
+    }).join('');
+    el.innerHTML=`
+      <div style="margin-bottom:20px;">${cardsHtml}</div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:10px;">Últimos 30 acessos</div>
+      <div>${historicoHtml}</div>`;
+  }catch(e){
+    el.innerHTML=`<div style="color:var(--red);font-size:13px;padding:16px;">Erro ao carregar acessos. Verifique se a tabela foi criada no Supabase.</div>`;
+    console.error(e);
+  }
+}
+
 // ── INIT ──
 window.onload=()=>{
   applyTheme();
@@ -1792,6 +1867,7 @@ window.onload=()=>{
     document.getElementById('hdrUser').textContent=currentUser+(isAdmin?' 👑':'');
     document.getElementById('btnResetSenhas').style.display=isAdmin?'inline-block':'none';
     document.getElementById('btnRelatorio').style.display=isAdmin?'inline-block':'none';
+    document.getElementById('btnAcessos').style.display=isAdmin?'inline-block':'none';
     loadDash();
   }
 };
