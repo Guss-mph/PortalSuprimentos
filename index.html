@@ -113,8 +113,8 @@ td{padding:10px 14px;vertical-align:middle;}
 .resol-body.open{display:block;}
 
 /* AVATAR */
-.av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#333;flex-shrink:0;}
-.av-md{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#333;flex-shrink:0;}
+.av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#333;flex-shrink:0;border:2px solid transparent;}
+.av-md{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#333;flex-shrink:0;border:2.5px solid transparent;}
 .avc{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;}
 
 /* URGENCY BAR */
@@ -707,11 +707,11 @@ const sb={
 
 // ── CONSTANTS ──
 const TEAM=[
-  {name:'Andressa',role:'Comprador Pleno',color:'#CCC0DA'},
-  {name:'Gustavo', role:'Comprador Pleno',color:'#B8CCE4'},
-  {name:'Gisele',  role:'Comprador Pleno',color:'#E6B8B7'},
-  {name:'Novaes',  role:'Comprador Pleno',color:'#D9D9D9'},
-  {name:'Henrique',role:'Comprador Sênior',color:'#FCD5B4'},
+  {name:'Andressa',role:'Comprador Pleno',color:'#CCC0DA',border:'#8B6FAD'},
+  {name:'Gustavo', role:'Comprador Pleno',color:'#B8CCE4',border:'#5B8DB8'},
+  {name:'Gisele',  role:'Comprador Pleno',color:'#E6B8B7',border:'#B5706E'},
+  {name:'Novaes',  role:'Comprador Pleno',color:'#D9D9D9',border:'#9E9E9E'},
+  {name:'Henrique',role:'Comprador Sênior',color:'#FCD5B4',border:'#C8884E'},
 ];
 const COR={
   blue:{c:'#2563EB',bg:'#DBEAFE'},green:{c:'#16A34A',bg:'#DCFCE7'},
@@ -781,9 +781,10 @@ function ago(s){if(!s)return'';const d=Math.floor((Date.now()-new Date(s))/86400
 // ── HELPERS ──
 function getTipo(n){return tipos.find(t=>t.nome===n);}
 function getCor(k){return COR[k]||COR.blue;}
-function tc(n){return TEAM.find(t=>t.name===n)?.color||'#888';}
+function tc(n){return TEAM.find(t=>t.name===n)?.color||'#D9D9D9';}
+function tb(n){return TEAM.find(t=>t.name===n)?.border||'#9E9E9E';}
 function ini(n){return n.split(' ').map(x=>x[0]).join('').substring(0,2).toUpperCase();}
-function avEl(n,size=24,fs=9){return`<div class="av" style="background:${tc(n)};width:${size}px;height:${size}px;font-size:${fs}px;">${ini(n)}</div>`;}
+function avEl(n,size=24,fs=9){return`<div class="av" style="background:${tc(n)};border-color:${tb(n)};width:${size}px;height:${size}px;font-size:${fs}px;">${ini(n)}</div>`;}
 function getMSt(m){if(m.concluido)return'concluido';const d=bizLeft(m.prazo);if(d<0)return'vencido';if(d===0)return'critico';if(d<=2)return'atencao';return'ok';}
 function etapaBadge(m,clickable=true){const e=ETAPA[m.etapa||'nao_iniciado']||ETAPA.nao_iniciado;const tip=m.etapa==='suspenso'&&m.motivo_suspenso?` title="${m.motivo_suspenso}"`:'';return`<button class="etapa-badge ${e.css}"${tip}${clickable?` onclick="openEtapa(${m.id})"`:' style="cursor:default"'}>${e.icon} ${e.label}</button>`;}
 
@@ -884,7 +885,7 @@ async function loadDash(){
       const nN=nfAb.filter(x=>x.responsavel===m.name).length;
       const cr=ativos.filter(x=>x.responsavel===m.name&&(getMSt(x)==='vencido'||getMSt(x)==='critico')).length;
       return`<button id="avb-${m.name}" class="av-btn${painelAtivo===m.name?' ativo':''}" onclick="togglePainel('${m.name}')">
-        <div class="av-md" style="background:${m.color}">${ini(m.name)}</div>
+        <div class="av-md" style="background:${m.color};border:2.5px solid ${m.border||'#9E9E9E'}">${ini(m.name)}</div>
         <div>
           <div style="font-size:13px;font-weight:700;color:var(--text)">${m.name}</div>
           <div style="font-size:11px;color:var(--muted)">${nM} mapa${nM!==1?'s':''} · ${nP} proj · ${nN} NF</div>
@@ -959,7 +960,7 @@ function renderPainel(name){
   document.getElementById('dashPainel').innerHTML=`<div class="dash-painel">
     <div class="dash-painel-head">
       <div style="display:flex;align-items:center;gap:12px;">
-        <div class="av-md" style="background:${member.color}">${ini(name)}</div>
+        <div class="av-md" style="background:${member.color};border:2.5px solid ${member.border||'#9E9E9E'}">${ini(name)}</div>
         <div><div style="font-size:15px;font-weight:700;color:#F0F0F0">${name}</div><div style="font-size:11px;color:#9CA3AF">${member.role}</div></div>
       </div>
       <div style="display:flex;gap:18px;align-items:center;">
@@ -1820,7 +1821,7 @@ async function openAcessos(){
       const dtFmt=ultimo?new Date(ultimo).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'Nunca acessou';
       return`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);">
         <div style="display:flex;align-items:center;gap:10px;">
-          <div class="av-md" style="background:${cor}">${ini(nome)}</div>
+          <div class="av-md" style="background:${cor};border:2.5px solid ${TEAM.find(t=>t.name===nome)?.border||'#9E9E9E'}">${ini(nome)}</div>
           <div>
             <div style="font-size:14px;font-weight:600;">${nome}</div>
             <div style="font-size:12px;color:var(--muted);margin-top:2px;">Último acesso: <strong style="color:var(--text)">${dtFmt}</strong></div>
