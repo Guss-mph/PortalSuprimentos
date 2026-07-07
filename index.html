@@ -1118,7 +1118,11 @@ async function addMapa(){
 }
 async function toggleMapa(id){
   const m=mapas.find(x=>x.id===id);if(!m)return;
-  m.concluido=!m.concluido;await sb.patch('mapas',id,{concluido:m.concluido});
+  m.concluido=!m.concluido;
+  const patch={concluido:m.concluido};
+  if(m.concluido){m.concluido_em=new Date().toISOString();patch.concluido_em=m.concluido_em;}
+  else{m.concluido_em=null;patch.concluido_em=null;}
+  await sb.patch('mapas',id,patch);
   renderMapas();renderMCStats();toast(m.concluido?`Mapa ${m.numero} concluído!`:`Mapa ${m.numero} reaberto`);
 }
 async function delMapa(id){
@@ -1157,6 +1161,25 @@ async function saveEditMapa(){
   const b={numero:document.getElementById('eMNum').value.trim(),obra:document.getElementById('eMObra').value,tipo:document.getElementById('eMTipo').value,descricao:document.getElementById('eMDesc').value.trim(),responsavel:document.getElementById('eMResp').value,data_solicitacao:dataSolicitacao,prazo:document.getElementById('eMPrazo').value,obs:document.getElementById('eMObs').value.trim()};
   await sb.patch('mapas',id,b);const i=mapas.findIndex(x=>x.id===id);if(i>=0)mapas[i]={...mapas[i],...b};
   closeOv('ovEditMapa');renderMapas();renderMCStats();toast('Mapa atualizado!');
+}
+
+// ── PONTUALIDADE ──
+function calcPontualidade(m){
+  if(!m.concluido_em)return null;
+  const prazo=new Date(m.prazo+'T23:59:59');
+  const conc=new Date(m.concluido_em);
+  let diff=0;
+  const d=new Date(Math.min(prazo,conc));
+  const end=new Date(Math.max(prazo,conc));
+  while(d<end){d.setDate(d.getDate()+1);if(d.getDay()&&d.getDay()!==6)diff++;}
+  return{dias:diff,sinal:conc<=prazo?1:-1};
+}
+function pontBadge(m){
+  const p=calcPontualidade(m);
+  if(!p)return'<span style="font-size:11px;color:#aaa;font-style:italic">sem registro</span>';
+  if(p.dias===0)return'<span style="display:inline-block;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:bold;background:#F3F4F6;color:#374151;">No prazo</span>';
+  if(p.sinal===1)return`<span style="display:inline-block;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:bold;background:#DCFCE7;color:#166534;">${p.dias}d adiantado</span>`;
+  return`<span style="display:inline-block;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:bold;background:#FEE2E2;color:#991B1B;">${p.dias}d atrasado</span>`;
 }
 
 // ── ETAPA ──
@@ -1711,6 +1734,19 @@ async function gerarRelatorio(){
     html=headerHtml+`
       <div class="print-section">
         <div class="print-section-title">Resumo — ${compLabel}</div>
+        ${relSt==='finalizado'?`
+        <table><thead><tr><th>Total</th><th>Concluídos</th><th>Em Andamento</th><th style="background:#166534">Adiantados</th><th>No Prazo</th><th style="background:#991B1B">Atrasados</th><th>Sem Registro</th></tr></thead>
+        <tbody><tr>
+          <td>${mRes.length}</td>
+          <td>${conc.length}</td>
+          <td>${ativos.length}</td>
+          <td style="color:#166534;font-weight:bold;background:#F0FDF4">${conc.filter(m=>{const p=calcPontualidade(m);return p&&p.sinal===1&&p.dias>0;}).length}</td>
+          <td style="font-weight:bold">${conc.filter(m=>{const p=calcPontualidade(m);return p&&p.dias===0;}).length}</td>
+          <td style="color:#991B1B;font-weight:bold;background:#FEF2F2">${conc.filter(m=>{const p=calcPontualidade(m);return p&&p.sinal===-1;}).length}</td>
+          <td style="color:#9CA3AF">${conc.filter(m=>!m.concluido_em).length}</td>
+        </tr></tbody></table>
+        <div style="font-size:10px;color:#aaa;font-style:italic;margin-top:4px;">"Sem registro" = concluídos antes da atualização do sistema.</div>
+        `:`
         <table><thead><tr><th>Total de Mapas</th><th>Em Andamento</th><th>Vencidos/Críticos</th><th>Concluídos</th></tr></thead>
         <tbody><tr>
           <td>${mRes.length}</td>
@@ -1718,17 +1754,22 @@ async function gerarRelatorio(){
           <td>${ativos.filter(m=>getMSt(m)==='vencido'||getMSt(m)==='critico').length}</td>
           <td>${conc.length}</td>
         </tr></tbody></table>
+        `}
       </div>
       <div class="print-section">
         <div class="print-section-title">Mapas — ${relStLabel} (${listagem.length})</div>
         ${listagem.length===0?'<p style="color:#888;font-style:italic">Nenhum mapa encontrado.</p>':`
-        <table><thead><tr><th>Nº Mapa</th><th>Obra</th><th>Tipo</th><th>Responsável</th><th>Solicitado</th><th>Prazo</th><th>Dias Rest.</th><th>Status</th><th>Etapa</th></tr></thead>
+        <table><thead><tr><th>Nº Mapa</th><th>Obra</th><th>Tipo</th><th>Responsável</th><th>Solicitado</th><th>Prazo</th>${relSt==='finalizado'?'<th>Concluído em</th><th>Pontualidade</th>':'<th>Dias Rest.</th>'}<th>Status</th><th>Etapa</th></tr></thead>
         <tbody>${listagem.sort((a,b)=>{const o={vencido:0,critico:1,atencao:2,ok:3,concluido:4};return(o[getMSt(a)]??3)-(o[getMSt(b)]??3);}).map(m=>{
           const s=getMSt(m);const d=bizLeft(m.prazo);
           const ei=ETAPA[m.etapa||'nao_iniciado']||ETAPA.nao_iniciado;
           const dt=d<0?Math.abs(d)+'d atrás':d===0?'Hoje!':d+'d';
           const bg=STATUS_COLORS[s]||'#fff';
-          return`<tr style="background:${bg}"><td style="font-weight:bold">${m.numero}</td><td>${m.obra}</td><td>${m.tipo}</td><td>${m.responsavel}</td><td>${fmtBR(m.data_solicitacao)}</td><td style="font-weight:bold">${fmtBR(m.prazo)}</td><td style="font-weight:bold">${dt}</td><td>${MS[s]}</td><td>${ei.label}</td></tr>`;
+          const p=calcPontualidade(m);
+          const pontCell=relSt==='finalizado'
+            ?`<td>${m.concluido_em?fmtBR(m.concluido_em.split('T')[0]):'<span style="color:#aaa;font-style:italic">—</span>'}</td><td>${pontBadge(m)}</td>`
+            :`<td style="font-weight:bold">${dt}</td>`;
+          return`<tr style="background:${bg}"><td style="font-weight:bold">${m.numero}</td><td>${m.obra}</td><td>${m.tipo}</td><td>${m.responsavel}</td><td>${fmtBR(m.data_solicitacao)}</td><td style="font-weight:bold;color:${s==='vencido'||s==='critico'?'#DC2626':'inherit'}">${fmtBR(m.prazo)}</td>${pontCell}<td>${MS[s]}</td><td>${ei.label}</td></tr>`;
         }).join('')}</tbody></table>`}
       </div>
       ${relSt==='todos'&&conc.length>0?`<div class="print-section">
