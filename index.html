@@ -2007,17 +2007,20 @@ function renderObrasDivisao(){
     return '<span class="sbadge s-ok">✅ Em andamento</span>';
   };
 
+  const falta='<span style="color:var(--red);font-size:10px;font-weight:700;">FALTA INFORMAR</span>';
+  const cv=(v)=>v?`<span style="font-size:12px">${v}</span>`:falta;
+  const canEdit=o=>isAdmin||o.comprador===currentUser;
   const renderRow=o=>`<tr style="${o.status==='checklist'?'background:var(--yellow-light)':''}">
     <td style="font-weight:600;font-size:13px">${o.nome}</td>
     <td><div class="avc">${avEl(o.comprador)}${o.comprador}</div></td>
     <td style="font-size:12px;color:var(--muted)">${o.ano||'—'}</td>
-    <td style="font-size:12px">${o.fat1||'—'}${o.fat2?`<br><span style="color:var(--muted);font-size:11px">${o.fat2}</span>`:''}</td>
-    <td style="font-size:12px;color:var(--muted)">${o.tipo||'—'}</td>
-    <td style="font-size:12px">${o.cidade||'—'}</td>
-    <td style="font-size:12px">${o.coordenador||'—'}</td>
-    <td style="font-size:12px">${o.eng_ini||'—'}</td>
+    <td>${cv(o.fat1)}${o.fat2?`<br><span style="color:var(--muted);font-size:11px">${o.fat2}</span>`:''}</td>
+    <td>${cv(o.tipo)}</td>
+    <td>${cv(o.cidade)}</td>
+    <td>${cv(o.coordenador)}</td>
+    <td>${cv(o.eng_ini)}</td>
     <td>${stBadge(o)}</td>
-    <td>${isAdmin?`<button class="abt" onclick="editObraDiv(${o.id})">✏️</button>`:''}
+    <td>${canEdit(o)?`<button class="abt" onclick="editObraDiv(${o.id})">✏️</button>`:''}
     </td>
   </tr>`;
 
@@ -2052,6 +2055,10 @@ function openObraDiv(){
   if(!isAdmin){toast('Apenas administradores podem cadastrar obras','err');return;}
   document.getElementById('odId').value='';
   document.getElementById('odNome').value='';
+  document.getElementById('odNome').readOnly=false;
+  document.getElementById('odNome').style.opacity='1';
+  document.getElementById('odComp').disabled=false;
+  document.getElementById('odComp').style.opacity='1';
   document.getElementById('odFat1').value='';
   document.getElementById('odFat2').value='';
   document.getElementById('odEnd').value='';
@@ -2069,8 +2076,9 @@ function openObraDiv(){
 }
 
 function editObraDiv(id){
-  if(!isAdmin){toast('Apenas administradores podem editar obras','err');return;}
   const o=obrasDivisao.find(x=>x.id===id);if(!o)return;
+  // Não-admin só edita suas próprias obras
+  if(!isAdmin&&o.comprador!==currentUser){toast('Você só pode editar suas próprias obras','err');return;}
   document.getElementById('odId').value=id;
   document.getElementById('odNome').value=o.nome||'';
   document.getElementById('odComp').value=o.comprador||'Gustavo';
@@ -2084,30 +2092,55 @@ function editObraDiv(id){
   document.getElementById('odApoio').value=o.apoio||'';
   document.getElementById('odEngIni').value=o.eng_ini||'';
   document.getElementById('odStatus').value=o.status||'andamento';
-  document.getElementById('odDelBtn').style.display='inline-block';
-  document.getElementById('obraDivTit').textContent='✏️ Editar Obra';
+  document.getElementById('odDelBtn').style.display=isAdmin?'inline-block':'none';
+  document.getElementById('obraDivTit').textContent='✏️ Editar Obra — '+o.nome;
+  // Nome e Comprador: só admin pode alterar
+  document.getElementById('odNome').readOnly=!isAdmin;
+  document.getElementById('odNome').style.opacity=isAdmin?'1':'.7';
+  document.getElementById('odComp').disabled=!isAdmin;
+  document.getElementById('odComp').style.opacity=isAdmin?'1':'.7';
+  // Admin bloqueia o Status para não-admin
+  const statusWrap=document.getElementById('odStatus');
+  statusWrap.disabled=false; // todos podem mudar status
   openOv('ovObraDiv');
 }
 
 async function saveObraDiv(){
   const idV=document.getElementById('odId').value;
   const nome=document.getElementById('odNome').value.trim();
-  const fat1=document.getElementById('odFat1').value.trim();
-  if(!nome||!fat1){toast('Informe o nome da obra e faturamento','err');return;}
-  const body={
-    nome,
-    comprador:document.getElementById('odComp').value,
-    ano:parseInt(document.getElementById('odAno').value)||new Date().getFullYear(),
-    fat1,
-    fat2:document.getElementById('odFat2').value.trim(),
-    endereco:document.getElementById('odEnd').value.trim(),
-    tipo:document.getElementById('odTipo').value,
-    cidade:document.getElementById('odCidade').value.trim(),
-    coordenador:document.getElementById('odCoordenador').value.trim(),
-    apoio:document.getElementById('odApoio').value.trim(),
-    eng_ini:document.getElementById('odEngIni').value.trim(),
-    status:document.getElementById('odStatus').value,
-  };
+  // Admin precisa de nome; não-admin só precisa salvar detalhes
+  if(isAdmin&&!nome){toast('Informe o nome da obra','err');return;}
+  // Monta body diferente para admin e comprador
+  let body;
+  if(isAdmin){
+    body={
+      nome,
+      comprador:document.getElementById('odComp').value,
+      ano:parseInt(document.getElementById('odAno').value)||new Date().getFullYear(),
+      fat1:document.getElementById('odFat1').value.trim(),
+      fat2:document.getElementById('odFat2').value.trim(),
+      endereco:document.getElementById('odEnd').value.trim(),
+      tipo:document.getElementById('odTipo').value,
+      cidade:document.getElementById('odCidade').value.trim(),
+      coordenador:document.getElementById('odCoordenador').value.trim(),
+      apoio:document.getElementById('odApoio').value.trim(),
+      eng_ini:document.getElementById('odEngIni').value.trim(),
+      status:document.getElementById('odStatus').value,
+    };
+  }else{
+    // Comprador só atualiza campos de detalhe — não mexe em nome/comprador
+    body={
+      fat1:document.getElementById('odFat1').value.trim(),
+      fat2:document.getElementById('odFat2').value.trim(),
+      endereco:document.getElementById('odEnd').value.trim(),
+      tipo:document.getElementById('odTipo').value,
+      cidade:document.getElementById('odCidade').value.trim(),
+      coordenador:document.getElementById('odCoordenador').value.trim(),
+      apoio:document.getElementById('odApoio').value.trim(),
+      eng_ini:document.getElementById('odEngIni').value.trim(),
+      status:document.getElementById('odStatus').value,
+    };
+  }
   try{
     if(idV){
       await sb.patch('obras_divisao',parseInt(idV),body);
