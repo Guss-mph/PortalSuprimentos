@@ -601,9 +601,7 @@ td{padding:10px 14px;vertical-align:middle;}
     <div class="f"><label>Cidade / Condomínio</label><input id="odCidade" placeholder="Ex: São Paulo / Cond. Europa"></div>
     <div class="f"><label>Coordenador</label><input id="odCoordenador" placeholder="Nome do coordenador"></div>
     <div class="f"><label>Apoio</label><input id="odApoio" placeholder="Nome do apoio"></div>
-    <div class="f"><label>Engenheiro Início</label><input id="odEngIni" placeholder="Nome"></div>
-    <div class="f"><label>Engenheiro Fim</label><input id="odEngFim" placeholder="Nome (se diferente)"></div>
-    <div class="f"><label>Previsão de Entrega</label><input type="date" id="odPrevisao"></div>
+    <div class="f" style="grid-column:span 2"><label>Engenheiro</label><input id="odEngIni" placeholder="Nome do engenheiro"></div>
     <div class="f"><label>Status</label><select id="odStatus"><option value="andamento">Em andamento</option><option value="checklist">Checklist</option><option value="finalizada">Finalizada</option></select></div>
   </div>
   <div class="modal-foot">
@@ -725,8 +723,11 @@ td{padding:10px 14px;vertical-align:middle;}
           <option value="">Todos tipos</option>
           <option>Casa</option><option>Reforma Casa</option><option>Apartamento</option><option>Cooperativa</option><option>Outros</option>
         </select>
-        <select class="fsel" id="obrasDivFCidade" onchange="renderObrasDivisao()">
-          <option value="">Todas cidades</option>
+        <select class="fsel" id="obrasDivFStatus" onchange="renderObrasDivisao()">
+          <option value="">Todos status</option>
+          <option value="andamento">Em andamento</option>
+          <option value="checklist">Checklist</option>
+          <option value="finalizada">Finalizada</option>
         </select>
       </div>
     </div>
@@ -1962,10 +1963,7 @@ async function loadObrasDivisao(){
     const all=await sb.get('obras_divisao','?order=criado_em.desc')||[];
     obrasDivisao=isAdmin?all:all.filter(o=>o.comprador===currentUser);
     renderObrasDivisao();renderObrasDivisaoStats();
-    // Popula filtro de cidades
-    const cidades=[...new Set(all.map(o=>o.cidade).filter(Boolean))].sort();
-    const sel=document.getElementById('obrasDivFCidade');
-    if(sel){sel.innerHTML='<option value="">Todas cidades</option>';cidades.forEach(c=>{const op=document.createElement('option');op.value=c;op.textContent=c;sel.appendChild(op);});}
+
   }catch(e){console.error('obras div err:',e);}
 }
 
@@ -1986,22 +1984,27 @@ function renderObrasDivisao(){
   const s=document.getElementById('obrasDivSearch').value.toLowerCase();
   const fc=document.getElementById('obrasDivFComp').value;
   const ft=document.getElementById('obrasDivFTipo').value;
-  const fci=document.getElementById('obrasDivFCidade').value;
+  const fst=document.getElementById('obrasDivFStatus').value;
   const ativas=obrasDivisao.filter(o=>{
-    if(o.status==='finalizada')return false;
+    if(!fst&&o.status==='finalizada')return false;
     if(s&&!`${o.nome} ${o.comprador} ${o.cidade||''} ${o.coordenador||''} ${o.fat1||''}`.toLowerCase().includes(s))return false;
     if(fc&&o.comprador!==fc)return false;
     if(ft&&o.tipo!==ft)return false;
-    if(fci&&o.cidade!==fci)return false;
+    if(fst){
+      // Se filtrou por status específico, mostra esse status (incluindo finalizada)
+      return o.status===fst;
+    }
     return true;
   });
-  const finalizadas=obrasDivisao.filter(o=>o.status==='finalizada');
+  // Finalizadas: só no toggle se não estiver filtrando por finalizada
+  const finalizadas=fst==='finalizada'?[]:obrasDivisao.filter(o=>o.status==='finalizada');
+  // Se filtrou por finalizada, mostra na tabela principal sem ocultar
+  const mostrarFinalizadasNaTabela=fst==='finalizada';
   const c=document.getElementById('obrasDivTable');
 
   const stBadge=o=>{
     if(o.status==='checklist')return'<span class="sbadge s-atencao">📋 Checklist</span>';
-    const atr=o.previsao&&new Date(o.previsao+'T12:00:00')<new Date();
-    return atr?'<span class="sbadge s-vencido">⚠️ Atrasada</span>':'<span class="sbadge s-ok">✅ Em andamento</span>';
+    return '<span class="sbadge s-ok">✅ Em andamento</span>';
   };
 
   const renderRow=o=>`<tr style="${o.status==='checklist'?'background:var(--yellow-light)':''}">
@@ -2012,8 +2015,7 @@ function renderObrasDivisao(){
     <td style="font-size:12px;color:var(--muted)">${o.tipo||'—'}</td>
     <td style="font-size:12px">${o.cidade||'—'}</td>
     <td style="font-size:12px">${o.coordenador||'—'}</td>
-    <td style="font-size:12px">${o.eng_ini||'—'}${o.eng_fim&&o.eng_fim!==o.eng_ini?`<br><span style="color:var(--muted);font-size:11px">${o.eng_fim}</span>`:''}</td>
-    <td style="font-size:12px;font-weight:600;color:${o.previsao&&new Date(o.previsao+'T12:00:00')<new Date()?'var(--red)':'inherit'}">${fmtBR(o.previsao)}</td>
+    <td style="font-size:12px">${o.eng_ini||'—'}</td>
     <td>${stBadge(o)}</td>
     <td>${isAdmin?`<button class="abt" onclick="editObraDiv(${o.id})">✏️</button>`:''}
     </td>
@@ -2040,7 +2042,6 @@ function renderObrasDivisao(){
         <td style="font-size:12px">${o.cidade||'—'}</td>
         <td style="font-size:12px">${o.coordenador||'—'}</td>
         <td style="font-size:12px">${o.eng_ini||'—'}</td>
-        <td style="font-size:12px">${fmtBR(o.previsao)}</td>
         <td><span class="sbadge s-concluido">✔ Finalizada</span></td>
         <td>${isAdmin?`<button class="abt" onclick="editObraDiv(${o.id})">✏️</button>`:''}</td>
       </tr>`).join('')+'</tbody></table>'}
@@ -2058,8 +2059,8 @@ function openObraDiv(){
   document.getElementById('odCoordenador').value='';
   document.getElementById('odApoio').value='';
   document.getElementById('odEngIni').value='';
-  document.getElementById('odEngFim').value='';
-  document.getElementById('odPrevisao').value='';
+  document.getElementById('odEngIni').value='';
+  document.getElementById('odStatus').value='andamento';
   document.getElementById('odAno').value=new Date().getFullYear();
   document.getElementById('odStatus').value='andamento';
   document.getElementById('odDelBtn').style.display='none';
@@ -2082,8 +2083,6 @@ function editObraDiv(id){
   document.getElementById('odCoordenador').value=o.coordenador||'';
   document.getElementById('odApoio').value=o.apoio||'';
   document.getElementById('odEngIni').value=o.eng_ini||'';
-  document.getElementById('odEngFim').value=o.eng_fim||'';
-  document.getElementById('odPrevisao').value=o.previsao||'';
   document.getElementById('odStatus').value=o.status||'andamento';
   document.getElementById('odDelBtn').style.display='inline-block';
   document.getElementById('obraDivTit').textContent='✏️ Editar Obra';
@@ -2107,8 +2106,6 @@ async function saveObraDiv(){
     coordenador:document.getElementById('odCoordenador').value.trim(),
     apoio:document.getElementById('odApoio').value.trim(),
     eng_ini:document.getElementById('odEngIni').value.trim(),
-    eng_fim:document.getElementById('odEngFim').value.trim(),
-    previsao:document.getElementById('odPrevisao').value,
     status:document.getElementById('odStatus').value,
   };
   try{
