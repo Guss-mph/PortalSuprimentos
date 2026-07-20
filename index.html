@@ -195,7 +195,7 @@ td{padding:10px 14px;vertical-align:middle;}
 .rel-opcao-desc{font-size:12px;color:var(--muted);}
 
 @media print{
-  header,nav,.btn-back,.btn-theme,.fab,.toast,.overlay,#view-home,#view-mc,#view-proj,#view-nf,#loginScreen{display:none !important;}
+  header,nav,.btn-back,.btn-theme,.fab,.toast,.overlay,#view-home,#view-mc,#view-proj,#view-nf,#view-obras,#loginScreen{display:none !important;}
   #printArea{display:block !important;padding:28px;font-family:Arial,sans-serif;font-size:12px;color:#000;}
   #printArea table{width:100%;border-collapse:collapse;margin-top:12px;}
   #printArea thead th{background:#EF3236 !important;color:#fff !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:8px 10px;text-align:left;font-size:11px;}
@@ -335,6 +335,7 @@ td{padding:10px 14px;vertical-align:middle;}
       <button onclick="openModule('mc')" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">📋 Mapas de Cotação</button>
       <button onclick="openModule('proj')" style="background:var(--purple);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">📁 Projetos</button>
       <button onclick="openModule('nf')" style="background:var(--orange);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">🧾 Pendências de NF</button>
+      <button id="btnObrasDiv" onclick="openModule('obras')" style="background:#0F766E;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">🏗 Divisão de Obras</button>
     </div>
   </div>
 
@@ -400,15 +401,10 @@ td{padding:10px 14px;vertical-align:middle;}
     </div>
     <div id="mcTable"></div>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px;">
-    <div class="card">
-      <div class="card-head"><span class="dot"></span>Obras</div>
-      <div class="tbl-head"><input class="fsearch" id="obraSearch" placeholder="🔍" oninput="renderObras()" style="flex:1"><button class="btn-pri blue" id="btnNovaObra" style="padding:6px 12px;font-size:12px;" onclick="openObraForm()">+ Nova</button></div>
-      <div id="obrasTable"></div>
-    </div>
+  <div style="margin-top:20px;">
     <div class="card">
       <div class="card-head"><span class="dot"></span>Tipos e Prazos</div>
-      <div class="tbl-head"><span style="font-size:12px;color:var(--muted)">Categorias de materiais</span><button class="btn-pri blue" id="btnNovoTipo" style="padding:6px 12px;font-size:12px;" onclick="openTipoForm()">+ Novo</button></div>
+      <div class="tbl-head"><span style="font-size:12px;color:var(--muted)">Categorias de materiais</span>${isAdmin?'<button class="btn-pri blue" id="btnNovoTipo" style="padding:6px 12px;font-size:12px;" onclick="openTipoForm()">+ Novo</button>':''}</div>
       <div id="tiposTable"></div>
     </div>
   </div>
@@ -590,6 +586,33 @@ td{padding:10px 14px;vertical-align:middle;}
   <div class="modal-foot"><button class="btn-sec" onclick="closeOv('ovTipo')">Cancelar</button><button class="btn-del" id="tipoDelBtn" onclick="delTipo()" style="display:none">Excluir</button><button class="btn-pri" onclick="saveTipo()">Salvar</button></div>
 </div></div>
 
+<!-- MODAL DIVISÃO DE OBRAS -->
+<div class="overlay" id="ovObraDiv"><div class="modal" style="width:600px;">
+  <div class="modal-head"><h3 id="obraDivTit">🏗 Nova Obra</h3><button class="modal-x" onclick="closeOv('ovObraDiv')">×</button></div>
+  <div class="modal-body" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <input type="hidden" id="odId">
+    <div class="f" style="grid-column:span 2"><label>Nome da Obra *</label><input id="odNome" placeholder="Ex: Residencial João e Maria"></div>
+    <div class="f"><label>Comprador *</label><select id="odComp"><option>Andressa</option><option>Gustavo</option><option>Gisele</option><option>Novaes</option><option>Henrique</option></select></div>
+    <div class="f"><label>Ano</label><input type="number" id="odAno" placeholder="2026"></div>
+    <div class="f"><label>Faturamento 1 *</label><input id="odFat1" placeholder="Empresa que fatura"></div>
+    <div class="f"><label>Faturamento 2 (opcional)</label><input id="odFat2" placeholder="Segunda empresa (se houver)"></div>
+    <div class="f" style="grid-column:span 2"><label>Endereço</label><input id="odEnd" placeholder="Rua, número, bairro..."></div>
+    <div class="f"><label>Tipo</label><select id="odTipo"><option>Casa</option><option>Reforma Casa</option><option>Apartamento</option><option>Cooperativa</option><option>Outros</option></select></div>
+    <div class="f"><label>Cidade / Condomínio</label><input id="odCidade" placeholder="Ex: São Paulo / Cond. Europa"></div>
+    <div class="f"><label>Coordenador</label><input id="odCoordenador" placeholder="Nome do coordenador"></div>
+    <div class="f"><label>Apoio</label><input id="odApoio" placeholder="Nome do apoio"></div>
+    <div class="f"><label>Engenheiro Início</label><input id="odEngIni" placeholder="Nome"></div>
+    <div class="f"><label>Engenheiro Fim</label><input id="odEngFim" placeholder="Nome (se diferente)"></div>
+    <div class="f"><label>Previsão de Entrega</label><input type="date" id="odPrevisao"></div>
+    <div class="f"><label>Status</label><select id="odStatus"><option value="andamento">Em andamento</option><option value="checklist">Checklist</option><option value="finalizada">Finalizada</option></select></div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn-sec" onclick="closeOv('ovObraDiv')">Cancelar</button>
+    <button class="btn-del" id="odDelBtn" onclick="delObraDiv()" style="display:none">Excluir</button>
+    <button class="btn-pri" style="background:#0F766E;" onclick="saveObraDiv()">Salvar</button>
+  </div>
+</div></div>
+
 <!-- MODAL RESET SENHAS (só admin) -->
 <div class="overlay" id="ovResetSenhas"><div class="modal">
   <div class="modal-head"><h3>🔑 Gerenciar Senhas</h3><button class="modal-x" onclick="closeOv('ovResetSenhas')">×</button></div>
@@ -681,6 +704,37 @@ td{padding:10px 14px;vertical-align:middle;}
   <div class="modal-foot"><button class="btn-sec" onclick="closeOv('ovAcessos')">Fechar</button></div>
 </div></div>
 
+<!-- ===== VIEW: DIVISÃO DE OBRAS ===== -->
+<div class="view" id="view-obras">
+<div class="wrap">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+    <span style="font-size:28px;">🏗</span>
+    <div><h2 style="font-size:20px;font-weight:700;">Divisão de Obras</h2><p style="font-size:13px;color:var(--muted);">Cadastro e acompanhamento de obras da equipe</p></div>
+  </div>
+  <div class="stats-row" id="obras-stats"></div>
+  <div class="card">
+    <div class="tbl-head">
+      <span style="font-size:13px;font-weight:600;">Obras em Andamento</span>
+      <div class="filters">
+        <input class="fsearch" id="obrasDivSearch" placeholder="🔍 Buscar obra..." oninput="renderObrasDivisao()">
+        <select class="fsel" id="obrasDivFComp" onchange="renderObrasDivisao()">
+          <option value="">Todos</option>
+          <option>Andressa</option><option>Gustavo</option><option>Gisele</option><option>Novaes</option><option>Henrique</option>
+        </select>
+        <select class="fsel" id="obrasDivFTipo" onchange="renderObrasDivisao()">
+          <option value="">Todos tipos</option>
+          <option>Casa</option><option>Reforma Casa</option><option>Apartamento</option><option>Cooperativa</option><option>Outros</option>
+        </select>
+        <select class="fsel" id="obrasDivFCidade" onchange="renderObrasDivisao()">
+          <option value="">Todas cidades</option>
+        </select>
+      </div>
+    </div>
+    <div id="obrasDivTable"></div>
+  </div>
+</div>
+</div>
+
 <button class="fab" id="fabBtn">+</button>
 <div class="toast" id="toast"></div>
 
@@ -760,6 +814,7 @@ function openModule(mod){
   if(mod==='mc')loadMC();
   if(mod==='proj')loadProj();
   if(mod==='nf')loadNF();
+  if(mod==='obras'){loadObrasDivisao();document.getElementById('fabBtn').onclick=()=>openObraDiv();}
 }
 function goHome(){
   curMod=null;
@@ -807,13 +862,16 @@ function popTipos(){
   });
 }
 function popObras(){
+  // Puxa de obras_divisao (fonte oficial) e também de obras (legado)
+  const fonteObras=obrasDivisao.length>0?obrasDivisao:obras;
   ['fObra','eMObra','nfObra'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
     const v=el.value;
     el.innerHTML=id==='nfObra'?'<option value="">— Selecionar obra —</option>':'<option value="">— Selecionar —</option>';
-    // Admin vê todas, usuário comum só vê as suas
-    const listaObras=isAdmin?obras:obras.filter(o=>o.comprador===currentUser);
-    listaObras.forEach(o=>{const op=document.createElement('option');op.value=o.nome;op.textContent=o.nome;el.appendChild(op);});
+    const lista=isAdmin?fonteObras:fonteObras.filter(o=>o.comprador===currentUser);
+    // Filtra apenas ativas (não finalizadas)
+    const ativas=lista.filter(o=>!o.status||o.status!=='finalizada');
+    ativas.forEach(o=>{const op=document.createElement('option');op.value=o.nome;op.textContent=o.nome;el.appendChild(op);});
     if(v)el.value=v;
   });
 }
@@ -839,12 +897,14 @@ function onNFObraChange(){
   const obraNome=document.getElementById('nfObra').value;
   const sel=document.getElementById('nfResp');
   if(!obraNome){sel.disabled=false;return;}
-  const obra=obras.find(o=>o.nome===obraNome);
+  const fonte=obrasDivisao.length?obrasDivisao:obras;
+  const obra=fonte.find(o=>o.nome===obraNome);
   if(obra){sel.value=obra.comprador;sel.disabled=true;}
   else sel.disabled=false;
 }
 function onObraChange(){
-  const o=obras.find(x=>x.nome===document.getElementById('fObra').value);
+  const fonte=obrasDivisao.length?obrasDivisao:obras;
+  const o=fonte.find(x=>x.nome===document.getElementById('fObra').value);
   const s=document.getElementById('fResp');
   if(o){s.value=o.comprador;s.disabled=true;}else s.disabled=false;
 }
@@ -983,8 +1043,9 @@ function renderPainel(name){
 // ── MAPAS ──
 async function loadMC(){
   try{
-    let [mRes,oRes,tRes]=await Promise.all([sb.get('mapas','?order=criado_em.desc'),sb.get('obras','?order=nome.asc'),sb.get('tipos','?order=nome.asc')]);
+    let [mRes,oRes,tRes,odRes]=await Promise.all([sb.get('mapas','?order=criado_em.desc'),sb.get('obras','?order=nome.asc'),sb.get('tipos','?order=nome.asc'),sb.get('obras_divisao','?order=nome.asc')]);
     mapas=(mRes||[]).filter(m=>isAdmin||m.responsavel===currentUser);obras=oRes||[];
+    if(odRes&&odRes.length)obrasDivisao=odRes;
     if(!tRes||!tRes.length){for(const t of DEF_TIPOS)await sb.post('tipos',t);tipos=[...DEF_TIPOS];}else{tipos=tRes;}
     popTipos();popObras();
     renderMapas();renderMCStats();renderObras();renderTipos();
@@ -1269,14 +1330,8 @@ function editObra(id){
   openOv('ovObra');
 }
 function renderObras(){
-  const s=document.getElementById('obraSearch').value.toLowerCase();
-  const f=obras.filter(o=>!s||o.nome.toLowerCase().includes(s)||o.comprador.toLowerCase().includes(s));
+  // Seção de obras migrada para Divisão de Obras — mantida por compatibilidade
   const c=document.getElementById('obrasTable');if(!c)return;
-  c.innerHTML=f.length===0?'<div class="empty" style="padding:20px">Nenhuma obra</div>':
-    `<table><thead><tr><th>Obra</th><th>Comprador</th><th>Mapas</th><th></th></tr></thead><tbody>${f.map(o=>{
-      const q=mapas.filter(m=>m.obra===o.nome).length;
-      return`<tr><td style="font-weight:600">${o.nome}</td><td><div class="avc">${avEl(o.comprador)}${o.comprador}</div></td><td><span class="badge" style="background:var(--blue-light);color:var(--blue)">${q} mapa${q!==1?'s':''}</span></td><td>${isAdmin?`<div class="acts"><button class="abt" onclick="editObra(${o.id})">✏️</button></div>`:''}</td></tr>`;
-    }).join('')}</tbody></table>`;
 }
 function openTiposModal(){openOv('ovTipo');document.getElementById('tipoId').value='';document.getElementById('tipoNome').value='';document.getElementById('tipoDias').value='3';document.getElementById('tipoCor').value='blue';document.getElementById('tipoTit').textContent='Novo Tipo';document.getElementById('tipoDelBtn').style.display='none';}
 function openTipoForm(){if(!isAdmin){toast('Apenas administradores podem cadastrar tipos','err');return;}openTiposModal();}
@@ -1393,12 +1448,14 @@ async function delProj(){
 // ── NFs ──
 async function loadNF(){
   try{
-    const [nfAll,oRes]=await Promise.all([
+    const [nfAll,oRes,odRes]=await Promise.all([
       sb.get('nfs','?order=criado_em.desc'),
       obras.length?Promise.resolve(obras):sb.get('obras','?order=nome.asc'),
+      obrasDivisao.length?Promise.resolve(obrasDivisao):sb.get('obras_divisao','?order=nome.asc'),
     ]);
     nfs=isAdmin?(nfAll||[]):(nfAll||[]).filter(n=>n.responsavel===currentUser);
     if(!obras.length)obras=oRes||[];
+    if(!obrasDivisao.length&&odRes)obrasDivisao=odRes;
     popObras();
     renderNFs();renderNFStats();
   }catch(e){console.error('nf err:',e);document.getElementById('nfContainer').innerHTML='<div class="empty">Erro ao carregar</div>';}
@@ -1895,6 +1952,188 @@ async function openAcessos(){
     el.innerHTML=`<div style="color:var(--red);font-size:13px;padding:16px;">Erro ao carregar acessos. Verifique se a tabela foi criada no Supabase.</div>`;
     console.error(e);
   }
+}
+
+// ── DIVISÃO DE OBRAS ──
+let obrasDivisao=[];
+
+async function loadObrasDivisao(){
+  try{
+    const all=await sb.get('obras_divisao','?order=criado_em.desc')||[];
+    obrasDivisao=isAdmin?all:all.filter(o=>o.comprador===currentUser);
+    renderObrasDivisao();renderObrasDivisaoStats();
+    // Popula filtro de cidades
+    const cidades=[...new Set(all.map(o=>o.cidade).filter(Boolean))].sort();
+    const sel=document.getElementById('obrasDivFCidade');
+    if(sel){sel.innerHTML='<option value="">Todas cidades</option>';cidades.forEach(c=>{const op=document.createElement('option');op.value=c;op.textContent=c;sel.appendChild(op);});}
+  }catch(e){console.error('obras div err:',e);}
+}
+
+function renderObrasDivisaoStats(){
+  const el=document.getElementById('obras-stats');if(!el)return;
+  const and=obrasDivisao.filter(o=>o.status==='andamento').length;
+  const chk=obrasDivisao.filter(o=>o.status==='checklist').length;
+  const fin=obrasDivisao.filter(o=>o.status==='finalizada').length;
+  el.innerHTML=`
+    <div class="stat-c" style="border-left:4px solid #0F766E"><div class="sl">Em Andamento</div><div class="sv" style="color:#0F766E">${and}</div></div>
+    <div class="stat-c" style="border-left:4px solid var(--yellow)"><div class="sl">Checklist</div><div class="sv" style="color:var(--yellow)">${chk}</div></div>
+    <div class="stat-c" style="border-left:4px solid var(--green)"><div class="sl">Finalizadas</div><div class="sv c-green">${fin}</div></div>
+    <div class="stat-c"><div class="sl">Total</div><div class="sv c-text">${obrasDivisao.length}</div></div>
+    <div class="stat-c"><div class="sl">Compradores</div><div class="sv c-text">${[...new Set(obrasDivisao.map(o=>o.comprador))].length}</div></div>`;
+}
+
+function renderObrasDivisao(){
+  const s=document.getElementById('obrasDivSearch').value.toLowerCase();
+  const fc=document.getElementById('obrasDivFComp').value;
+  const ft=document.getElementById('obrasDivFTipo').value;
+  const fci=document.getElementById('obrasDivFCidade').value;
+  const ativas=obrasDivisao.filter(o=>{
+    if(o.status==='finalizada')return false;
+    if(s&&!`${o.nome} ${o.comprador} ${o.cidade||''} ${o.coordenador||''} ${o.fat1||''}`.toLowerCase().includes(s))return false;
+    if(fc&&o.comprador!==fc)return false;
+    if(ft&&o.tipo!==ft)return false;
+    if(fci&&o.cidade!==fci)return false;
+    return true;
+  });
+  const finalizadas=obrasDivisao.filter(o=>o.status==='finalizada');
+  const c=document.getElementById('obrasDivTable');
+
+  const stBadge=o=>{
+    if(o.status==='checklist')return'<span class="sbadge s-atencao">📋 Checklist</span>';
+    const atr=o.previsao&&new Date(o.previsao+'T12:00:00')<new Date();
+    return atr?'<span class="sbadge s-vencido">⚠️ Atrasada</span>':'<span class="sbadge s-ok">✅ Em andamento</span>';
+  };
+
+  const renderRow=o=>`<tr style="${o.status==='checklist'?'background:var(--yellow-light)':''}">
+    <td style="font-weight:600;font-size:13px">${o.nome}</td>
+    <td><div class="avc">${avEl(o.comprador)}${o.comprador}</div></td>
+    <td style="font-size:12px;color:var(--muted)">${o.ano||'—'}</td>
+    <td style="font-size:12px">${o.fat1||'—'}${o.fat2?`<br><span style="color:var(--muted);font-size:11px">${o.fat2}</span>`:''}</td>
+    <td style="font-size:12px;color:var(--muted)">${o.tipo||'—'}</td>
+    <td style="font-size:12px">${o.cidade||'—'}</td>
+    <td style="font-size:12px">${o.coordenador||'—'}</td>
+    <td style="font-size:12px">${o.eng_ini||'—'}${o.eng_fim&&o.eng_fim!==o.eng_ini?`<br><span style="color:var(--muted);font-size:11px">${o.eng_fim}</span>`:''}</td>
+    <td style="font-size:12px;font-weight:600;color:${o.previsao&&new Date(o.previsao+'T12:00:00')<new Date()?'var(--red)':'inherit'}">${fmtBR(o.previsao)}</td>
+    <td>${stBadge(o)}</td>
+    <td>${isAdmin?`<button class="abt" onclick="editObraDiv(${o.id})">✏️</button>`:''}
+    </td>
+  </tr>`;
+
+  const thead=`<table><thead><tr>
+    <th>Obra</th><th>Comprador</th><th>Ano</th><th>Faturamento</th><th>Tipo</th>
+    <th>Cidade</th><th>Coordenador</th><th>Engenheiro</th><th>Previsão</th><th>Status</th><th></th>
+  </tr></thead><tbody>`;
+
+  c.innerHTML=(ativas.length===0?'<div class="empty">Nenhuma obra em andamento</div>':
+    thead+ativas.map(renderRow).join('')+'</tbody></table>')+
+    (finalizadas.length>0?`
+    <button class="concl-toggle" onclick="var b=this.nextElementSibling;b.classList.toggle('open');this.querySelector('span:last-child').textContent=b.classList.contains('open')?'▴':'▾'">
+      <span>✅ Ver finalizadas (${finalizadas.length})</span><span>▾</span>
+    </button>
+    <div class="concl-body">
+      ${thead+finalizadas.map(o=>`<tr style="opacity:.6">
+        <td style="font-weight:600;font-size:13px">${o.nome}</td>
+        <td><div class="avc">${avEl(o.comprador)}${o.comprador}</div></td>
+        <td style="font-size:12px;color:var(--muted)">${o.ano||'—'}</td>
+        <td style="font-size:12px">${o.fat1||'—'}</td>
+        <td style="font-size:12px;color:var(--muted)">${o.tipo||'—'}</td>
+        <td style="font-size:12px">${o.cidade||'—'}</td>
+        <td style="font-size:12px">${o.coordenador||'—'}</td>
+        <td style="font-size:12px">${o.eng_ini||'—'}</td>
+        <td style="font-size:12px">${fmtBR(o.previsao)}</td>
+        <td><span class="sbadge s-concluido">✔ Finalizada</span></td>
+        <td>${isAdmin?`<button class="abt" onclick="editObraDiv(${o.id})">✏️</button>`:''}</td>
+      </tr>`).join('')+'</tbody></table>'}
+    </div>`:'');
+}
+
+function openObraDiv(){
+  if(!isAdmin){toast('Apenas administradores podem cadastrar obras','err');return;}
+  document.getElementById('odId').value='';
+  document.getElementById('odNome').value='';
+  document.getElementById('odFat1').value='';
+  document.getElementById('odFat2').value='';
+  document.getElementById('odEnd').value='';
+  document.getElementById('odCidade').value='';
+  document.getElementById('odCoordenador').value='';
+  document.getElementById('odApoio').value='';
+  document.getElementById('odEngIni').value='';
+  document.getElementById('odEngFim').value='';
+  document.getElementById('odPrevisao').value='';
+  document.getElementById('odAno').value=new Date().getFullYear();
+  document.getElementById('odStatus').value='andamento';
+  document.getElementById('odDelBtn').style.display='none';
+  document.getElementById('obraDivTit').textContent='🏗 Nova Obra';
+  openOv('ovObraDiv');
+}
+
+function editObraDiv(id){
+  if(!isAdmin){toast('Apenas administradores podem editar obras','err');return;}
+  const o=obrasDivisao.find(x=>x.id===id);if(!o)return;
+  document.getElementById('odId').value=id;
+  document.getElementById('odNome').value=o.nome||'';
+  document.getElementById('odComp').value=o.comprador||'Gustavo';
+  document.getElementById('odAno').value=o.ano||'';
+  document.getElementById('odFat1').value=o.fat1||'';
+  document.getElementById('odFat2').value=o.fat2||'';
+  document.getElementById('odEnd').value=o.endereco||'';
+  document.getElementById('odTipo').value=o.tipo||'Casa';
+  document.getElementById('odCidade').value=o.cidade||'';
+  document.getElementById('odCoordenador').value=o.coordenador||'';
+  document.getElementById('odApoio').value=o.apoio||'';
+  document.getElementById('odEngIni').value=o.eng_ini||'';
+  document.getElementById('odEngFim').value=o.eng_fim||'';
+  document.getElementById('odPrevisao').value=o.previsao||'';
+  document.getElementById('odStatus').value=o.status||'andamento';
+  document.getElementById('odDelBtn').style.display='inline-block';
+  document.getElementById('obraDivTit').textContent='✏️ Editar Obra';
+  openOv('ovObraDiv');
+}
+
+async function saveObraDiv(){
+  const idV=document.getElementById('odId').value;
+  const nome=document.getElementById('odNome').value.trim();
+  const fat1=document.getElementById('odFat1').value.trim();
+  if(!nome||!fat1){toast('Informe o nome da obra e faturamento','err');return;}
+  const body={
+    nome,
+    comprador:document.getElementById('odComp').value,
+    ano:parseInt(document.getElementById('odAno').value)||new Date().getFullYear(),
+    fat1,
+    fat2:document.getElementById('odFat2').value.trim(),
+    endereco:document.getElementById('odEnd').value.trim(),
+    tipo:document.getElementById('odTipo').value,
+    cidade:document.getElementById('odCidade').value.trim(),
+    coordenador:document.getElementById('odCoordenador').value.trim(),
+    apoio:document.getElementById('odApoio').value.trim(),
+    eng_ini:document.getElementById('odEngIni').value.trim(),
+    eng_fim:document.getElementById('odEngFim').value.trim(),
+    previsao:document.getElementById('odPrevisao').value,
+    status:document.getElementById('odStatus').value,
+  };
+  try{
+    if(idV){
+      await sb.patch('obras_divisao',parseInt(idV),body);
+      const i=obrasDivisao.findIndex(x=>x.id===parseInt(idV));
+      if(i>=0)obrasDivisao[i]={...obrasDivisao[i],...body};
+      toast('Obra atualizada!');
+    }else{
+      body.id=Date.now();
+      const n=await sb.post('obras_divisao',body);
+      obrasDivisao.unshift(n[0]);
+      toast(`Obra "${nome}" cadastrada!`);
+    }
+    closeOv('ovObraDiv');
+    renderObrasDivisao();renderObrasDivisaoStats();
+  }catch(e){toast('Erro ao salvar: '+e.message.substring(0,60),'err');}
+}
+
+async function delObraDiv(){
+  const id=parseInt(document.getElementById('odId').value);
+  if(!confirm('Excluir esta obra permanentemente?'))return;
+  await sb.del('obras_divisao',id);
+  obrasDivisao=obrasDivisao.filter(x=>x.id!==id);
+  closeOv('ovObraDiv');renderObrasDivisao();renderObrasDivisaoStats();toast('Obra excluída');
 }
 
 // ── INIT ──
