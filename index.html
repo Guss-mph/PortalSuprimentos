@@ -1963,7 +1963,6 @@ async function loadObrasDivisao(){
     const all=await sb.get('obras_divisao','?order=criado_em.desc')||[];
     obrasDivisao=isAdmin?all:all.filter(o=>o.comprador===currentUser);
     renderObrasDivisao();renderObrasDivisaoStats();
-
   }catch(e){console.error('obras div err:',e);}
 }
 
