@@ -710,6 +710,10 @@ td{padding:10px 14px;vertical-align:middle;}
     <div><h2 style="font-size:20px;font-weight:700;">Divisão de Obras</h2><p style="font-size:13px;color:var(--muted);">Cadastro e acompanhamento de obras da equipe</p></div>
   </div>
   <div class="stats-row" id="obras-stats"></div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:20px;box-shadow:var(--shadow);">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:12px;">Resumo por comprador</div>
+    <div id="obras-team-bar" style="display:flex;gap:12px;flex-wrap:wrap;"></div>
+  </div>
   <div class="card">
     <div class="tbl-head">
       <span style="font-size:13px;font-weight:600;">Obras em Andamento</span>
@@ -1977,6 +1981,24 @@ function renderObrasDivisaoStats(){
     <div class="stat-c" style="border-left:4px solid var(--green)"><div class="sl">Finalizadas</div><div class="sv c-green">${fin}</div></div>
     <div class="stat-c"><div class="sl">Total</div><div class="sv c-text">${obrasDivisao.length}</div></div>
     <div class="stat-c"><div class="sl">Compradores</div><div class="sv c-text">${[...new Set(obrasDivisao.map(o=>o.comprador))].length}</div></div>`;
+
+  // Faixa de resumo por comprador
+  const teamEl=document.getElementById('obras-team-bar');
+  if(!teamEl)return;
+  const membros=isAdmin?TEAM:TEAM.filter(t=>t.name===currentUser);
+  teamEl.innerHTML=membros.map(m=>{
+    const total=obrasDivisao.filter(o=>o.comprador===m.name).length;
+    const mAnd=obrasDivisao.filter(o=>o.comprador===m.name&&o.status==='andamento').length;
+    const mChk=obrasDivisao.filter(o=>o.comprador===m.name&&o.status==='checklist').length;
+    const mFin=obrasDivisao.filter(o=>o.comprador===m.name&&o.status==='finalizada').length;
+    return`<div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:10px 16px;display:flex;align-items:center;gap:10px;min-width:170px;">
+      <div class="av-md" style="background:${m.color};border:2.5px solid ${m.border||'#9E9E9E'}">${ini(m.name)}</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text)">${m.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${total} obra${total!==1?'s':''} · ${mAnd} andamento · ${mChk} checklist · ${mFin} finalizada${mFin!==1?'s':''}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function renderObrasDivisao(){
