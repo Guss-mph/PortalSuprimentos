@@ -1726,9 +1726,9 @@ function selRelTipo(tipo){
   document.getElementById('relStatusMC').style.display=tipo==='mc'?'':'none';
   document.getElementById('relStatusProj').style.display=tipo==='proj'?'':'none';
   document.getElementById('relStatusNF').style.display=tipo==='nf'?'':'none';
-  // Obras: oculta passos 2 e 3 (não precisa filtrar)
+  // Obras: oculta apenas passo 3 (status), mantém passo 2 (comprador)
   const isObras=tipo==='obras';
-  document.getElementById('relStep2wrap').style.display=isObras?'none':'';
+  document.getElementById('relStep2wrap').style.display='';
   document.getElementById('relStep3wrap').style.display=isObras?'none':'';
 }
 
@@ -2196,11 +2196,14 @@ async function saveObraDiv(){
 }
 
 async function gerarRelatorioObras(){
+  const comp=document.getElementById('relComprador')?.value||'';
+  const compLabel=comp||'Toda a equipe';
   const dataHoje=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-  // Carrega todos (admin vê tudo)
   let all=[];
   try{all=await sb.get('obras_divisao','?order=comprador.asc,nome.asc')||[];}
   catch(e){all=[...obrasDivisao];}
+  // Filtra por comprador se selecionado
+  if(comp)all=all.filter(o=>o.comprador===comp);
 
   // Agrupa por comprador em ordem alfabética
   const compradores=[...new Set(all.map(o=>o.comprador))].sort();
@@ -2218,7 +2221,7 @@ async function gerarRelatorioObras(){
   let html=`<div class="print-header">
     <div>
       <div class="print-title">MpH Engenharia — Portal de Suprimentos</div>
-      <div class="print-sub">Relatório de Divisão de Obras — Equipe completa</div>
+      <div class="print-sub">Relatório de Divisão de Obras — ${compLabel}</div>
     </div>
     <div class="print-date">Gerado em ${dataHoje}</div>
   </div>
