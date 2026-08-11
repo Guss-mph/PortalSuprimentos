@@ -705,9 +705,12 @@ td{padding:10px 14px;vertical-align:middle;}
 <!-- ===== VIEW: DIVISÃO DE OBRAS ===== -->
 <div class="view" id="view-obras">
 <div class="wrap">
-  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
-    <span style="font-size:28px;">🏗</span>
-    <div><h2 style="font-size:20px;font-weight:700;">Divisão de Obras</h2><p style="font-size:13px;color:var(--muted);">Cadastro e acompanhamento de obras da equipe</p></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span style="font-size:28px;">🏗</span>
+      <div><h2 style="font-size:20px;font-weight:700;">Divisão de Obras</h2><p style="font-size:13px;color:var(--muted);">Cadastro e acompanhamento de obras da equipe</p></div>
+    </div>
+    <button id="btnRelObras" onclick="gerarRelatorioObras()" style="display:none;background:#0F766E;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">📄 Gerar Relatório PDF</button>
   </div>
   <div class="stats-row" id="obras-stats"></div>
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:20px;box-shadow:var(--shadow);">
@@ -819,7 +822,7 @@ function openModule(mod){
   if(mod==='mc')loadMC();
   if(mod==='proj')loadProj();
   if(mod==='nf')loadNF();
-  if(mod==='obras'){loadObrasDivisao();document.getElementById('fabBtn').onclick=()=>openObraDiv();}
+  if(mod==='obras'){loadObrasDivisao();document.getElementById('fabBtn').onclick=()=>openObraDiv();const rb=document.getElementById('btnRelObras');if(rb)rb.style.display=isAdmin?'block':'none';}
 }
 function goHome(){
   curMod=null;
@@ -2177,6 +2180,71 @@ async function saveObraDiv(){
     closeOv('ovObraDiv');
     renderObrasDivisao();renderObrasDivisaoStats();
   }catch(e){toast('Erro ao salvar: '+e.message.substring(0,60),'err');}
+}
+
+async function gerarRelatorioObras(){
+  const dataHoje=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  // Carrega todos (admin vê tudo)
+  let all=[];
+  try{all=await sb.get('obras_divisao','?order=comprador.asc,nome.asc')||[];}
+  catch(e){all=[...obrasDivisao];}
+
+  // Agrupa por comprador em ordem alfabética
+  const compradores=[...new Set(all.map(o=>o.comprador))].sort();
+  const STATUS_LABEL={andamento:'Em andamento',checklist:'Checklist',finalizada:'Finalizada'};
+  const STATUS_BG={andamento:'#DCFCE7',checklist:'#FEF3C7',finalizada:'#F3F4F6'};
+
+  const stBadgePrint=s=>{
+    const bg=STATUS_BG[s]||'#fff';
+    const lb=STATUS_LABEL[s]||s;
+    return`<span style="display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;font-weight:bold;background:${bg}">${lb}</span>`;
+  };
+  const falta='<span style="color:#DC2626;font-size:10px;font-weight:bold">FALTA INFORMAR</span>';
+  const cv=v=>v||falta;
+
+  let html=`<div class="print-header">
+    <div>
+      <div class="print-title">MpH Engenharia — Portal de Suprimentos</div>
+      <div class="print-sub">Relatório de Divisão de Obras — Equipe completa</div>
+    </div>
+    <div class="print-date">Gerado em ${dataHoje}</div>
+  </div>
+  <div class="print-section">
+    <div class="print-section-title">Resumo Geral</div>
+    <table><thead><tr><th>Total de Obras</th><th>Em Andamento</th><th>Checklist</th><th>Finalizadas</th></tr></thead>
+    <tbody><tr>
+      <td>${all.length}</td>
+      <td>${all.filter(o=>o.status==='andamento').length}</td>
+      <td>${all.filter(o=>o.status==='checklist').length}</td>
+      <td>${all.filter(o=>o.status==='finalizada').length}</td>
+    </tr></tbody></table>
+  </div>`;
+
+  compradores.forEach(comp=>{
+    const obras=all.filter(o=>o.comprador===comp).sort((a,b)=>a.nome.localeCompare(b.nome));
+    html+=`<div class="print-section" style="page-break-inside:avoid;">
+      <div class="print-section-title" style="color:#0F766E;">🏗 ${comp} (${obras.length} obra${obras.length!==1?'s':''})</div>
+      <table><thead><tr>
+        <th>Nome da Obra</th><th>Ano</th><th>Faturamento</th><th>Tipo</th>
+        <th>Cidade</th><th>Coordenador</th><th>Engenheiro</th><th>Apoio</th><th>Status</th>
+      </tr></thead><tbody>
+      ${obras.map(o=>`<tr style="background:${STATUS_BG[o.status]||'#fff'}">
+        <td style="font-weight:bold">${o.nome}</td>
+        <td>${o.ano||'—'}</td>
+        <td>${cv(o.fat1)}${o.fat2?`<br><span style="font-size:10px;color:#666">${o.fat2}</span>`:''}</td>
+        <td>${cv(o.tipo)}</td>
+        <td>${cv(o.cidade)}</td>
+        <td>${cv(o.coordenador)}</td>
+        <td>${cv(o.eng_ini)}</td>
+        <td>${cv(o.apoio)}</td>
+        <td>${stBadgePrint(o.status)}</td>
+      </tr>`).join('')}
+      </tbody></table>
+    </div>`;
+  });
+
+  document.getElementById('printArea').innerHTML=html;
+  setTimeout(()=>window.print(),200);
 }
 
 async function delObraDiv(){
