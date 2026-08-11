@@ -640,7 +640,12 @@ td{padding:10px 14px;vertical-align:middle;}
       <span class="rel-opcao-icon">🧾</span>
       <div><div class="rel-opcao-label">Pendências de NF</div><div class="rel-opcao-desc">Notas fiscais abertas e suas atualizações</div></div>
     </div>
+    <div class="rel-opcao" id="relOpcObras" onclick="selRelTipo('obras')">
+      <span class="rel-opcao-icon">🏗</span>
+      <div><div class="rel-opcao-label">Divisão de Obras</div><div class="rel-opcao-desc">Todas as obras por comprador em ordem alfabética</div></div>
+    </div>
 
+    <div id="relStep2wrap">
     <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:16px 0 10px;">2. Comprador</div>
     <div class="f">
       <select id="relComprador">
@@ -653,6 +658,8 @@ td{padding:10px 14px;vertical-align:middle;}
       </select>
     </div>
 
+    </div><!-- end step2wrap -->
+    <div id="relStep3wrap">
     <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:16px 0 10px;">3. Status</div>
     <div class="f">
       <!-- Opções de Mapas -->
@@ -683,6 +690,7 @@ td{padding:10px 14px;vertical-align:middle;}
         <option value="resolvida">Resolvido</option>
       </select>
     </div>
+    </div><!-- end step3wrap -->
   </div>
   <div class="modal-foot">
     <button class="btn-sec" onclick="closeOv('ovRelatorio')">Cancelar</button>
@@ -710,7 +718,6 @@ td{padding:10px 14px;vertical-align:middle;}
       <span style="font-size:28px;">🏗</span>
       <div><h2 style="font-size:20px;font-weight:700;">Divisão de Obras</h2><p style="font-size:13px;color:var(--muted);">Cadastro e acompanhamento de obras da equipe</p></div>
     </div>
-    <button id="btnRelObras" onclick="gerarRelatorioObras()" style="display:none;background:#0F766E;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">📄 Gerar Relatório PDF</button>
   </div>
   <div class="stats-row" id="obras-stats"></div>
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:20px;box-shadow:var(--shadow);">
@@ -822,7 +829,7 @@ function openModule(mod){
   if(mod==='mc')loadMC();
   if(mod==='proj')loadProj();
   if(mod==='nf')loadNF();
-  if(mod==='obras'){loadObrasDivisao();document.getElementById('fabBtn').onclick=()=>openObraDiv();const rb=document.getElementById('btnRelObras');if(rb)rb.style.display=isAdmin?'block':'none';}
+  if(mod==='obras'){loadObrasDivisao();document.getElementById('fabBtn').onclick=()=>openObraDiv();}
 }
 function goHome(){
   curMod=null;
@@ -1714,13 +1721,19 @@ function selRelTipo(tipo){
   document.getElementById('relOpcMC').classList.toggle('sel',tipo==='mc');
   document.getElementById('relOpcProj').classList.toggle('sel',tipo==='proj');
   document.getElementById('relOpcNF').classList.toggle('sel',tipo==='nf');
+  document.getElementById('relOpcObras').classList.toggle('sel',tipo==='obras');
   // Mostra o select de status correto
   document.getElementById('relStatusMC').style.display=tipo==='mc'?'':'none';
   document.getElementById('relStatusProj').style.display=tipo==='proj'?'':'none';
   document.getElementById('relStatusNF').style.display=tipo==='nf'?'':'none';
+  // Obras: oculta passos 2 e 3 (não precisa filtrar)
+  const isObras=tipo==='obras';
+  document.getElementById('relStep2wrap').style.display=isObras?'none':'';
+  document.getElementById('relStep3wrap').style.display=isObras?'none':'';
 }
 
 async function gerarRelatorio(){
+  if(relTipo==='obras'){closeOv('ovRelatorio');await gerarRelatorioObras();return;}
   const comp=document.getElementById('relComprador').value;
   const compLabel=comp||'Toda a equipe';
   const dataHoje=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
