@@ -175,6 +175,19 @@ td{padding:10px 14px;vertical-align:middle;}
 .etapa-opt{display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;border:2px solid var(--border);cursor:pointer;transition:border-color .15s;}
 .etapa-opt:hover,.etapa-opt.selected{border-color:var(--blue);background:var(--blue-light);}
 
+
+/* AVALIACAO */
+.aval-cat{margin-bottom:16px;}
+.aval-cat-title{background:var(--dark);color:#F0F0F0;padding:7px 14px;border-radius:6px 6px 0 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.aval-crit{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--border);gap:12px;background:var(--surface);}
+.aval-crit:last-child{border-bottom:none;border-radius:0 0 6px 6px;}
+.aval-crit-txt{font-size:12px;flex:1;}
+.aval-notas{display:flex;gap:4px;flex-shrink:0;}
+.aval-nota{width:30px;height:30px;border-radius:6px;border:1.5px solid var(--border);background:var(--surface2);cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;color:var(--text);transition:all .12s;}
+.aval-nota:hover{border-color:#B45309;}
+.aval-nota.sel{background:#B45309;color:#fff;border-color:#B45309;}
+.aval-media-cat{font-size:11px;color:var(--muted);padding:6px 14px;background:var(--surface2);border-radius:0 0 6px 6px;text-align:right;}
+
 /* FAB */
 .fab{position:fixed;bottom:32px;right:32px;width:62px;height:62px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:30px;cursor:pointer;box-shadow:0 6px 20px rgba(37,99,235,.5);display:none;align-items:center;justify-content:center;z-index:200;}
 .fab.show{display:flex;}
@@ -195,7 +208,7 @@ td{padding:10px 14px;vertical-align:middle;}
 .rel-opcao-desc{font-size:12px;color:var(--muted);}
 
 @media print{
-  header,nav,.btn-back,.btn-theme,.fab,.toast,.overlay,#view-home,#view-mc,#view-proj,#view-nf,#view-obras,#loginScreen{display:none !important;}
+  header,nav,.btn-back,.btn-theme,.fab,.toast,.overlay,#view-home,#view-mc,#view-proj,#view-nf,#view-obras,#view-aval,#loginScreen{display:none !important;}
   #printArea{display:block !important;padding:28px;font-family:Arial,sans-serif;font-size:12px;color:#000;}
   #printArea table{width:100%;border-collapse:collapse;margin-top:12px;}
   #printArea thead th{background:#EF3236 !important;color:#fff !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:8px 10px;text-align:left;font-size:11px;}
@@ -336,6 +349,7 @@ td{padding:10px 14px;vertical-align:middle;}
       <button onclick="openModule('proj')" style="background:var(--purple);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">📁 Projetos</button>
       <button onclick="openModule('nf')" style="background:var(--orange);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">🧾 Pendências de NF</button>
       <button id="btnObrasDiv" onclick="openModule('obras')" style="background:#0F766E;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">🏗 Divisão de Obras</button>
+      <button id="btnAvaliacoes" onclick="openModule('aval')" style="display:none;background:#B45309;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">⭐ Avaliações</button>
     </div>
   </div>
 
@@ -586,6 +600,37 @@ td{padding:10px 14px;vertical-align:middle;}
   <div class="modal-foot"><button class="btn-sec" onclick="closeOv('ovTipo')">Cancelar</button><button class="btn-del" id="tipoDelBtn" onclick="delTipo()" style="display:none">Excluir</button><button class="btn-pri" onclick="saveTipo()">Salvar</button></div>
 </div></div>
 
+<!-- MODAL AVALIACAO -->
+<div class="overlay" id="ovAval"><div class="modal" style="width:760px;max-width:97vw;">
+  <div class="modal-head"><h3 id="avalTit">&#11088; Lancar Avaliacao</h3><button class="modal-x" onclick="closeOv('ovAval')">&times;</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="avId">
+    <input type="hidden" id="avObraNome">
+    <div style="background:var(--surface2);border-radius:8px;padding:12px 16px;margin-bottom:14px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:12px;">
+        <div><span style="color:var(--muted)">Obra:</span> <strong id="avObraLbl">&mdash;</strong></div>
+        <div><span style="color:var(--muted)">Comprador:</span> <strong id="avCompLbl">&mdash;</strong></div>
+        <div><span style="color:var(--muted)">Engenheiro:</span> <strong id="avEngLbl">&mdash;</strong></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+      <div class="f"><label>Data da avaliacao</label><input type="date" id="avData"></div>
+      <div class="f"><label>Nivel do comprador</label><select id="avNivel"><option>Comprador Junior</option><option>Comprador Pleno</option><option>Comprador Senior</option></select></div>
+    </div>
+    <div id="avalCriterios"></div>
+    <div class="f" style="margin-top:14px;"><label>Observacoes</label><textarea id="avObs" style="min-height:70px"></textarea></div>
+    <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:13px;font-weight:600;">Nota final</span>
+      <span id="avMediaLbl" style="font-size:26px;font-weight:800;color:var(--blue)">&mdash;</span>
+    </div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn-sec" onclick="closeOv('ovAval')">Cancelar</button>
+    <button class="btn-del" id="avDelBtn" onclick="delAvaliacao()" style="display:none">Excluir</button>
+    <button class="btn-pri" style="background:#B45309;" onclick="saveAvaliacao()">Salvar Avaliacao</button>
+  </div>
+</div></div>
+
 <!-- MODAL DIVISÃO DE OBRAS -->
 <div class="overlay" id="ovObraDiv"><div class="modal" style="width:600px;">
   <div class="modal-head"><h3 id="obraDivTit">🏗 Nova Obra</h3><button class="modal-x" onclick="closeOv('ovObraDiv')">×</button></div>
@@ -643,6 +688,10 @@ td{padding:10px 14px;vertical-align:middle;}
     <div class="rel-opcao" id="relOpcObras" onclick="selRelTipo('obras')">
       <span class="rel-opcao-icon">🏗</span>
       <div><div class="rel-opcao-label">Divisão de Obras</div><div class="rel-opcao-desc">Todas as obras por comprador em ordem alfabética</div></div>
+    </div>
+    <div class="rel-opcao" id="relOpcAval" onclick="selRelTipo('aval')">
+      <span class="rel-opcao-icon">⭐</span>
+      <div><div class="rel-opcao-label">Avaliações da Engenharia</div><div class="rel-opcao-desc">Resultados consolidados por comprador e obra</div></div>
     </div>
 
     <div id="relStep2wrap">
@@ -750,6 +799,49 @@ td{padding:10px 14px;vertical-align:middle;}
 </div>
 </div>
 
+<!-- ===== VIEW: AVALIAÇÕES ===== -->
+<div class="view" id="view-aval">
+<div class="wrap">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span style="font-size:28px;">&#11088;</span>
+      <div><h2 style="font-size:20px;font-weight:700;">Avaliacoes da Engenharia</h2><p style="font-size:13px;color:var(--muted);">Ciclo anual (abril a abril) &mdash; performance da equipe de suprimentos</p></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <select class="fsel" id="avalCiclo" onchange="renderAvaliacoes()" style="padding:8px 12px;"></select>
+      <button onclick="imprimirFormularios()" style="background:#B45309;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;">&#128424; Imprimir Formularios</button>
+    </div>
+  </div>
+
+  <div class="stats-row" id="aval-stats"></div>
+
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:20px;box-shadow:var(--shadow);">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:12px;">Media por comprador</div>
+    <div id="aval-team-bar" style="display:flex;gap:12px;flex-wrap:wrap;"></div>
+  </div>
+
+  <div class="card">
+    <div class="tbl-head">
+      <span style="font-size:13px;font-weight:600;">Obras do ciclo</span>
+      <div class="filters">
+        <input class="fsearch" id="avalSearch" placeholder="&#128269; Buscar obra ou engenheiro..." oninput="renderAvaliacoes()">
+        <select class="fsel" id="avalFComp" onchange="renderAvaliacoes()">
+          <option value="">Todos compradores</option>
+          <option>Andressa</option><option>Gustavo</option><option>Gisele</option><option>Novaes</option><option>Henrique</option>
+        </select>
+        <select class="fsel" id="avalFEng" onchange="renderAvaliacoes()"><option value="">Todos engenheiros</option></select>
+        <select class="fsel" id="avalFStatus" onchange="renderAvaliacoes()">
+          <option value="">Todos status</option>
+          <option value="pendente">Pendentes</option>
+          <option value="avaliada">Avaliadas</option>
+        </select>
+      </div>
+    </div>
+    <div id="avalTable"></div>
+  </div>
+</div>
+</div>
+
 <button class="fab" id="fabBtn">+</button>
 <div class="toast" id="toast"></div>
 
@@ -830,6 +922,7 @@ function openModule(mod){
   if(mod==='proj')loadProj();
   if(mod==='nf')loadNF();
   if(mod==='obras'){loadObrasDivisao();document.getElementById('fabBtn').onclick=()=>openObraDiv();}
+  if(mod==='aval'){loadAvaliacoes();document.getElementById('fabBtn').classList.remove('show');}
 }
 function goHome(){
   curMod=null;
@@ -1661,6 +1754,7 @@ function loginSuccess(user,admin){
   document.getElementById('btnResetSenhas').style.display=admin?'inline-block':'none';
   document.getElementById('btnRelatorio').style.display=admin?'inline-block':'none';
   document.getElementById('btnAcessos').style.display=admin?'inline-block':'none';
+  const ba=document.getElementById('btnAvaliacoes');if(ba)ba.style.display=admin?'inline-block':'none';
   // Salva sessão
   sessionStorage.setItem('mph_user',user);
   sessionStorage.setItem('mph_admin',admin?'1':'0');
@@ -1722,18 +1816,20 @@ function selRelTipo(tipo){
   document.getElementById('relOpcProj').classList.toggle('sel',tipo==='proj');
   document.getElementById('relOpcNF').classList.toggle('sel',tipo==='nf');
   document.getElementById('relOpcObras').classList.toggle('sel',tipo==='obras');
+  document.getElementById('relOpcAval').classList.toggle('sel',tipo==='aval');
   // Mostra o select de status correto
   document.getElementById('relStatusMC').style.display=tipo==='mc'?'':'none';
   document.getElementById('relStatusProj').style.display=tipo==='proj'?'':'none';
   document.getElementById('relStatusNF').style.display=tipo==='nf'?'':'none';
   // Obras: oculta apenas passo 3 (status), mantém passo 2 (comprador)
-  const isObras=tipo==='obras';
+  const semStatus=tipo==='obras'||tipo==='aval';
   document.getElementById('relStep2wrap').style.display='';
-  document.getElementById('relStep3wrap').style.display=isObras?'none':'';
+  document.getElementById('relStep3wrap').style.display=semStatus?'none':'';
 }
 
 async function gerarRelatorio(){
   if(relTipo==='obras'){closeOv('ovRelatorio');await gerarRelatorioObras();return;}
+  if(relTipo==='aval'){closeOv('ovRelatorio');await gerarRelatorioAval();return;}
   const comp=document.getElementById('relComprador').value;
   const compLabel=comp||'Toda a equipe';
   const dataHoje=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
@@ -2195,6 +2291,106 @@ async function saveObraDiv(){
   }catch(e){toast('Erro ao salvar: '+e.message.substring(0,60),'err');}
 }
 
+async function gerarRelatorioAval(){
+  const comp=document.getElementById('relComprador').value||'';
+  const compLabel=comp||'Toda a equipe';
+  const dataHoje=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  let avs=[],obs=[];
+  try{
+    [avs,obs]=await Promise.all([
+      sb.get('avaliacoes','?order=comprador.asc'),
+      obrasDivisao.length?Promise.resolve(obrasDivisao):sb.get('obras_divisao','?order=nome.asc'),
+    ]);
+    avs=avs||[];obs=obs||[];
+    if(!obrasDivisao.length)obrasDivisao=obs;
+  }catch(e){avs=[...avaliacoes];obs=[...obrasDivisao];}
+
+  const ciclo=document.getElementById('avalCiclo')?document.getElementById('avalCiclo').value:cicloAtual();
+  avs=avs.filter(a=>a.ciclo===ciclo);
+  if(comp)avs=avs.filter(a=>a.comprador===comp);
+
+  let obrasCiclo=obs.filter(o=>o.status!=='finalizada');
+  if(comp)obrasCiclo=obrasCiclo.filter(o=>o.comprador===comp);
+  const pendentes=obrasCiclo.filter(o=>!avs.find(a=>a.obra_nome===o.nome));
+
+  const compradores=[...new Set(avs.map(a=>a.comprador))].sort();
+  const notas=avs.map(a=>parseFloat(a.media)||0);
+  const mediaGeral=notas.length?(notas.reduce((x,y)=>x+y,0)/notas.length).toFixed(2):'—';
+
+  let html='<div class="print-header"><div>'+
+    '<div class="print-title">MpH Engenharia — Portal de Suprimentos</div>'+
+    '<div class="print-sub">Relatorio de Avaliacoes da Engenharia — '+compLabel+' — Ciclo '+ciclo+'/'+(parseInt(ciclo)+1)+'</div>'+
+    '</div><div class="print-date">Gerado em '+dataHoje+'</div></div>';
+
+  html+='<div class="print-section"><div class="print-section-title">Resumo Geral</div>'+
+    '<table><thead><tr><th>Obras no Ciclo</th><th>Avaliadas</th><th>Pendentes</th><th>Media Geral</th></tr></thead>'+
+    '<tbody><tr><td>'+obrasCiclo.length+'</td><td>'+avs.length+'</td><td>'+pendentes.length+'</td><td style="font-weight:bold">'+mediaGeral+'</td></tr></tbody></table></div>';
+
+  // Media por comprador
+  html+='<div class="print-section"><div class="print-section-title">Media por Comprador</div>'+
+    '<table><thead><tr><th>Comprador</th><th>Obras Avaliadas</th><th>Media Geral</th>'+
+    AVAL_CATS.map(function(c){return '<th>'+c.nome.substring(0,18)+'</th>';}).join('')+'</tr></thead><tbody>';
+  compradores.forEach(function(cp){
+    const lista=avs.filter(a=>a.comprador===cp);
+    const med=(lista.reduce((x,a)=>x+(parseFloat(a.media)||0),0)/lista.length).toFixed(2);
+    let cells='';
+    AVAL_CATS.forEach(function(cat,ci){
+      const keys=[];for(let k=ci*4;k<ci*4+4;k++)keys.push('c'+k);
+      let soma=0,cont=0;
+      lista.forEach(function(a){
+        keys.forEach(function(k){if(a.notas&&a.notas[k]){soma+=a.notas[k];cont++;}});
+      });
+      const mc=cont?(soma/cont).toFixed(2):'—';
+      const bg=mc==='—'?'#fff':parseFloat(mc)>=4?'#DCFCE7':parseFloat(mc)>=3?'#FEF3C7':'#FEE2E2';
+      cells+='<td style="text-align:center;background:'+bg+'">'+mc+'</td>';
+    });
+    const bgM=parseFloat(med)>=4?'#DCFCE7':parseFloat(med)>=3?'#FEF3C7':'#FEE2E2';
+    html+='<tr><td style="font-weight:bold">'+cp+'</td><td>'+lista.length+'</td>'+
+      '<td style="font-weight:bold;text-align:center;background:'+bgM+'">'+med+'</td>'+cells+'</tr>';
+  });
+  html+='</tbody></table></div>';
+
+  // Detalhe por obra
+  html+='<div class="print-section"><div class="print-section-title">Avaliacoes por Obra</div>'+
+    '<table><thead><tr><th>Obra</th><th>Comprador</th><th>Engenheiro</th><th>Nivel</th><th>Data</th><th>Nota</th></tr></thead><tbody>';
+  avs.sort((a,b)=>(a.comprador||'').localeCompare(b.comprador||'')||(a.obra_nome||'').localeCompare(b.obra_nome||''));
+  avs.forEach(function(a){
+    const m=parseFloat(a.media)||0;
+    const bg=m>=4?'#DCFCE7':m>=3?'#FEF3C7':'#FEE2E2';
+    html+='<tr style="background:'+bg+'"><td style="font-weight:bold">'+a.obra_nome+'</td><td>'+a.comprador+'</td>'+
+      '<td>'+(a.engenheiro||'—')+'</td><td>'+(a.nivel||'—')+'</td><td>'+(a.data_avaliacao?fmtBR(a.data_avaliacao):'—')+'</td>'+
+      '<td style="font-weight:bold;text-align:center">'+m.toFixed(2)+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+
+  // Pendências
+  if(pendentes.length){
+    html+='<div class="print-section"><div class="print-section-title">Pendentes de Avaliacao ('+pendentes.length+')</div>'+
+      '<table><thead><tr><th>Obra</th><th>Comprador</th><th>Engenheiro Responsavel</th><th>Cidade</th></tr></thead><tbody>';
+    pendentes.sort((a,b)=>(a.eng_ini||'zzz').localeCompare(b.eng_ini||'zzz'));
+    pendentes.forEach(function(o){
+      html+='<tr style="background:#FEE2E2"><td style="font-weight:bold">'+o.nome+'</td><td>'+o.comprador+'</td>'+
+        '<td>'+(o.eng_ini||'<span style="color:#DC2626;font-weight:bold">SEM ENGENHEIRO</span>')+'</td><td>'+(o.cidade||'—')+'</td></tr>';
+    });
+    html+='</tbody></table></div>';
+  }
+
+  // Observações
+  const comObs=avs.filter(a=>a.observacoes&&a.observacoes.trim());
+  if(comObs.length){
+    html+='<div class="print-section"><div class="print-section-title">Observacoes</div>';
+    comObs.forEach(function(a){
+      html+='<div style="margin-bottom:10px;padding:8px 12px;background:#F9F9F9;border-left:3px solid #EF3236;border-radius:0 4px 4px 0;">'+
+        '<div style="font-size:11px;font-weight:bold;">'+a.obra_nome+' — '+a.comprador+' (nota '+parseFloat(a.media).toFixed(2)+')</div>'+
+        '<div style="font-size:11px;color:#444;margin-top:3px;">'+a.observacoes+'</div></div>';
+    });
+    html+='</div>';
+  }
+
+  document.getElementById('printArea').innerHTML=html;
+  setTimeout(function(){window.print();},200);
+}
+
 async function gerarRelatorioObras(){
   const comp=document.getElementById('relComprador')?.value||'';
   const compLabel=comp||'Toda a equipe';
@@ -2271,6 +2467,297 @@ async function delObraDiv(){
   closeOv('ovObraDiv');renderObrasDivisao();renderObrasDivisaoStats();toast('Obra excluída');
 }
 
+// ── AVALIAÇÕES DA ENGENHARIA ──
+const AVAL_CATS=[
+  {nome:'ATENDIMENTO DAS DEMANDAS',criterios:[
+    'Atende as demandas dentro do prazo esperado',
+    'Demonstra senso de prioridade',
+    'Dá retorno adequado sobre andamento das compras',
+    'Possui boa organização e acompanhamento dos processos']},
+  {nome:'QUALIDADE TÉCNICA DAS PROPOSTAS',criterios:[
+    'Entrega propostas equalizadas de forma clara',
+    'Compara fornecedores de maneira assertiva',
+    'Analisa custos e condições comerciais com criticidade',
+    'Demonstra entendimento da necessidade técnica']},
+  {nome:'NEGOCIAÇÃO',criterios:[
+    'Busca melhores condições comerciais',
+    'Atua com proatividade junto aos fornecedores',
+    'Demonstra capacidade de negociação',
+    'Contribui para redução de custos e ganhos operacionais']},
+  {nome:'COMUNICAÇÃO E RELACIONAMENTO',criterios:[
+    'Comunicação clara e objetiva',
+    'Mantém bom relacionamento com a equipe',
+    'Demonstra postura colaborativa',
+    'Atua como parceiro da Engenharia']},
+  {nome:'SUPORTE E AUTONOMIA',criterios:[
+    'Resolve problemas com autonomia',
+    'Demonstra capacidade analítica',
+    'Busca soluções ao invés de apenas apontar problemas',
+    'Apoia o time quando necessário']},
+];
+const ESCALA_TXT={1:'Muito abaixo do esperado',2:'Abaixo do esperado',3:'Dentro do esperado',4:'Acima do esperado',5:'Excelente'};
+let avaliacoes=[];
+let avalNotas={};
+
+// Ciclo abril-abril: se hoje >= abril, ciclo é o ano atual; senão ano anterior
+function cicloAtual(){
+  const d=new Date();
+  return String(d.getMonth()>=3?d.getFullYear():d.getFullYear()-1);
+}
+
+async function loadAvaliacoes(){
+  try{
+    const [avRes,obRes]=await Promise.all([
+      sb.get('avaliacoes','?order=criado_em.desc'),
+      obrasDivisao.length?Promise.resolve(obrasDivisao):sb.get('obras_divisao','?order=nome.asc'),
+    ]);
+    avaliacoes=avRes||[];
+    if(!obrasDivisao.length&&obRes)obrasDivisao=obRes;
+    // Popula seletor de ciclos
+    const anos=new Set(avaliacoes.map(a=>a.ciclo));
+    anos.add(cicloAtual());
+    const selC=document.getElementById('avalCiclo');
+    const vAtual=selC.value||cicloAtual();
+    selC.innerHTML=[...anos].sort().reverse().map(a=>'<option value="'+a+'">Ciclo '+a+'/'+(parseInt(a)+1)+'</option>').join('');
+    selC.value=vAtual;
+    // Popula filtro de engenheiros
+    const engs=[...new Set(obrasDivisao.map(o=>o.eng_ini).filter(Boolean))].sort();
+    const selE=document.getElementById('avalFEng');
+    selE.innerHTML='<option value="">Todos engenheiros</option>'+engs.map(e=>'<option>'+e+'</option>').join('');
+    renderAvaliacoes();
+  }catch(e){console.error('aval err:',e);document.getElementById('avalTable').innerHTML='<div class="empty">Erro ao carregar. Verifique se a tabela avaliacoes foi criada no Supabase.</div>';}
+}
+
+function getAvalObra(obraNome,ciclo){
+  return avaliacoes.find(a=>a.obra_nome===obraNome&&a.ciclo===ciclo);
+}
+
+function renderAvaliacoes(){
+  const ciclo=document.getElementById('avalCiclo').value||cicloAtual();
+  const s=document.getElementById('avalSearch').value.toLowerCase();
+  const fc=document.getElementById('avalFComp').value;
+  const fe=document.getElementById('avalFEng').value;
+  const fs=document.getElementById('avalFStatus').value;
+
+  // Só obras não finalizadas entram no ciclo
+  let lista=obrasDivisao.filter(o=>o.status!=='finalizada');
+  lista=lista.filter(o=>{
+    const av=getAvalObra(o.nome,ciclo);
+    if(s&&!((o.nome||'')+' '+(o.eng_ini||'')+' '+(o.comprador||'')).toLowerCase().includes(s))return false;
+    if(fc&&o.comprador!==fc)return false;
+    if(fe&&o.eng_ini!==fe)return false;
+    if(fs==='pendente'&&av)return false;
+    if(fs==='avaliada'&&!av)return false;
+    return true;
+  });
+  lista.sort((a,b)=>(a.comprador||'').localeCompare(b.comprador||'')||(a.nome||'').localeCompare(b.nome||''));
+
+  // Stats
+  const todasCiclo=obrasDivisao.filter(o=>o.status!=='finalizada');
+  const avaliadas=todasCiclo.filter(o=>getAvalObra(o.nome,ciclo)).length;
+  const pend=todasCiclo.length-avaliadas;
+  const notas=todasCiclo.map(o=>getAvalObra(o.nome,ciclo)).filter(Boolean).map(a=>parseFloat(a.media)||0);
+  const mediaGeral=notas.length?(notas.reduce((x,y)=>x+y,0)/notas.length).toFixed(2):'—';
+  const engsPend=[...new Set(todasCiclo.filter(o=>!getAvalObra(o.nome,ciclo)).map(o=>o.eng_ini).filter(Boolean))].length;
+  document.getElementById('aval-stats').innerHTML=
+    '<div class="stat-c" style="border-left:4px solid #B45309"><div class="sl">Total de Obras</div><div class="sv c-text">'+todasCiclo.length+'</div></div>'+
+    '<div class="stat-c" style="border-left:4px solid var(--green)"><div class="sl">Avaliadas</div><div class="sv c-green">'+avaliadas+'</div></div>'+
+    '<div class="stat-c" style="border-left:4px solid var(--red)"><div class="sl">Pendentes</div><div class="sv c-red">'+pend+'</div></div>'+
+    '<div class="stat-c"><div class="sl">Engenheiros Pendentes</div><div class="sv" style="color:var(--yellow)">'+engsPend+'</div></div>'+
+    '<div class="stat-c"><div class="sl">Media Geral</div><div class="sv c-blue">'+mediaGeral+'</div></div>';
+
+  // Media por comprador
+  const teamEl=document.getElementById('aval-team-bar');
+  teamEl.innerHTML=TEAM.map(m=>{
+    const obrasM=todasCiclo.filter(o=>o.comprador===m.name);
+    const avs=obrasM.map(o=>getAvalObra(o.nome,ciclo)).filter(Boolean);
+    const med=avs.length?(avs.reduce((x,a)=>x+(parseFloat(a.media)||0),0)/avs.length).toFixed(2):'—';
+    const cor=med==='—'?'var(--muted)':parseFloat(med)>=4?'var(--green)':parseFloat(med)>=3?'var(--yellow)':'var(--red)';
+    return '<div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:10px 16px;display:flex;align-items:center;gap:10px;min-width:180px;">'+
+      '<div class="av-md" style="background:'+m.color+';border:2.5px solid '+(m.border||'#9E9E9E')+'">'+ini(m.name)+'</div>'+
+      '<div><div style="font-size:13px;font-weight:700;color:var(--text)">'+m.name+'</div>'+
+      '<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+avs.length+'/'+obrasM.length+' avaliadas</div></div>'+
+      '<div style="margin-left:auto;text-align:center;"><div style="font-size:20px;font-weight:800;color:'+cor+'">'+med+'</div><div style="font-size:9px;color:var(--muted)">media</div></div>'+
+      '</div>';
+  }).join('');
+
+  // Tabela
+  const c=document.getElementById('avalTable');
+  if(!lista.length){c.innerHTML='<div class="empty">Nenhuma obra encontrada</div>';return;}
+  let rows='';
+  lista.forEach(o=>{
+    const av=getAvalObra(o.nome,ciclo);
+    const med=av?parseFloat(av.media).toFixed(2):null;
+    const corMed=med?(parseFloat(med)>=4?'var(--green)':parseFloat(med)>=3?'var(--yellow)':'var(--red)'):'';
+    const engTxt=o.eng_ini||'<span style="color:var(--red);font-size:10px;font-weight:700">SEM ENGENHEIRO</span>';
+    rows+='<tr'+(av?'':' style="background:var(--red-light)"')+'>'+
+      '<td style="font-weight:600;font-size:13px">'+o.nome+'</td>'+
+      '<td><div class="avc">'+avEl(o.comprador)+o.comprador+'</div></td>'+
+      '<td style="font-size:12px">'+engTxt+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+(o.cidade||'—')+'</td>'+
+      '<td>'+(av?'<span class="sbadge s-ok">Avaliada</span>':'<span class="sbadge s-vencido">Pendente</span>')+'</td>'+
+      '<td style="font-weight:800;font-size:15px;color:'+corMed+'">'+(med||'—')+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+(av&&av.data_avaliacao?fmtBR(av.data_avaliacao):'—')+'</td>'+
+      '<td><button class="abt" onclick="openAvaliacao(\''+o.nome.replace(/'/g,"\\'")+'\')" title="'+(av?'Editar':'Lancar')+'">'+(av?'✏️':'➕')+'</button></td>'+
+      '</tr>';
+  });
+  c.innerHTML='<table><thead><tr><th>Obra</th><th>Comprador</th><th>Engenheiro</th><th>Cidade</th><th>Status</th><th>Nota</th><th>Data</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+function openAvaliacao(obraNome){
+  const ciclo=document.getElementById('avalCiclo').value||cicloAtual();
+  const obra=obrasDivisao.find(o=>o.nome===obraNome);
+  if(!obra)return;
+  const av=getAvalObra(obraNome,ciclo);
+  document.getElementById('avId').value=av?av.id:'';
+  document.getElementById('avObraNome').value=obraNome;
+  document.getElementById('avObraLbl').textContent=obraNome;
+  document.getElementById('avCompLbl').textContent=obra.comprador;
+  document.getElementById('avEngLbl').textContent=obra.eng_ini||'—';
+  document.getElementById('avData').value=av&&av.data_avaliacao?av.data_avaliacao:today();
+  document.getElementById('avNivel').value=av&&av.nivel?av.nivel:'Comprador Pleno';
+  document.getElementById('avObs').value=av&&av.observacoes?av.observacoes:'';
+  document.getElementById('avDelBtn').style.display=av?'inline-block':'none';
+  document.getElementById('avalTit').textContent=(av?'✏️ Editar':'⭐ Lançar')+' Avaliação — Ciclo '+ciclo;
+  avalNotas=av&&av.notas?Object.assign({},av.notas):{};
+  renderCriterios();
+  openOv('ovAval');
+}
+
+function renderCriterios(){
+  let html='';
+  let idx=0;
+  AVAL_CATS.forEach((cat,ci)=>{
+    html+='<div class="aval-cat"><div class="aval-cat-title">'+cat.nome+'</div>';
+    cat.criterios.forEach(cr=>{
+      const key='c'+idx;
+      let btns='';
+      for(let n=1;n<=5;n++){
+        btns+='<button type="button" class="aval-nota'+(avalNotas[key]===n?' sel':'')+'" onclick="setNota(\''+key+'\','+n+')" title="'+ESCALA_TXT[n]+'">'+n+'</button>';
+      }
+      html+='<div class="aval-crit"><span class="aval-crit-txt">'+cr+'</span><div class="aval-notas">'+btns+'</div></div>';
+      idx++;
+    });
+    // Média da categoria
+    const keys=[];for(let k=ci*4;k<ci*4+4;k++)keys.push('c'+k);
+    const vals=keys.map(k=>avalNotas[k]).filter(v=>v);
+    const medCat=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2):'—';
+    html+='<div class="aval-media-cat">Media da categoria: <strong>'+medCat+'</strong> ('+vals.length+'/4 respondidos)</div>';
+    html+='</div>';
+  });
+  document.getElementById('avalCriterios').innerHTML=html;
+  atualizaMedia();
+}
+
+function setNota(key,n){
+  avalNotas[key]=n;
+  renderCriterios();
+}
+
+function atualizaMedia(){
+  const vals=Object.values(avalNotas).filter(v=>v);
+  const med=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length):0;
+  const el=document.getElementById('avMediaLbl');
+  el.textContent=vals.length?med.toFixed(2)+' ('+vals.length+'/20)':'—';
+  el.style.color=med>=4?'var(--green)':med>=3?'var(--yellow)':med>0?'var(--red)':'var(--blue)';
+}
+
+async function saveAvaliacao(){
+  const vals=Object.values(avalNotas).filter(v=>v);
+  if(vals.length<20){
+    if(!confirm('Faltam '+(20-vals.length)+' criterios. Salvar mesmo assim?'))return;
+  }
+  const ciclo=document.getElementById('avalCiclo').value||cicloAtual();
+  const obraNome=document.getElementById('avObraNome').value;
+  const obra=obrasDivisao.find(o=>o.nome===obraNome);
+  const media=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length):0;
+  const idV=document.getElementById('avId').value;
+  const body={
+    obra_nome:obraNome,
+    comprador:obra?obra.comprador:'',
+    engenheiro:obra?(obra.eng_ini||''):'',
+    ciclo:ciclo,
+    nivel:document.getElementById('avNivel').value,
+    data_avaliacao:document.getElementById('avData').value,
+    notas:avalNotas,
+    observacoes:document.getElementById('avObs').value.trim(),
+    media:parseFloat(media.toFixed(2)),
+  };
+  try{
+    if(idV){
+      await sb.patch('avaliacoes',parseInt(idV),body);
+      const i=avaliacoes.findIndex(x=>x.id===parseInt(idV));
+      if(i>=0)avaliacoes[i]=Object.assign({},avaliacoes[i],body);
+      toast('Avaliacao atualizada!');
+    }else{
+      body.id=Date.now();
+      const n=await sb.post('avaliacoes',body);
+      avaliacoes.unshift(n[0]);
+      toast('Avaliacao registrada!');
+    }
+    closeOv('ovAval');renderAvaliacoes();
+  }catch(e){toast('Erro ao salvar: '+e.message.substring(0,60),'err');}
+}
+
+async function delAvaliacao(){
+  const id=parseInt(document.getElementById('avId').value);
+  if(!confirm('Excluir esta avaliacao?'))return;
+  await sb.del('avaliacoes',id);
+  avaliacoes=avaliacoes.filter(x=>x.id!==id);
+  closeOv('ovAval');renderAvaliacoes();toast('Avaliacao excluida');
+}
+
+// ── IMPRIMIR FORMULÁRIOS EM BRANCO ──
+function imprimirFormularios(){
+  const ciclo=document.getElementById('avalCiclo').value||cicloAtual();
+  const fc=document.getElementById('avalFComp').value;
+  const fe=document.getElementById('avalFEng').value;
+  let lista=obrasDivisao.filter(o=>o.status!=='finalizada');
+  if(fc)lista=lista.filter(o=>o.comprador===fc);
+  if(fe)lista=lista.filter(o=>o.eng_ini===fe);
+  // Ordena por engenheiro depois obra
+  lista.sort((a,b)=>(a.eng_ini||'zzz').localeCompare(b.eng_ini||'zzz')||(a.nome||'').localeCompare(b.nome||''));
+  if(!lista.length){toast('Nenhuma obra para imprimir','err');return;}
+
+  let html='';
+  lista.forEach((o,i)=>{
+    let tabela='';
+    AVAL_CATS.forEach(cat=>{
+      tabela+='<tr><td colspan="6" style="background:#EF3236;color:#fff;font-weight:bold;font-size:10px;padding:5px 8px;text-transform:uppercase;">'+cat.nome+'</td></tr>';
+      cat.criterios.forEach(cr=>{
+        tabela+='<tr><td style="font-size:10px;padding:5px 8px;border-bottom:1px solid #ddd;">'+cr+'</td>';
+        for(let n=1;n<=5;n++){
+          tabela+='<td style="text-align:center;width:32px;font-size:10px;padding:5px 4px;border-bottom:1px solid #ddd;border-left:1px solid #eee;">( &nbsp; ) '+n+'</td>';
+        }
+        tabela+='</tr>';
+      });
+    });
+    html+='<div style="page-break-after:'+(i<lista.length-1?'always':'auto')+';padding-bottom:12px;">'+
+      '<div style="border-bottom:3px solid #EF3236;padding-bottom:10px;margin-bottom:12px;">'+
+        '<div style="font-size:16px;font-weight:bold;">AVALIACAO DA EQUIPE DE SUPRIMENTOS</div>'+
+        '<div style="font-size:11px;color:#666;margin-top:3px;">Ciclo '+ciclo+'/'+(parseInt(ciclo)+1)+' &mdash; MpH Engenharia</div>'+
+      '</div>'+
+      '<table style="width:100%;margin-bottom:10px;font-size:11px;"><tr>'+
+        '<td style="padding:3px 0;"><strong>Obra:</strong> '+o.nome+'</td>'+
+        '<td style="padding:3px 0;"><strong>Comprador:</strong> '+o.comprador+'</td>'+
+      '</tr><tr>'+
+        '<td style="padding:3px 0;"><strong>Avaliador (Engenheiro):</strong> '+(o.eng_ini||'_______________________')+'</td>'+
+        '<td style="padding:3px 0;"><strong>Data:</strong> ____/____/________</td>'+
+      '</tr></table>'+
+      '<div style="font-size:10px;background:#F5F5F5;padding:7px 10px;border-radius:4px;margin-bottom:10px;line-height:1.5;">'+
+        '<strong>ESCALA:</strong> 1 Muito abaixo do esperado &nbsp;|&nbsp; 2 Abaixo do esperado &nbsp;|&nbsp; 3 Dentro do esperado &nbsp;|&nbsp; 4 Acima do esperado &nbsp;|&nbsp; 5 Excelente'+
+      '</div>'+
+      '<div style="font-size:10px;margin-bottom:8px;"><strong>IDENTIFICACAO:</strong> ( &nbsp; ) Comprador Junior &nbsp;&nbsp; ( &nbsp; ) Comprador Pleno &nbsp;&nbsp; ( &nbsp; ) Comprador Senior</div>'+
+      '<table style="width:100%;border-collapse:collapse;border:1px solid #ddd;">'+tabela+'</table>'+
+      '<div style="margin-top:10px;font-size:10px;"><strong>Observacoes:</strong></div>'+
+      '<div style="border:1px solid #ddd;height:70px;margin-top:4px;border-radius:4px;"></div>'+
+      '<div style="margin-top:14px;font-size:10px;text-align:center;">_______________________________________<br>Assinatura do Avaliador</div>'+
+      '</div>';
+  });
+  document.getElementById('printArea').innerHTML=html;
+  setTimeout(function(){window.print();},200);
+}
+
 // ── INIT ──
 window.onload=()=>{
   applyTheme();
@@ -2286,6 +2773,7 @@ window.onload=()=>{
     document.getElementById('btnResetSenhas').style.display=isAdmin?'inline-block':'none';
     document.getElementById('btnRelatorio').style.display=isAdmin?'inline-block':'none';
     document.getElementById('btnAcessos').style.display=isAdmin?'inline-block':'none';
+    const ba2=document.getElementById('btnAvaliacoes');if(ba2)ba2.style.display=isAdmin?'inline-block':'none';
     loadDash();
   }
 };
