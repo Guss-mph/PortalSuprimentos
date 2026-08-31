@@ -7,8 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--red:#EF3236;--red-light:#FEE2E2;--green:#16A34A;--green-light:#DCFCE7;--yellow:#D97706;--yellow-light:#FEF3C7;--blue:#2563EB;--blue-light:#DBEAFE;--purple:#7C3AED;--purple-light:#EDE9FE;--orange:#EA580C;--orange-light:#FFEDD5;--gray:#6B7280;--dark:#2C2C2C;}
-body.light{--bg:#EBEBEB;--surface:#FFFFFF;--surface2:#F5F5F5;--border:#E0E0E0;--text:#1A1A1A;--muted:#6B6B6B;--shadow:0 1px 4px rgba(0,0,0,.08);}
-body.dark{--bg:#0D0F18;--surface:#161927;--surface2:#1E2235;--border:#2A2F45;--text:#E8EAF0;--muted:#7A80A0;--shadow:0 1px 4px rgba(0,0,0,.4);}
+body.light{--bg:#EBEBEB;--surface:#FFFFFF;--surface2:#F5F5F5;--border:#E0E0E0;--text:#1A1A1A;--muted:#6B6B6B;--shadow:0 1px 4px rgba(0,0,0,.08);--row-alert:#FEE9E9;--row-warn:#FDF3DC;}
+body.dark{--bg:#0D0F18;--surface:#161927;--surface2:#1E2235;--border:#2A2F45;--text:#E8EAF0;--muted:#7A80A0;--shadow:0 1px 4px rgba(0,0,0,.4);--row-alert:#3A1D22;--row-warn:#3A2E18;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
@@ -67,6 +67,7 @@ td{padding:10px 14px;vertical-align:middle;}
 
 /* BADGES */
 .badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap;}
+body.dark .badge{filter:brightness(.55) saturate(1.4);}
 .sbadge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:600;white-space:nowrap;}
 .sbadge::before{content:'';width:6px;height:6px;border-radius:50%;}
 .s-vencido{background:var(--red-light);color:#B91C1C;}.s-vencido::before{background:#B91C1C;}
@@ -74,6 +75,19 @@ td{padding:10px 14px;vertical-align:middle;}
 .s-atencao{background:var(--yellow-light);color:var(--yellow);}.s-atencao::before{background:var(--yellow);}
 .s-ok{background:var(--green-light);color:var(--green);}.s-ok::before{background:var(--green);}
 .s-concluido{background:#F3F4F6;color:var(--gray);}.s-concluido::before{background:var(--gray);}
+body.dark .s-concluido,body.dark .s-concluido2{background:#2A2F45;color:#9CA3AF;}
+body.dark .s-vencido{background:rgba(239,50,54,.22);color:#FCA5A5;}
+body.dark .s-critico{background:rgba(239,50,54,.22);color:#FCA5A5;}
+body.dark .s-atencao{background:rgba(217,119,6,.22);color:#FCD34D;}
+body.dark .s-ok{background:rgba(22,163,74,.22);color:#86EFAC;}
+body.dark .s-andamento{background:rgba(37,99,235,.22);color:#93C5FD;}
+body.dark .s-pausado{background:rgba(217,119,6,.22);color:#FCD34D;}
+body.dark .s-cancelado{background:rgba(239,50,54,.22);color:#FCA5A5;}
+body.dark .s-aberta{background:rgba(234,88,12,.22);color:#FDBA74;}
+body.dark .s-resolvida{background:rgba(22,163,74,.22);color:#86EFAC;}
+body.dark .p-alta{background:rgba(239,50,54,.22);color:#FCA5A5;}
+body.dark .p-media{background:rgba(217,119,6,.22);color:#FCD34D;}
+body.dark .p-baixa{background:rgba(22,163,74,.22);color:#86EFAC;}
 .s-andamento{background:var(--blue-light);color:var(--blue);}.s-andamento::before{background:var(--blue);}
 .s-pausado{background:var(--yellow-light);color:var(--yellow);}.s-pausado::before{background:var(--yellow);}
 .s-concluido2{background:#F3F4F6;color:var(--gray);}.s-concluido2::before{background:var(--gray);}
@@ -81,12 +95,22 @@ td{padding:10px 14px;vertical-align:middle;}
 .s-aberta{background:var(--orange-light);color:var(--orange);}.s-aberta::before{background:var(--orange);}
 .s-resolvida{background:var(--green-light);color:var(--green);}.s-resolvida::before{background:var(--green);}
 .p-alta{background:var(--red-light);color:var(--red);}.p-media{background:var(--yellow-light);color:var(--yellow);}.p-baixa{background:var(--green-light);color:var(--green);}
-.e-nao{background:#F3F4F6;color:var(--gray);}.e-cotacao{background:var(--blue-light);color:var(--blue);}.e-balizando{background:var(--yellow-light);color:var(--yellow);}.e-finalizado{background:var(--green-light);color:var(--green);}.e-suspenso{background:var(--red-light);color:var(--red);}
+.e-nao{background:#F3F4F6;color:var(--gray);}
+body.dark .e-nao{background:#2A2F45;color:#9CA3AF;}
+body.dark .e-cotacao{background:rgba(37,99,235,.22);color:#93C5FD;}
+body.dark .e-balizando{background:rgba(217,119,6,.22);color:#FCD34D;}
+body.dark .e-finalizado{background:rgba(22,163,74,.22);color:#86EFAC;}
+body.dark .e-suspenso{background:rgba(239,50,54,.22);color:#FCA5A5;}.e-cotacao{background:var(--blue-light);color:var(--blue);}.e-balizando{background:var(--yellow-light);color:var(--yellow);}.e-finalizado{background:var(--green-light);color:var(--green);}.e-suspenso{background:var(--red-light);color:var(--red);}
 .etapa-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:600;border:none;font-family:inherit;cursor:pointer;white-space:nowrap;}
 /* pills etapa */
 .etapa-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
 .etapa-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;border:0.5px solid;}
 .ep-gray{background:#F1EFE8;color:#5F5E5A;border-color:#D3D1C7;}
+body.dark .ep-gray{background:#2A2F45;color:#9CA3AF;border-color:#3A4055;}
+body.dark .ep-blue{background:rgba(37,99,235,.2);color:#93C5FD;border-color:rgba(37,99,235,.4);}
+body.dark .ep-yellow{background:rgba(217,119,6,.2);color:#FCD34D;border-color:rgba(217,119,6,.4);}
+body.dark .ep-green{background:rgba(22,163,74,.2);color:#86EFAC;border-color:rgba(22,163,74,.4);}
+body.dark .ep-red{background:rgba(239,50,54,.2);color:#FCA5A5;border-color:rgba(239,50,54,.4);}
 .ep-blue{background:#DBEAFE;color:#1D4ED8;border-color:#93C5FD;}
 .ep-yellow{background:#FEF3C7;color:#92400E;border-color:#FCD34D;}
 .ep-green{background:#DCFCE7;color:#166534;border-color:#86EFAC;}
@@ -174,6 +198,7 @@ td{padding:10px 14px;vertical-align:middle;}
 /* ETAPA OPTS */
 .etapa-opt{display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;border:2px solid var(--border);cursor:pointer;transition:border-color .15s;}
 .etapa-opt:hover,.etapa-opt.selected{border-color:var(--blue);background:var(--blue-light);}
+body.dark .etapa-opt:hover,body.dark .etapa-opt.selected{background:rgba(37,99,235,.18);}
 
 
 /* AVALIACAO */
@@ -203,6 +228,7 @@ td{padding:10px 14px;vertical-align:middle;}
 .rel-opcao{display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s;margin-bottom:8px;}
 .rel-opcao:hover{border-color:var(--blue);background:var(--blue-light);}
 .rel-opcao.sel{border-color:var(--blue);background:var(--blue-light);}
+body.dark .rel-opcao:hover,body.dark .rel-opcao.sel{background:rgba(37,99,235,.18);}
 .rel-opcao-icon{font-size:24px;}
 .rel-opcao-label{font-size:14px;font-weight:600;}
 .rel-opcao-desc{font-size:12px;color:var(--muted);}
@@ -251,6 +277,7 @@ td{padding:10px 14px;vertical-align:middle;}
 .av-btn{background:var(--surface2);border:2px solid var(--border);border-radius:10px;padding:10px 16px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:10px;transition:all .15s;min-width:150px;text-align:left;}
 .av-btn:hover{border-color:var(--red);transform:translateY(-1px);}
 .av-btn.ativo{border-color:var(--red);background:var(--red-light);}
+body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
 .dash-painel{margin-bottom:20px;border:2px solid var(--red);border-radius:12px;overflow:hidden;}
 .dash-painel-head{background:var(--dark);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;}
 .dash-painel-body{display:grid;grid-template-columns:1fr 1fr 1fr;}
@@ -418,7 +445,7 @@ td{padding:10px 14px;vertical-align:middle;}
   <div style="margin-top:20px;">
     <div class="card">
       <div class="card-head"><span class="dot"></span>Tipos e Prazos</div>
-      <div class="tbl-head"><span style="font-size:12px;color:var(--muted)">Categorias de materiais</span>${isAdmin?'<button class="btn-pri blue" id="btnNovoTipo" style="padding:6px 12px;font-size:12px;" onclick="openTipoForm()">+ Novo</button>':''}</div>
+      <div class="tbl-head"><span style="font-size:12px;color:var(--muted)">Categorias de materiais</span><button class="btn-pri blue" id="btnNovoTipo" style="display:none;padding:6px 12px;font-size:12px;" onclick="openTipoForm()">+ Novo</button></div>
       <div id="tiposTable"></div>
     </div>
   </div>
@@ -918,7 +945,7 @@ function openModule(mod){
   fab.classList.add('show');
   const acts={mc:"openOv('ovNovoMapa')",proj:"openOv('ovProj')",nf:"openOv('ovNF')"};
   fab.onclick=new Function(acts[mod]||'');
-  if(mod==='mc')loadMC();
+  if(mod==='mc'){loadMC();const bt=document.getElementById('btnNovoTipo');if(bt)bt.style.display=isAdmin?'inline-block':'none';}
   if(mod==='proj')loadProj();
   if(mod==='nf')loadNF();
   if(mod==='obras'){loadObrasDivisao();document.getElementById('fabBtn').onclick=()=>openObraDiv();}
@@ -1773,7 +1800,7 @@ function openResetSenhas(){
         <div style="font-size:12px;color:var(--muted);margin-top:2px;">${temSenha?'✅ Senha cadastrada':'⚠️ Sem senha (primeiro acesso pendente)'}</div>
       </div>
       ${temSenha
-        ?`<button onclick="resetSenha('${u}')" style="background:var(--red-light);color:var(--red);border:1px solid var(--red);border-radius:6px;padding:7px 14px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;">Resetar senha</button>`
+        ?`<button onclick="resetSenha('${u}')" style="background:transparent;color:var(--red);border:1px solid var(--red);border-radius:6px;padding:7px 14px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;">Resetar senha</button>`
         :`<span style="font-size:12px;color:var(--muted);font-style:italic;">Aguardando primeiro acesso</span>`
       }
     </div>`;
@@ -2143,7 +2170,7 @@ function renderObrasDivisao(){
   const falta='<span style="color:var(--red);font-size:10px;font-weight:700;">FALTA INFORMAR</span>';
   const cv=(v)=>v?`<span style="font-size:12px">${v}</span>`:falta;
   const canEdit=o=>isAdmin||o.comprador===currentUser;
-  const renderRow=o=>`<tr style="${o.status==='checklist'?'background:var(--yellow-light)':''}">
+  const renderRow=o=>`<tr style="${o.status==='checklist'?'background:var(--row-warn)':''}">
     <td style="font-weight:600;font-size:13px">${o.nome}</td>
     <td><div class="avc">${avEl(o.comprador)}${o.comprador}</div></td>
     <td style="font-size:12px;color:var(--muted)">${o.ano||'—'}</td>
@@ -2590,7 +2617,7 @@ function renderAvaliacoes(){
     const med=av?parseFloat(av.media).toFixed(2):null;
     const corMed=med?(parseFloat(med)>=4?'var(--green)':parseFloat(med)>=3?'var(--yellow)':'var(--red)'):'';
     const engTxt=o.eng_ini||'<span style="color:var(--red);font-size:10px;font-weight:700">SEM ENGENHEIRO</span>';
-    rows+='<tr'+(av?'':' style="background:var(--red-light)"')+'>'+
+    rows+='<tr'+(av?'':' style="background:var(--row-alert)"')+'>'+
       '<td style="font-weight:600;font-size:13px">'+o.nome+'</td>'+
       '<td><div class="avc">'+avEl(o.comprador)+o.comprador+'</div></td>'+
       '<td style="font-size:12px">'+engTxt+'</td>'+
