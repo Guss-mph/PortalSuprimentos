@@ -241,6 +241,8 @@ body.dark .rel-opcao:hover,body.dark .rel-opcao.sel{background:rgba(37,99,235,.1
   #printArea thead th{background:#EF3236 !important;color:#fff !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:8px 10px;text-align:left;font-size:11px;}
   #printArea tbody td{padding:7px 10px;border-bottom:1px solid #eee;font-size:12px;}
   #printArea tbody tr:nth-child(even){background:#F9F9F9 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  #printArea tbody tr.cat-row{background:#EF3236 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  #printArea tbody tr.cat-row td{color:#fff !important;}
   #printArea .print-header{border-bottom:3px solid #EF3236;padding-bottom:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-end;}
   #printArea .print-title{font-size:20px;font-weight:bold;color:#2C2C2C;}
   #printArea .print-sub{font-size:12px;color:#666;margin-top:4px;}
@@ -2758,7 +2760,7 @@ function imprimirFormularios(){
   lista.forEach(function(o,i){
     let tabela='';
     AVAL_CATS.forEach(function(cat){
-      tabela+='<tr style="background:#EF3236;-webkit-print-color-adjust:exact;print-color-adjust:exact;">'+
+      tabela+='<tr class="cat-row" style="background:#EF3236;-webkit-print-color-adjust:exact;print-color-adjust:exact;">'+
         '<td style="color:#fff;font-weight:bold;font-size:9px;padding:3px 7px;text-transform:uppercase;letter-spacing:.3px;">'+cat.nome+'</td>'+
         NUMS.replace(/font-weight:bold;/g,'font-weight:bold;color:#fff;')+'</tr>';
       cat.criterios.forEach(function(cr){
@@ -2788,9 +2790,9 @@ function imprimirFormularios(){
       '</div>'+
       '<table style="width:100%;border-collapse:collapse;border:1px solid #ddd;">'+tabela+'</table>'+
       '<div style="margin-top:8px;font-size:9px;font-weight:bold;">OBSERVAÇÕES:</div>'+
-      '<div style="border:1px solid #ddd;height:54px;margin-top:3px;border-radius:3px;"></div>'+
-      '<div style="margin-top:12px;font-size:9px;font-weight:bold;text-align:center;color:#666;letter-spacing:.5px;">COMISSÃO AVALIADORA</div>'+
-      '<table style="width:100%;margin-top:16px;font-size:8.5px;border-collapse:collapse;"><tr>'+
+      '<div style="border:1px solid #ddd;height:50px;margin-top:3px;border-radius:3px;"></div>'+
+      '<div style="margin-top:26px;font-size:9px;font-weight:bold;text-align:center;color:#666;letter-spacing:.5px;">COMISSÃO AVALIADORA</div>'+
+      '<table style="width:100%;margin-top:34px;font-size:8.5px;border-collapse:collapse;"><tr>'+
         '<td style="text-align:center;width:33%;padding:0 8px;"><div style="border-top:1px solid #333;padding-top:3px;">Nome / Assinatura</div></td>'+
         '<td style="text-align:center;width:33%;padding:0 8px;"><div style="border-top:1px solid #333;padding-top:3px;">Nome / Assinatura</div></td>'+
         '<td style="text-align:center;width:33%;padding:0 8px;"><div style="border-top:1px solid #333;padding-top:3px;">Nome / Assinatura</div></td>'+
