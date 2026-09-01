@@ -235,7 +235,8 @@ body.dark .rel-opcao:hover,body.dark .rel-opcao.sel{background:rgba(37,99,235,.1
 
 @media print{
   header,nav,.btn-back,.btn-theme,.fab,.toast,.overlay,#view-home,#view-mc,#view-proj,#view-nf,#view-obras,#view-aval,#loginScreen{display:none !important;}
-  #printArea{display:block !important;padding:28px;font-family:Arial,sans-serif;font-size:12px;color:#000;}
+  #printArea{display:block !important;padding:18px 22px;font-family:Arial,sans-serif;font-size:12px;color:#000;}
+  @page{size:A4;margin:10mm;}
   #printArea table{width:100%;border-collapse:collapse;margin-top:12px;}
   #printArea thead th{background:#EF3236 !important;color:#fff !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:8px 10px;text-align:left;font-size:11px;}
   #printArea tbody td{padding:7px 10px;border-bottom:1px solid #eee;font-size:12px;}
@@ -642,7 +643,7 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
       <div class="f"><label>Data da avaliacao</label><input type="date" id="avData"></div>
-      <div class="f"><label>Nivel do comprador</label><select id="avNivel"><option>Comprador Junior</option><option>Comprador Pleno</option><option>Comprador Senior</option></select></div>
+      <div class="f"><label>Nível do comprador</label><select id="avNivel"><option>Comprador Júnior</option><option>Comprador Pleno</option><option>Comprador Sênior</option></select></div>
     </div>
     <div id="avalCriterios"></div>
     <div class="f" style="margin-top:14px;"><label>Observacoes</label><textarea id="avObs" style="min-height:70px"></textarea></div>
@@ -895,12 +896,13 @@ const sb={
 
 // ── CONSTANTS ──
 const TEAM=[
-  {name:'Andressa',role:'Comprador Pleno',color:'#CCC0DA',border:'#8B6FAD'},
-  {name:'Gustavo', role:'Comprador Pleno',color:'#B8CCE4',border:'#5B8DB8'},
-  {name:'Gisele',  role:'Comprador Pleno',color:'#E6B8B7',border:'#B5706E'},
-  {name:'Novaes',  role:'Comprador Pleno',color:'#D9D9D9',border:'#9E9E9E'},
-  {name:'Henrique',role:'Comprador Sênior',color:'#FCD5B4',border:'#C8884E'},
+  {name:'Andressa',role:'Comprador Júnior',nivel:'Comprador Júnior',color:'#CCC0DA',border:'#8B6FAD'},
+  {name:'Gustavo', role:'Comprador Pleno', nivel:'Comprador Pleno', color:'#B8CCE4',border:'#5B8DB8'},
+  {name:'Gisele',  role:'Comprador Sênior',nivel:'Comprador Sênior',color:'#E6B8B7',border:'#B5706E'},
+  {name:'Novaes',  role:'Comprador Sênior',nivel:'Comprador Sênior',color:'#D9D9D9',border:'#9E9E9E'},
+  {name:'Henrique',role:'Comprador Júnior',nivel:'Comprador Júnior',color:'#FCD5B4',border:'#C8884E'},
 ];
+function nivelDe(nome){const t=TEAM.find(x=>x.name===nome);return t&&t.nivel?t.nivel:'Comprador Pleno';}
 const COR={
   blue:{c:'#2563EB',bg:'#DBEAFE'},green:{c:'#16A34A',bg:'#DCFCE7'},
   yellow:{c:'#D97706',bg:'#FEF3C7'},red:{c:'#EF3236',bg:'#FEE2E2'},
@@ -2642,7 +2644,7 @@ function openAvaliacao(obraNome){
   document.getElementById('avCompLbl').textContent=obra.comprador;
   document.getElementById('avEngLbl').textContent=obra.eng_ini||'—';
   document.getElementById('avData').value=av&&av.data_avaliacao?av.data_avaliacao:today();
-  document.getElementById('avNivel').value=av&&av.nivel?av.nivel:'Comprador Pleno';
+  document.getElementById('avNivel').value=av&&av.nivel?av.nivel:nivelDe(obra.comprador);
   document.getElementById('avObs').value=av&&av.observacoes?av.observacoes:'';
   document.getElementById('avDelBtn').style.display=av?'inline-block':'none';
   document.getElementById('avalTit').textContent=(av?'✏️ Editar':'⭐ Lançar')+' Avaliação — Ciclo '+ciclo;
@@ -2742,43 +2744,57 @@ function imprimirFormularios(){
   let lista=obrasDivisao.filter(o=>o.status!=='finalizada');
   if(fc)lista=lista.filter(o=>o.comprador===fc);
   if(fe)lista=lista.filter(o=>o.eng_ini===fe);
-  // Ordena por engenheiro depois obra
   lista.sort((a,b)=>(a.eng_ini||'zzz').localeCompare(b.eng_ini||'zzz')||(a.nome||'').localeCompare(b.nome||''));
   if(!lista.length){toast('Nenhuma obra para imprimir','err');return;}
 
+  const NUMS='<td style="text-align:center;width:26px;font-size:9px;font-weight:bold;padding:2px 0;">1</td>'+
+             '<td style="text-align:center;width:26px;font-size:9px;font-weight:bold;padding:2px 0;">2</td>'+
+             '<td style="text-align:center;width:26px;font-size:9px;font-weight:bold;padding:2px 0;">3</td>'+
+             '<td style="text-align:center;width:26px;font-size:9px;font-weight:bold;padding:2px 0;">4</td>'+
+             '<td style="text-align:center;width:26px;font-size:9px;font-weight:bold;padding:2px 0;">5</td>';
+  const CIRC='<td style="text-align:center;font-size:10px;padding:3px 0;border-left:1px solid #eee;">(&nbsp;&nbsp;)</td>';
+
   let html='';
-  lista.forEach((o,i)=>{
+  lista.forEach(function(o,i){
     let tabela='';
-    AVAL_CATS.forEach(cat=>{
-      tabela+='<tr><td colspan="6" style="background:#EF3236;color:#fff;font-weight:bold;font-size:10px;padding:5px 8px;text-transform:uppercase;">'+cat.nome+'</td></tr>';
-      cat.criterios.forEach(cr=>{
-        tabela+='<tr><td style="font-size:10px;padding:5px 8px;border-bottom:1px solid #ddd;">'+cr+'</td>';
-        for(let n=1;n<=5;n++){
-          tabela+='<td style="text-align:center;width:32px;font-size:10px;padding:5px 4px;border-bottom:1px solid #ddd;border-left:1px solid #eee;">( &nbsp; ) '+n+'</td>';
-        }
-        tabela+='</tr>';
+    AVAL_CATS.forEach(function(cat){
+      tabela+='<tr style="background:#EF3236;-webkit-print-color-adjust:exact;print-color-adjust:exact;">'+
+        '<td style="color:#fff;font-weight:bold;font-size:9px;padding:3px 7px;text-transform:uppercase;letter-spacing:.3px;">'+cat.nome+'</td>'+
+        NUMS.replace(/font-weight:bold;/g,'font-weight:bold;color:#fff;')+'</tr>';
+      cat.criterios.forEach(function(cr){
+        tabela+='<tr><td style="font-size:9px;padding:3px 7px;border-bottom:1px solid #e8e8e8;">'+cr+'</td>'+
+          CIRC.repeat(5).replace(/padding:3px 0;/g,'padding:3px 0;border-bottom:1px solid #e8e8e8;')+'</tr>';
       });
     });
-    html+='<div style="page-break-after:'+(i<lista.length-1?'always':'auto')+';padding-bottom:12px;">'+
-      '<div style="border-bottom:3px solid #EF3236;padding-bottom:10px;margin-bottom:12px;">'+
-        '<div style="font-size:16px;font-weight:bold;">AVALIACAO DA EQUIPE DE SUPRIMENTOS</div>'+
-        '<div style="font-size:11px;color:#666;margin-top:3px;">Ciclo '+ciclo+'/'+(parseInt(ciclo)+1)+' &mdash; MpH Engenharia</div>'+
+
+    const nivel=nivelDe(o.comprador);
+    html+='<div style="page-break-after:'+(i<lista.length-1?'always':'auto')+';">'+
+      '<div style="border-bottom:2.5px solid #EF3236;padding-bottom:6px;margin-bottom:8px;">'+
+        '<div style="font-size:14px;font-weight:bold;letter-spacing:.3px;">AVALIAÇÃO DA EQUIPE DE SUPRIMENTOS</div>'+
+        '<div style="font-size:9px;color:#666;margin-top:2px;">Ciclo '+ciclo+'/'+(parseInt(ciclo)+1)+' &mdash; MpH Engenharia</div>'+
       '</div>'+
-      '<table style="width:100%;margin-bottom:10px;font-size:11px;"><tr>'+
-        '<td style="padding:3px 0;"><strong>Obra:</strong> '+o.nome+'</td>'+
-        '<td style="padding:3px 0;"><strong>Comprador:</strong> '+o.comprador+'</td>'+
-      '</tr><tr>'+
-        '<td style="padding:3px 0;"><strong>Avaliador (Engenheiro):</strong> '+(o.eng_ini||'_______________________')+'</td>'+
-        '<td style="padding:3px 0;"><strong>Data:</strong> ____/____/________</td>'+
-      '</tr></table>'+
-      '<div style="font-size:10px;background:#F5F5F5;padding:7px 10px;border-radius:4px;margin-bottom:10px;line-height:1.5;">'+
+      '<table style="width:100%;margin-bottom:7px;font-size:10px;border-collapse:collapse;">'+
+        '<tr>'+
+          '<td style="padding:2px 0;width:48%;"><strong>Obra:</strong> '+o.nome+'</td>'+
+          '<td style="padding:2px 0;"><strong>Comprador:</strong> '+o.comprador+' &mdash; <span style="background:#F0F0F0;padding:1px 6px;border-radius:3px;font-weight:bold;-webkit-print-color-adjust:exact;print-color-adjust:exact;">'+nivel+'</span></td>'+
+        '</tr>'+
+        '<tr>'+
+          '<td style="padding:2px 0;"><strong>Avaliador (Engenheiro):</strong> '+(o.eng_ini||'____________________')+'</td>'+
+          '<td style="padding:2px 0;"><strong>Data:</strong> ______/______/____________</td>'+
+        '</tr>'+
+      '</table>'+
+      '<div style="font-size:8.5px;background:#F5F5F5;padding:4px 8px;border-radius:3px;margin-bottom:7px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">'+
         '<strong>ESCALA:</strong> 1 Muito abaixo do esperado &nbsp;|&nbsp; 2 Abaixo do esperado &nbsp;|&nbsp; 3 Dentro do esperado &nbsp;|&nbsp; 4 Acima do esperado &nbsp;|&nbsp; 5 Excelente'+
       '</div>'+
-      '<div style="font-size:10px;margin-bottom:8px;"><strong>IDENTIFICACAO:</strong> ( &nbsp; ) Comprador Junior &nbsp;&nbsp; ( &nbsp; ) Comprador Pleno &nbsp;&nbsp; ( &nbsp; ) Comprador Senior</div>'+
       '<table style="width:100%;border-collapse:collapse;border:1px solid #ddd;">'+tabela+'</table>'+
-      '<div style="margin-top:10px;font-size:10px;"><strong>Observacoes:</strong></div>'+
-      '<div style="border:1px solid #ddd;height:70px;margin-top:4px;border-radius:4px;"></div>'+
-      '<div style="margin-top:14px;font-size:10px;text-align:center;">_______________________________________<br>Assinatura do Avaliador</div>'+
+      '<div style="margin-top:8px;font-size:9px;font-weight:bold;">OBSERVAÇÕES:</div>'+
+      '<div style="border:1px solid #ddd;height:54px;margin-top:3px;border-radius:3px;"></div>'+
+      '<div style="margin-top:12px;font-size:9px;font-weight:bold;text-align:center;color:#666;letter-spacing:.5px;">COMISSÃO AVALIADORA</div>'+
+      '<table style="width:100%;margin-top:16px;font-size:8.5px;border-collapse:collapse;"><tr>'+
+        '<td style="text-align:center;width:33%;padding:0 8px;"><div style="border-top:1px solid #333;padding-top:3px;">Nome / Assinatura</div></td>'+
+        '<td style="text-align:center;width:33%;padding:0 8px;"><div style="border-top:1px solid #333;padding-top:3px;">Nome / Assinatura</div></td>'+
+        '<td style="text-align:center;width:33%;padding:0 8px;"><div style="border-top:1px solid #333;padding-top:3px;">Nome / Assinatura</div></td>'+
+      '</tr></table>'+
       '</div>';
   });
   document.getElementById('printArea').innerHTML=html;
