@@ -676,9 +676,15 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
       <div id="trResumo" style="font-size:12px;color:var(--muted);margin-top:6px;"></div>
     </div>
     <div class="f"><label>Transferir para *</label><select id="trPara"></select></div>
+    <div class="f" style="margin-top:12px;"><label>O que transferir</label>
+      <select id="trEscopo" onchange="atualizaResumoTransfer()">
+        <option value="abertos">Apenas registros em aberto (mant&eacute;m hist&oacute;rico)</option>
+        <option value="tudo">Tudo, incluindo conclu&iacute;dos e finalizados</option>
+      </select>
+    </div>
     <div style="font-size:12px;color:var(--muted);margin-top:12px;line-height:1.6;">
-      Ser&atilde;o transferidos: obras da Divis&atilde;o de Obras, mapas de cota&ccedil;&atilde;o, projetos e pend&ecirc;ncias de NF.
-      As avalia&ccedil;&otilde;es j&aacute; lan&ccedil;adas <strong>n&atilde;o</strong> s&atilde;o transferidas &mdash; ficam no hist&oacute;rico de quem foi avaliado.
+Com <strong>apenas registros em aberto</strong>, os mapas conclu&iacute;dos e obras finalizadas continuam no nome de quem os fez &mdash; o hist&oacute;rico fica preservado.
+      As avalia&ccedil;&otilde;es j&aacute; lan&ccedil;adas nunca s&atilde;o transferidas.
     </div>
   </div>
   <div class="modal-foot">
@@ -962,6 +968,7 @@ let TEAM=[
   {name:'Henrique',role:'Comprador Júnior',nivel:'Comprador Júnior',color:'#FCD5B4',border:'#C8884E'},
 ];
 let equipeDB=[];
+let equipeErro='';
 let ADMIN_NAMES=['Gustavo','Gisele','Novaes'];
 const PALETA=[
   {cor:'#B8CCE4',borda:'#5B8DB8'},{cor:'#CCC0DA',borda:'#8B6FAD'},
@@ -972,15 +979,34 @@ const PALETA=[
 ];
 
 async function loadEquipe(){
+  const PADRAO=[
+    {id:1,nome:'Andressa',nivel:'Comprador Júnior',cor:'#CCC0DA',borda:'#8B6FAD',admin:false,ativo:true,ordem:1},
+    {id:2,nome:'Gustavo', nivel:'Comprador Pleno', cor:'#B8CCE4',borda:'#5B8DB8',admin:true, ativo:true,ordem:2},
+    {id:3,nome:'Gisele',  nivel:'Comprador Sênior',cor:'#E6B8B7',borda:'#B5706E',admin:true, ativo:true,ordem:3},
+    {id:4,nome:'Novaes',  nivel:'Comprador Sênior',cor:'#D9D9D9',borda:'#9E9E9E',admin:true, ativo:true,ordem:4},
+    {id:5,nome:'Henrique',nivel:'Comprador Júnior',cor:'#FCD5B4',borda:'#C8884E',admin:false,ativo:true,ordem:5},
+  ];
   try{
-    const rows=await sb.get('equipe','?order=ordem.asc');
+    let rows=await sb.get('equipe','?order=ordem.asc');
+    // Tabela existe mas está vazia — popula com os membros padrão
+    if(!rows||!rows.length){
+      console.log('Tabela equipe vazia, populando...');
+      for(const p of PADRAO){
+        try{await sb.post('equipe',p);}catch(e2){console.warn('seed',p.nome,e2.message);}
+      }
+      rows=await sb.get('equipe','?order=ordem.asc');
+    }
     if(rows&&rows.length){
       equipeDB=rows;
       const ativos=rows.filter(r=>r.ativo);
       TEAM=ativos.map(r=>({name:r.nome,role:r.nivel,nivel:r.nivel,color:r.cor,border:r.borda}));
       ADMIN_NAMES=ativos.filter(r=>r.admin).map(r=>r.nome);
+      equipeErro='';
     }
-  }catch(e){console.warn('Equipe: usando lista padrao',e);}
+  }catch(e){
+    equipeErro=e.message||String(e);
+    console.warn('Equipe: usando lista padrao —',equipeErro);
+  }
   popLoginUsers();
   popTeamSelects();
 }
@@ -2922,7 +2948,7 @@ function openEquipe(){
 
 function renderEquipeList(){
   const el=document.getElementById('equipeList');
-  if(!equipeDB.length){el.innerHTML='<div class="empty">Execute o SQL da tabela equipe no Supabase.</div>';return;}
+  if(!equipeDB.length){el.innerHTML='<div style="padding:20px;text-align:center;"><div style="color:var(--red);font-size:13px;font-weight:600;margin-bottom:8px;">Não foi possível carregar a equipe</div><div style="font-size:12px;color:var(--muted);margin-bottom:12px;">'+(equipeErro?('Erro: '+equipeErro.substring(0,140)):'A tabela equipe está vazia ou inacessível.')+'</div><button class="btn-pri blue" style="padding:8px 16px;font-size:12px;" onclick="loadEquipe().then(renderEquipeList)">Tentar novamente</button></div>';return;}
   const ordenado=[...equipeDB].sort((a,b)=>(a.ativo===b.ativo?0:a.ativo?-1:1)||(a.ordem||99)-(b.ordem||99));
   el.innerHTML=ordenado.map(function(m){
     const nMapas=mapas.filter(x=>x.responsavel===m.nome).length;
@@ -2998,16 +3024,11 @@ async function saveMembro(){
   try{
     if(idV){
       const alvo=equipeDB.find(x=>x.id===parseInt(idV));
-      // Impede desativar quem ainda tem carteira
-      if(!body.ativo&&alvo){
-        const nO=obrasDivisao.filter(x=>x.comprador===alvo.nome).length;
-        const nM=mapas.filter(x=>x.responsavel===alvo.nome).length;
-        const nP=projetos.filter(x=>x.responsavel===alvo.nome).length;
-        const nN=nfs.filter(x=>x.responsavel===alvo.nome).length;
-        if(nO+nM+nP+nN>0){
-          toast('Transfira a carteira antes de desativar ('+(nO+nM+nP+nN)+' registros)','err');
-          return;
-        }
+      const alvoM=equipeDB.find(x=>x.id===parseInt(idV));
+      if(alvoM&&alvoM.ativo&&!body.ativo){
+        const ab=itensTransfer(alvoM.nome,'abertos');
+        const totAb=ab.obras.length+ab.mapas.length+ab.proj.length+ab.nfs.length;
+        if(totAb>0&&!confirm(alvoM.nome+' ainda tem '+totAb+' registros em aberto.\n\nDesativar mesmo assim? O histórico será preservado e você pode transferir depois.'))return;
       }
       await sb.patch('equipe',parseInt(idV),body);
       const i=equipeDB.findIndex(x=>x.id===parseInt(idV));
@@ -3056,41 +3077,55 @@ async function delMembro(){
   }catch(e){toast('Erro: '+e.message.substring(0,60),'err');}
 }
 
+function itensTransfer(nome,escopo){
+  const soAbertos=escopo==='abertos';
+  return {
+    obras:obrasDivisao.filter(x=>x.comprador===nome&&(!soAbertos||x.status!=='finalizada')),
+    mapas:mapas.filter(x=>x.responsavel===nome&&(!soAbertos||!x.concluido)),
+    proj:projetos.filter(x=>x.responsavel===nome&&(!soAbertos||(x.status!=='concluido'&&x.status!=='cancelado'))),
+    nfs:nfs.filter(x=>x.responsavel===nome&&(!soAbertos||x.status!=='resolvida')),
+  };
+}
+
+function atualizaResumoTransfer(){
+  const nome=document.getElementById('trDe').value;
+  const escopo=document.getElementById('trEscopo').value;
+  const it=itensTransfer(nome,escopo);
+  const tot=it.obras.length+it.mapas.length+it.proj.length+it.nfs.length;
+  document.getElementById('trResumo').innerHTML=
+    it.obras.length+' obras &middot; '+it.mapas.length+' mapas &middot; '+it.proj.length+' projetos &middot; '+it.nfs.length+' NFs'+
+    '<div style="margin-top:5px;font-weight:600;color:var(--text);">Total: '+tot+' registros</div>';
+}
+
 function openTransfer(nome){
   document.getElementById('trDe').value=nome;
   document.getElementById('trDeLbl').textContent=nome;
-  const nObras=obrasDivisao.filter(x=>x.comprador===nome).length;
-  const nMapas=mapas.filter(x=>x.responsavel===nome).length;
-  const nProj=projetos.filter(x=>x.responsavel===nome).length;
-  const nNF=nfs.filter(x=>x.responsavel===nome).length;
-  document.getElementById('trResumo').innerHTML=nObras+' obras &middot; '+nMapas+' mapas &middot; '+nProj+' projetos &middot; '+nNF+' NFs';
+  document.getElementById('trEscopo').value='abertos';
   const destinos=TEAM.filter(t=>t.name!==nome);
   document.getElementById('trPara').innerHTML=destinos.map(t=>'<option>'+t.name+'</option>').join('');
+  atualizaResumoTransfer();
   openOv('ovTransfer');
 }
 
 async function executarTransferencia(){
   const de=document.getElementById('trDe').value;
   const para=document.getElementById('trPara').value;
+  const escopo=document.getElementById('trEscopo').value;
   if(!para){toast('Selecione o destino','err');return;}
-  if(!confirm('Transferir toda a carteira de '+de+' para '+para+'?'))return;
+  const it=itensTransfer(de,escopo);
+  const tot=it.obras.length+it.mapas.length+it.proj.length+it.nfs.length;
+  if(!tot){toast('Nada a transferir com esse filtro','err');return;}
+  const txt=escopo==='abertos'?'apenas os registros em aberto':'TUDO, incluindo histórico';
+  if(!confirm('Transferir '+tot+' registros de '+de+' para '+para+'?\n\nEscopo: '+txt))return;
   try{
-    toast('Transferindo...','ok');
-    // Obras
-    const obrasT=obrasDivisao.filter(x=>x.comprador===de);
-    for(const o of obrasT){await sb.patch('obras_divisao',o.id,{comprador:para});o.comprador=para;}
-    // Mapas
-    const mapasT=mapas.filter(x=>x.responsavel===de);
-    for(const m of mapasT){await sb.patch('mapas',m.id,{responsavel:para});m.responsavel=para;}
-    // Projetos
-    const projT=projetos.filter(x=>x.responsavel===de);
-    for(const p of projT){await sb.patch('projetos',p.id,{responsavel:para});p.responsavel=para;}
-    // NFs
-    const nfsT=nfs.filter(x=>x.responsavel===de);
-    for(const n of nfsT){await sb.patch('nfs',n.id,{responsavel:para});n.responsavel=para;}
+    toast('Transferindo '+tot+' registros...','ok');
+    for(const o of it.obras){await sb.patch('obras_divisao',o.id,{comprador:para});o.comprador=para;}
+    for(const m of it.mapas){await sb.patch('mapas',m.id,{responsavel:para});m.responsavel=para;}
+    for(const p of it.proj){await sb.patch('projetos',p.id,{responsavel:para});p.responsavel=para;}
+    for(const n of it.nfs){await sb.patch('nfs',n.id,{responsavel:para});n.responsavel=para;}
     closeOv('ovTransfer');
     renderEquipeList();
-    toast('Carteira de '+de+' transferida para '+para+'!');
+    toast(tot+' registros transferidos para '+para+'!');
   }catch(e){toast('Erro na transferência: '+e.message.substring(0,60),'err');}
 }
 
