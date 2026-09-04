@@ -359,6 +359,7 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
     <button class="logout-btn" id="btnResetSenhas" onclick="openResetSenhas()" style="display:none;background:#2A2A2A;border-color:#555;color:#F59E0B;" title="Resetar senhas">🔑 Senhas</button>
     <button class="logout-btn" id="btnRelatorio" onclick="openOv('ovRelatorio')" style="display:none;background:#2A2A2A;border-color:#555;color:#22C55E;" title="Gerar relatório">📄 Relatório</button>
     <button class="logout-btn" id="btnAcessos" onclick="openAcessos()" style="display:none;background:#2A2A2A;border-color:#555;color:#A78BFA;" title="Histórico de acessos">👁 Acessos</button>
+    <button class="logout-btn" id="btnEquipe" onclick="openEquipe()" style="display:none;background:#2A2A2A;border-color:#555;color:#60A5FA;" title="Gerenciar equipe">👥 Equipe</button>
     <button class="logout-btn" onclick="doLogout()">Sair</button>
     <button class="btn-back" id="backBtn" onclick="goHome()">Início</button>
     <button class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
@@ -630,6 +631,61 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
   <div class="modal-foot"><button class="btn-sec" onclick="closeOv('ovTipo')">Cancelar</button><button class="btn-del" id="tipoDelBtn" onclick="delTipo()" style="display:none">Excluir</button><button class="btn-pri" onclick="saveTipo()">Salvar</button></div>
 </div></div>
 
+<!-- MODAL EQUIPE -->
+<div class="overlay" id="ovEquipe"><div class="modal" style="width:640px;">
+  <div class="modal-head"><h3>&#128101; Gerenciar Equipe</h3><button class="modal-x" onclick="closeOv('ovEquipe')">&times;</button></div>
+  <div class="modal-body">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <p style="font-size:13px;color:var(--muted);">Cadastre, edite ou desative membros da equipe.</p>
+      <button class="btn-pri blue" style="padding:7px 14px;font-size:12px;" onclick="openMembroForm()">+ Novo membro</button>
+    </div>
+    <div id="equipeList"></div>
+  </div>
+  <div class="modal-foot"><button class="btn-sec" onclick="closeOv('ovEquipe')">Fechar</button></div>
+</div></div>
+
+<!-- MODAL NOVO/EDITAR MEMBRO -->
+<div class="overlay" id="ovMembroForm"><div class="modal" style="width:480px;">
+  <div class="modal-head"><h3 id="membroFormTit">Novo Membro</h3><button class="modal-x" onclick="closeOv('ovMembroForm')">&times;</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="mbId">
+    <div class="f"><label>Nome *</label><input id="mbNome" placeholder="Ex: Rafael"></div>
+    <div class="f"><label>N&iacute;vel</label><select id="mbNivel"><option>Comprador J&uacute;nior</option><option>Comprador Pleno</option><option>Comprador S&ecirc;nior</option></select></div>
+    <div class="f"><label>Cor do avatar</label><div id="mbPaleta" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;"></div></div>
+    <div class="f"><label>Perfil de acesso</label>
+      <select id="mbAdmin"><option value="0">Comprador (v&ecirc; apenas o que &eacute; dele)</option><option value="1">Administrador (v&ecirc; tudo)</option></select>
+    </div>
+    <div class="f" id="mbAtivoWrap"><label>Situa&ccedil;&atilde;o</label>
+      <select id="mbAtivo"><option value="1">Ativo</option><option value="0">Inativo (sai do sistema)</option></select>
+    </div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn-sec" onclick="closeOv('ovMembroForm')">Cancelar</button>
+    <button class="btn-pri blue" onclick="saveMembro()">Salvar</button>
+  </div>
+</div></div>
+
+<!-- MODAL TRANSFERIR CARTEIRA -->
+<div class="overlay" id="ovTransfer"><div class="modal" style="width:520px;">
+  <div class="modal-head"><h3>&#128260; Transferir Carteira</h3><button class="modal-x" onclick="closeOv('ovTransfer')">&times;</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="trDe">
+    <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-bottom:14px;">
+      <div style="font-size:13px;">Transferindo tudo de <strong id="trDeLbl">&mdash;</strong></div>
+      <div id="trResumo" style="font-size:12px;color:var(--muted);margin-top:6px;"></div>
+    </div>
+    <div class="f"><label>Transferir para *</label><select id="trPara"></select></div>
+    <div style="font-size:12px;color:var(--muted);margin-top:12px;line-height:1.6;">
+      Ser&atilde;o transferidos: obras da Divis&atilde;o de Obras, mapas de cota&ccedil;&atilde;o, projetos e pend&ecirc;ncias de NF.
+      As avalia&ccedil;&otilde;es j&aacute; lan&ccedil;adas <strong>n&atilde;o</strong> s&atilde;o transferidas &mdash; ficam no hist&oacute;rico de quem foi avaliado.
+    </div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn-sec" onclick="closeOv('ovTransfer')">Cancelar</button>
+    <button class="btn-pri" style="background:#B45309;" onclick="executarTransferencia()">Transferir</button>
+  </div>
+</div></div>
+
 <!-- MODAL AVALIACAO -->
 <div class="overlay" id="ovAval"><div class="modal" style="width:760px;max-width:97vw;">
   <div class="modal-head"><h3 id="avalTit">&#11088; Lancar Avaliacao</h3><button class="modal-x" onclick="closeOv('ovAval')">&times;</button></div>
@@ -897,13 +953,72 @@ const sb={
 };
 
 // ── CONSTANTS ──
-const TEAM=[
+let TEAM=[
   {name:'Andressa',role:'Comprador Júnior',nivel:'Comprador Júnior',color:'#CCC0DA',border:'#8B6FAD'},
   {name:'Gustavo', role:'Comprador Pleno', nivel:'Comprador Pleno', color:'#B8CCE4',border:'#5B8DB8'},
   {name:'Gisele',  role:'Comprador Sênior',nivel:'Comprador Sênior',color:'#E6B8B7',border:'#B5706E'},
   {name:'Novaes',  role:'Comprador Sênior',nivel:'Comprador Sênior',color:'#D9D9D9',border:'#9E9E9E'},
   {name:'Henrique',role:'Comprador Júnior',nivel:'Comprador Júnior',color:'#FCD5B4',border:'#C8884E'},
 ];
+let equipeDB=[];
+let ADMIN_NAMES=['Gustavo','Gisele','Novaes'];
+const PALETA=[
+  {cor:'#B8CCE4',borda:'#5B8DB8'},{cor:'#CCC0DA',borda:'#8B6FAD'},
+  {cor:'#E6B8B7',borda:'#B5706E'},{cor:'#FCD5B4',borda:'#C8884E'},
+  {cor:'#D9D9D9',borda:'#9E9E9E'},{cor:'#C4E0B2',borda:'#6B9E4A'},
+  {cor:'#F5D8E4',borda:'#C4718F'},{cor:'#BFDCDC',borda:'#4E8F8F'},
+  {cor:'#B5EEFD',borda:'#3D93AD'},{cor:'#E4D5A1',borda:'#A88C3D'},
+];
+
+async function loadEquipe(){
+  try{
+    const rows=await sb.get('equipe','?order=ordem.asc');
+    if(rows&&rows.length){
+      equipeDB=rows;
+      const ativos=rows.filter(r=>r.ativo);
+      TEAM=ativos.map(r=>({name:r.nome,role:r.nivel,nivel:r.nivel,color:r.cor,border:r.borda}));
+      ADMIN_NAMES=ativos.filter(r=>r.admin).map(r=>r.nome);
+    }
+  }catch(e){console.warn('Equipe: usando lista padrao',e);}
+  popLoginUsers();
+  popTeamSelects();
+}
+
+function popLoginUsers(){
+  const sel=document.getElementById('loginUser');
+  if(!sel)return;
+  const v=sel.value;
+  sel.innerHTML='<option value="">— Selecione seu nome —</option>'+
+    TEAM.map(t=>'<option value="'+t.name+'">'+t.name+'</option>').join('');
+  if(v)sel.value=v;
+}
+
+function popTeamSelects(){
+  const nomes=TEAM.map(t=>t.name);
+  // selects de responsável / comprador
+  ['fResp','eMResp','pResp','ePResp','nfResp','odComp'].forEach(function(id){
+    const el=document.getElementById(id);if(!el)return;
+    const v=el.value;
+    el.innerHTML=nomes.map(n=>'<option>'+n+'</option>').join('');
+    if(v&&nomes.includes(v))el.value=v;
+  });
+  // selects de filtro (com opção Todos)
+  ['mcFResp','projFResp','nfFResp','obrasDivFComp','avalFComp'].forEach(function(id){
+    const el=document.getElementById(id);if(!el)return;
+    const v=el.value;
+    const lbl=id==='obrasDivFComp'||id==='avalFComp'?'Todos compradores':'Todos';
+    el.innerHTML='<option value="">'+lbl+'</option>'+nomes.map(n=>'<option>'+n+'</option>').join('');
+    if(v&&nomes.includes(v))el.value=v;
+  });
+  // select do relatório
+  const rc=document.getElementById('relComprador');
+  if(rc){
+    const v=rc.value;
+    rc.innerHTML='<option value="">Toda a equipe</option>'+nomes.map(n=>'<option>'+n+'</option>').join('');
+    if(v&&nomes.includes(v))rc.value=v;
+  }
+}
+
 function nivelDe(nome){const t=TEAM.find(x=>x.name===nome);return t&&t.nivel?t.nivel:'Comprador Pleno';}
 const COR={
   blue:{c:'#2563EB',bg:'#DBEAFE'},green:{c:'#16A34A',bg:'#DCFCE7'},
@@ -1710,8 +1825,8 @@ async function delNF(){
 
 // ── AUTH ──
 // Admins: senha fixa. Usuários comuns: senha no localStorage
-const ADMINS={Gustavo:'portalsupri',Gisele:'portalsupri',Novaes:'portalsupri'};
-const USERS_COMMON=['Andressa','Henrique'];
+const SENHA_ADMIN='portalsupri';
+function isAdminName(n){return ADMIN_NAMES.includes(n);}
 let currentUser=null;
 let isAdmin=false;
 
@@ -1721,11 +1836,9 @@ function onLoginUserChange(){
   const newPassBox=document.getElementById('loginNewPassBox');
   if(!user){passField.style.display='none';newPassBox.style.display='none';return;}
   passField.style.display='block';
-  // Verifica se é usuário comum sem senha ainda
-  if(USERS_COMMON.includes(user)){
+  if(!isAdminName(user)){
     const saved=localStorage.getItem('mph_pass_'+user);
     if(!saved){
-      // Primeiro acesso
       newPassBox.style.display='block';
       passField.style.display='none';
       document.getElementById('loginTitle').textContent='Crie sua senha — '+user;
@@ -1743,32 +1856,24 @@ function onLoginUserChange(){
 function doLogin(){
   const user=document.getElementById('loginUser').value;
   if(!user){showLoginErr('Selecione seu usuário');return;}
-  const errEl=document.getElementById('loginErr');
-
-  // Admin
-  if(ADMINS[user]){
+  if(isAdminName(user)){
     const pass=document.getElementById('loginPass').value;
-    if(pass!==ADMINS[user]){showLoginErr('Senha incorreta');return;}
+    if(pass!==SENHA_ADMIN){showLoginErr('Senha incorreta');return;}
     loginSuccess(user,true);
     return;
   }
-
-  // Usuário comum
-  if(USERS_COMMON.includes(user)){
-    const saved=localStorage.getItem('mph_pass_'+user);
-    if(!saved){
-      // Criar senha
-      const p1=document.getElementById('newPass1').value;
-      const p2=document.getElementById('newPass2').value;
-      if(!p1||p1.length<4){showLoginErr('Senha deve ter pelo menos 4 caracteres');return;}
-      if(p1!==p2){showLoginErr('As senhas não coincidem');return;}
-      localStorage.setItem('mph_pass_'+user,p1);
-      loginSuccess(user,false);
-    } else {
-      const pass=document.getElementById('loginPass').value;
-      if(pass!==saved){showLoginErr('Senha incorreta');return;}
-      loginSuccess(user,false);
-    }
+  const saved=localStorage.getItem('mph_pass_'+user);
+  if(!saved){
+    const p1=document.getElementById('newPass1').value;
+    const p2=document.getElementById('newPass2').value;
+    if(!p1||p1.length<4){showLoginErr('Senha deve ter pelo menos 4 caracteres');return;}
+    if(p1!==p2){showLoginErr('As senhas não coincidem');return;}
+    localStorage.setItem('mph_pass_'+user,p1);
+    loginSuccess(user,false);
+  } else {
+    const pass=document.getElementById('loginPass').value;
+    if(pass!==saved){showLoginErr('Senha incorreta');return;}
+    loginSuccess(user,false);
   }
 }
 
@@ -1786,6 +1891,7 @@ function loginSuccess(user,admin){
   document.getElementById('btnRelatorio').style.display=admin?'inline-block':'none';
   document.getElementById('btnAcessos').style.display=admin?'inline-block':'none';
   const ba=document.getElementById('btnAvaliacoes');if(ba)ba.style.display=admin?'inline-block':'none';
+  const be=document.getElementById('btnEquipe');if(be)be.style.display=admin?'inline-block':'none';
   // Salva sessão
   sessionStorage.setItem('mph_user',user);
   sessionStorage.setItem('mph_admin',admin?'1':'0');
@@ -1795,7 +1901,8 @@ function loginSuccess(user,admin){
 }
 
 function openResetSenhas(){
-  const users=['Andressa','Henrique'];
+  const users=TEAM.filter(t=>!isAdminName(t.name)).map(t=>t.name);
+  if(!users.length){document.getElementById('resetUserList').innerHTML='<div class="empty">Nenhum usuário comum cadastrado.</div>';openOv('ovResetSenhas');return;}
   document.getElementById('resetUserList').innerHTML=users.map(u=>{
     const temSenha=!!localStorage.getItem('mph_pass_'+u);
     return`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);">
@@ -2803,15 +2910,164 @@ function imprimirFormularios(){
   setTimeout(function(){window.print();},200);
 }
 
+// ── GESTÃO DE EQUIPE ──
+let paletaSel=0;
+
+function openEquipe(){
+  if(!isAdmin){toast('Apenas administradores','err');return;}
+  renderEquipeList();
+  openOv('ovEquipe');
+}
+
+function renderEquipeList(){
+  const el=document.getElementById('equipeList');
+  if(!equipeDB.length){el.innerHTML='<div class="empty">Execute o SQL da tabela equipe no Supabase.</div>';return;}
+  const ordenado=[...equipeDB].sort((a,b)=>(a.ativo===b.ativo?0:a.ativo?-1:1)||(a.ordem||99)-(b.ordem||99));
+  el.innerHTML=ordenado.map(function(m){
+    const nMapas=mapas.filter(x=>x.responsavel===m.nome&&!x.concluido).length;
+    const nObras=obrasDivisao.filter(x=>x.comprador===m.nome&&x.status!=='finalizada').length;
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);'+(m.ativo?'':'opacity:.5;')+'">'+
+      '<div style="display:flex;align-items:center;gap:11px;">'+
+        '<div class="av-md" style="background:'+m.cor+';border:2.5px solid '+m.borda+'">'+ini(m.nome)+'</div>'+
+        '<div>'+
+          '<div style="font-size:14px;font-weight:600;">'+m.nome+(m.admin?' <span style="font-size:10px;color:var(--yellow)">&#128081; Admin</span>':'')+(m.ativo?'':' <span style="font-size:10px;color:var(--red)">INATIVO</span>')+'</div>'+
+          '<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+m.nivel+' &middot; '+nObras+' obra'+(nObras!==1?'s':'')+' &middot; '+nMapas+' mapa'+(nMapas!==1?'s':'')+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:5px;">'+
+        (m.ativo&&(nObras>0||nMapas>0)?'<button class="abt" onclick="openTransfer(\''+m.nome.replace(/'/g,"\\'")+'\')" title="Transferir carteira">&#128260;</button>':'')+
+        '<button class="abt" onclick="editMembro('+m.id+')" title="Editar">&#9999;&#65039;</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function renderPaleta(){
+  document.getElementById('mbPaleta').innerHTML=PALETA.map(function(p,i){
+    return '<button type="button" onclick="paletaSel='+i+';renderPaleta()" style="width:34px;height:34px;border-radius:50%;background:'+p.cor+';border:'+(paletaSel===i?'3px solid var(--text)':'2.5px solid '+p.borda)+';cursor:pointer;"></button>';
+  }).join('');
+}
+
+function openMembroForm(){
+  document.getElementById('mbId').value='';
+  document.getElementById('mbNome').value='';
+  document.getElementById('mbNome').readOnly=false;
+  document.getElementById('mbNivel').value='Comprador Pleno';
+  document.getElementById('mbAdmin').value='0';
+  document.getElementById('mbAtivo').value='1';
+  document.getElementById('mbAtivoWrap').style.display='none';
+  document.getElementById('membroFormTit').textContent='Novo Membro';
+  paletaSel=0;renderPaleta();
+  openOv('ovMembroForm');
+}
+
+function editMembro(id){
+  const m=equipeDB.find(x=>x.id===id);if(!m)return;
+  document.getElementById('mbId').value=id;
+  document.getElementById('mbNome').value=m.nome;
+  document.getElementById('mbNome').readOnly=true;
+  document.getElementById('mbNivel').value=m.nivel||'Comprador Pleno';
+  document.getElementById('mbAdmin').value=m.admin?'1':'0';
+  document.getElementById('mbAtivo').value=m.ativo?'1':'0';
+  document.getElementById('mbAtivoWrap').style.display='';
+  document.getElementById('membroFormTit').textContent='Editar — '+m.nome;
+  const idx=PALETA.findIndex(p=>p.cor===m.cor);
+  paletaSel=idx>=0?idx:0;renderPaleta();
+  openOv('ovMembroForm');
+}
+
+async function saveMembro(){
+  const idV=document.getElementById('mbId').value;
+  const nome=document.getElementById('mbNome').value.trim();
+  if(!nome){toast('Informe o nome','err');return;}
+  if(!idV&&equipeDB.find(x=>x.nome.toLowerCase()===nome.toLowerCase())){toast('Já existe alguém com esse nome','err');return;}
+  const p=PALETA[paletaSel]||PALETA[0];
+  const body={
+    nome:nome,
+    nivel:document.getElementById('mbNivel').value,
+    cor:p.cor,borda:p.borda,
+    admin:document.getElementById('mbAdmin').value==='1',
+    ativo:document.getElementById('mbAtivo').value==='1',
+  };
+  try{
+    if(idV){
+      const alvo=equipeDB.find(x=>x.id===parseInt(idV));
+      // Impede desativar quem ainda tem carteira
+      if(!body.ativo&&alvo){
+        const nObras=obrasDivisao.filter(x=>x.comprador===alvo.nome&&x.status!=='finalizada').length;
+        const nMapas=mapas.filter(x=>x.responsavel===alvo.nome&&!x.concluido).length;
+        if(nObras>0||nMapas>0){
+          toast('Transfira a carteira antes de desativar ('+nObras+' obras, '+nMapas+' mapas)','err');
+          return;
+        }
+      }
+      await sb.patch('equipe',parseInt(idV),body);
+      const i=equipeDB.findIndex(x=>x.id===parseInt(idV));
+      if(i>=0)equipeDB[i]=Object.assign({},equipeDB[i],body);
+      toast('Membro atualizado!');
+    }else{
+      body.id=Date.now();
+      body.ordem=equipeDB.length+1;
+      const n=await sb.post('equipe',body);
+      equipeDB.push(n[0]);
+      toast(nome+' adicionado à equipe!');
+    }
+    // Recarrega TEAM
+    const ativos=equipeDB.filter(r=>r.ativo).sort((a,b)=>(a.ordem||99)-(b.ordem||99));
+    TEAM=ativos.map(r=>({name:r.nome,role:r.nivel,nivel:r.nivel,color:r.cor,border:r.borda}));
+    ADMIN_NAMES=ativos.filter(r=>r.admin).map(r=>r.nome);
+    popLoginUsers();popTeamSelects();
+    closeOv('ovMembroForm');renderEquipeList();
+  }catch(e){toast('Erro: '+e.message.substring(0,60),'err');}
+}
+
+function openTransfer(nome){
+  document.getElementById('trDe').value=nome;
+  document.getElementById('trDeLbl').textContent=nome;
+  const nObras=obrasDivisao.filter(x=>x.comprador===nome&&x.status!=='finalizada').length;
+  const nMapas=mapas.filter(x=>x.responsavel===nome&&!x.concluido).length;
+  const nProj=projetos.filter(x=>x.responsavel===nome&&x.status!=='concluido'&&x.status!=='cancelado').length;
+  const nNF=nfs.filter(x=>x.responsavel===nome&&x.status!=='resolvida').length;
+  document.getElementById('trResumo').innerHTML=nObras+' obras &middot; '+nMapas+' mapas &middot; '+nProj+' projetos &middot; '+nNF+' NFs';
+  const destinos=TEAM.filter(t=>t.name!==nome);
+  document.getElementById('trPara').innerHTML=destinos.map(t=>'<option>'+t.name+'</option>').join('');
+  openOv('ovTransfer');
+}
+
+async function executarTransferencia(){
+  const de=document.getElementById('trDe').value;
+  const para=document.getElementById('trPara').value;
+  if(!para){toast('Selecione o destino','err');return;}
+  if(!confirm('Transferir toda a carteira de '+de+' para '+para+'?'))return;
+  try{
+    toast('Transferindo...','ok');
+    // Obras
+    const obrasT=obrasDivisao.filter(x=>x.comprador===de);
+    for(const o of obrasT){await sb.patch('obras_divisao',o.id,{comprador:para});o.comprador=para;}
+    // Mapas
+    const mapasT=mapas.filter(x=>x.responsavel===de);
+    for(const m of mapasT){await sb.patch('mapas',m.id,{responsavel:para});m.responsavel=para;}
+    // Projetos
+    const projT=projetos.filter(x=>x.responsavel===de);
+    for(const p of projT){await sb.patch('projetos',p.id,{responsavel:para});p.responsavel=para;}
+    // NFs
+    const nfsT=nfs.filter(x=>x.responsavel===de);
+    for(const n of nfsT){await sb.patch('nfs',n.id,{responsavel:para});n.responsavel=para;}
+    closeOv('ovTransfer');
+    renderEquipeList();
+    toast('Carteira de '+de+' transferida para '+para+'!');
+  }catch(e){toast('Erro na transferência: '+e.message.substring(0,60),'err');}
+}
+
 // ── INIT ──
-window.onload=()=>{
+window.onload=async()=>{
   applyTheme();
   document.getElementById('fData').value=today();
   document.getElementById('pInicio').value=today();
-  // Verifica sessão ativa
+  await loadEquipe();
   const sessUser=sessionStorage.getItem('mph_user');
   const sessAdmin=sessionStorage.getItem('mph_admin');
-  if(sessUser){
+  if(sessUser&&TEAM.find(t=>t.name===sessUser)){
     currentUser=sessUser;isAdmin=sessAdmin==='1';
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('hdrUser').textContent=currentUser+(isAdmin?' 👑':'');
@@ -2819,6 +3075,7 @@ window.onload=()=>{
     document.getElementById('btnRelatorio').style.display=isAdmin?'inline-block':'none';
     document.getElementById('btnAcessos').style.display=isAdmin?'inline-block':'none';
     const ba2=document.getElementById('btnAvaliacoes');if(ba2)ba2.style.display=isAdmin?'inline-block':'none';
+    const be2=document.getElementById('btnEquipe');if(be2)be2.style.display=isAdmin?'inline-block':'none';
     loadDash();
   }
 };
