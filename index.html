@@ -661,6 +661,7 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
   </div>
   <div class="modal-foot">
     <button class="btn-sec" onclick="closeOv('ovMembroForm')">Cancelar</button>
+    <button class="btn-del" id="mbDelBtn" onclick="delMembro()" style="display:none">Excluir</button>
     <button class="btn-pri blue" onclick="saveMembro()">Salvar</button>
   </div>
 </div></div>
@@ -2924,8 +2925,11 @@ function renderEquipeList(){
   if(!equipeDB.length){el.innerHTML='<div class="empty">Execute o SQL da tabela equipe no Supabase.</div>';return;}
   const ordenado=[...equipeDB].sort((a,b)=>(a.ativo===b.ativo?0:a.ativo?-1:1)||(a.ordem||99)-(b.ordem||99));
   el.innerHTML=ordenado.map(function(m){
-    const nMapas=mapas.filter(x=>x.responsavel===m.nome&&!x.concluido).length;
-    const nObras=obrasDivisao.filter(x=>x.comprador===m.nome&&x.status!=='finalizada').length;
+    const nMapas=mapas.filter(x=>x.responsavel===m.nome).length;
+    const nObras=obrasDivisao.filter(x=>x.comprador===m.nome).length;
+    const nProjM=projetos.filter(x=>x.responsavel===m.nome).length;
+    const nNFM=nfs.filter(x=>x.responsavel===m.nome).length;
+    const temCarteira=(nMapas+nObras+nProjM+nNFM)>0;
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);'+(m.ativo?'':'opacity:.5;')+'">'+
       '<div style="display:flex;align-items:center;gap:11px;">'+
         '<div class="av-md" style="background:'+m.cor+';border:2.5px solid '+m.borda+'">'+ini(m.nome)+'</div>'+
@@ -2935,7 +2939,7 @@ function renderEquipeList(){
         '</div>'+
       '</div>'+
       '<div style="display:flex;gap:5px;">'+
-        (m.ativo&&(nObras>0||nMapas>0)?'<button class="abt" onclick="openTransfer(\''+m.nome.replace(/'/g,"\\'")+'\')" title="Transferir carteira">&#128260;</button>':'')+
+        (temCarteira?'<button class="abt" onclick="openTransfer(\''+m.nome.replace(/'/g,"\\'")+'\')" title="Transferir carteira">&#128260;</button>':'')+
         '<button class="abt" onclick="editMembro('+m.id+')" title="Editar">&#9999;&#65039;</button>'+
       '</div>'+
     '</div>';
@@ -2956,6 +2960,7 @@ function openMembroForm(){
   document.getElementById('mbAdmin').value='0';
   document.getElementById('mbAtivo').value='1';
   document.getElementById('mbAtivoWrap').style.display='none';
+  document.getElementById('mbDelBtn').style.display='none';
   document.getElementById('membroFormTit').textContent='Novo Membro';
   paletaSel=0;renderPaleta();
   openOv('ovMembroForm');
@@ -2970,6 +2975,7 @@ function editMembro(id){
   document.getElementById('mbAdmin').value=m.admin?'1':'0';
   document.getElementById('mbAtivo').value=m.ativo?'1':'0';
   document.getElementById('mbAtivoWrap').style.display='';
+  document.getElementById('mbDelBtn').style.display='inline-block';
   document.getElementById('membroFormTit').textContent='Editar — '+m.nome;
   const idx=PALETA.findIndex(p=>p.cor===m.cor);
   paletaSel=idx>=0?idx:0;renderPaleta();
@@ -2994,10 +3000,12 @@ async function saveMembro(){
       const alvo=equipeDB.find(x=>x.id===parseInt(idV));
       // Impede desativar quem ainda tem carteira
       if(!body.ativo&&alvo){
-        const nObras=obrasDivisao.filter(x=>x.comprador===alvo.nome&&x.status!=='finalizada').length;
-        const nMapas=mapas.filter(x=>x.responsavel===alvo.nome&&!x.concluido).length;
-        if(nObras>0||nMapas>0){
-          toast('Transfira a carteira antes de desativar ('+nObras+' obras, '+nMapas+' mapas)','err');
+        const nO=obrasDivisao.filter(x=>x.comprador===alvo.nome).length;
+        const nM=mapas.filter(x=>x.responsavel===alvo.nome).length;
+        const nP=projetos.filter(x=>x.responsavel===alvo.nome).length;
+        const nN=nfs.filter(x=>x.responsavel===alvo.nome).length;
+        if(nO+nM+nP+nN>0){
+          toast('Transfira a carteira antes de desativar ('+(nO+nM+nP+nN)+' registros)','err');
           return;
         }
       }
@@ -3021,13 +3029,40 @@ async function saveMembro(){
   }catch(e){toast('Erro: '+e.message.substring(0,60),'err');}
 }
 
+async function delMembro(){
+  const id=parseInt(document.getElementById('mbId').value);
+  const m=equipeDB.find(x=>x.id===id);if(!m)return;
+  if(m.nome===currentUser){toast('Você não pode excluir seu próprio usuário','err');return;}
+  const nObras=obrasDivisao.filter(x=>x.comprador===m.nome).length;
+  const nMapas=mapas.filter(x=>x.responsavel===m.nome).length;
+  const nProj=projetos.filter(x=>x.responsavel===m.nome).length;
+  const nNF=nfs.filter(x=>x.responsavel===m.nome).length;
+  const total=nObras+nMapas+nProj+nNF;
+  if(total>0){
+    toast('Transfira a carteira antes de excluir ('+total+' registros vinculados)','err');
+    return;
+  }
+  if(!confirm('Excluir '+m.nome+' permanentemente da equipe?\n\nEsta ação não pode ser desfeita.'))return;
+  try{
+    await sb.del('equipe',id);
+    equipeDB=equipeDB.filter(x=>x.id!==id);
+    localStorage.removeItem('mph_pass_'+m.nome);
+    const ativos=equipeDB.filter(r=>r.ativo).sort((a,b)=>(a.ordem||99)-(b.ordem||99));
+    TEAM=ativos.map(r=>({name:r.nome,role:r.nivel,nivel:r.nivel,color:r.cor,border:r.borda}));
+    ADMIN_NAMES=ativos.filter(r=>r.admin).map(r=>r.nome);
+    popLoginUsers();popTeamSelects();
+    closeOv('ovMembroForm');renderEquipeList();
+    toast(m.nome+' removido da equipe');
+  }catch(e){toast('Erro: '+e.message.substring(0,60),'err');}
+}
+
 function openTransfer(nome){
   document.getElementById('trDe').value=nome;
   document.getElementById('trDeLbl').textContent=nome;
-  const nObras=obrasDivisao.filter(x=>x.comprador===nome&&x.status!=='finalizada').length;
-  const nMapas=mapas.filter(x=>x.responsavel===nome&&!x.concluido).length;
-  const nProj=projetos.filter(x=>x.responsavel===nome&&x.status!=='concluido'&&x.status!=='cancelado').length;
-  const nNF=nfs.filter(x=>x.responsavel===nome&&x.status!=='resolvida').length;
+  const nObras=obrasDivisao.filter(x=>x.comprador===nome).length;
+  const nMapas=mapas.filter(x=>x.responsavel===nome).length;
+  const nProj=projetos.filter(x=>x.responsavel===nome).length;
+  const nNF=nfs.filter(x=>x.responsavel===nome).length;
   document.getElementById('trResumo').innerHTML=nObras+' obras &middot; '+nMapas+' mapas &middot; '+nProj+' projetos &middot; '+nNF+' NFs';
   const destinos=TEAM.filter(t=>t.name!==nome);
   document.getElementById('trPara').innerHTML=destinos.map(t=>'<option>'+t.name+'</option>').join('');
