@@ -213,6 +213,28 @@ body.dark .etapa-opt:hover,body.dark .etapa-opt.selected{background:rgba(37,99,2
 .aval-nota.sel{background:#B45309;color:#fff;border-color:#B45309;}
 .aval-media-cat{font-size:11px;color:var(--muted);padding:6px 14px;background:var(--surface2);border-radius:0 0 6px 6px;text-align:right;}
 
+
+/* AGENDA */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:0 0 10px 10px;overflow:hidden;}
+.cal-wd{background:var(--surface2);padding:8px 6px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);}
+.cal-day{background:var(--surface);min-height:104px;padding:5px 6px;position:relative;cursor:pointer;transition:background .12s;}
+.cal-day:hover{background:var(--surface2);}
+.cal-day.outro{opacity:.35;}
+.cal-day.hoje{background:rgba(8,145,178,.10);}
+.cal-day.hoje .cal-num{background:#0891B2;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
+.cal-num{font-size:12px;font-weight:700;margin-bottom:3px;}
+.cal-ev{display:flex;align-items:center;gap:4px;font-size:10px;padding:2px 5px;border-radius:4px;margin-bottom:2px;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border-left:3px solid;}
+.cal-ev:hover{filter:brightness(.94);}
+.cal-more{font-size:9px;color:var(--muted);padding-left:5px;cursor:pointer;}
+.ag-lista-item{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.ag-lista-item:hover{background:var(--surface2);}
+.ag-data-box{flex-shrink:0;width:46px;text-align:center;}
+.ag-data-dia{font-size:19px;font-weight:800;line-height:1;}
+.ag-data-mes{font-size:9px;text-transform:uppercase;color:var(--muted);letter-spacing:.4px;margin-top:2px;}
+.tipo-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+.ag-toggle-btn{background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:7px 13px;cursor:pointer;font-family:inherit;font-size:12px;color:var(--text);}
+.ag-toggle-btn.on{background:#0891B2;color:#fff;border-color:#0891B2;}
+
 /* FAB */
 .fab{position:fixed;bottom:32px;right:32px;width:62px;height:62px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:30px;cursor:pointer;box-shadow:0 6px 20px rgba(37,99,235,.5);display:none;align-items:center;justify-content:center;z-index:200;}
 .fab.show{display:flex;}
@@ -234,7 +256,7 @@ body.dark .rel-opcao:hover,body.dark .rel-opcao.sel{background:rgba(37,99,235,.1
 .rel-opcao-desc{font-size:12px;color:var(--muted);}
 
 @media print{
-  header,nav,.btn-back,.btn-theme,.fab,.toast,.overlay,#view-home,#view-mc,#view-proj,#view-nf,#view-obras,#view-aval,#loginScreen{display:none !important;}
+  header,nav,.btn-back,.btn-theme,.fab,.toast,.overlay,#view-home,#view-mc,#view-proj,#view-nf,#view-obras,#view-aval,#view-agenda,#loginScreen{display:none !important;}
   #printArea{display:block !important;padding:18px 22px;font-family:Arial,sans-serif;font-size:12px;color:#000;}
   @page{size:A4;margin:10mm;}
   #printArea table{width:100%;border-collapse:collapse;margin-top:12px;}
@@ -380,11 +402,14 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
       <button onclick="openModule('proj')" style="background:var(--purple);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">📁 Projetos</button>
       <button onclick="openModule('nf')" style="background:var(--orange);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">🧾 Pendências de NF</button>
       <button id="btnObrasDiv" onclick="openModule('obras')" style="background:#0F766E;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">🏗 Divisão de Obras</button>
+      <button onclick="openModule('agenda')" style="background:#0891B2;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">📅 Agenda</button>
       <button id="btnAvaliacoes" onclick="openModule('aval')" style="display:none;background:#B45309;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">⭐ Avaliações</button>
     </div>
   </div>
 
   <!-- KPIs -->
+    <div id="dashAusentes" style="display:none;"></div>
+
   <div class="kpi-grid">
     <div class="kpi" style="border-left:4px solid var(--blue)"><div class="kpi-label">Mapas em Andamento</div><div class="kpi-val c-blue" id="k-mapas">—</div></div>
     <div class="kpi" style="border-left:4px solid var(--red)"><div class="kpi-label">Atrasados / Críticos</div><div class="kpi-val c-red" id="k-crit">—</div></div>
@@ -629,6 +654,45 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
     <div class="f"><label>Cor</label><select id="tipoCor"><option value="blue">Azul</option><option value="green">Verde</option><option value="yellow">Amarelo</option><option value="red">Vermelho</option><option value="purple">Roxo</option><option value="gray">Cinza</option></select></div>
   </div>
   <div class="modal-foot"><button class="btn-sec" onclick="closeOv('ovTipo')">Cancelar</button><button class="btn-del" id="tipoDelBtn" onclick="delTipo()" style="display:none">Excluir</button><button class="btn-pri" onclick="saveTipo()">Salvar</button></div>
+</div></div>
+
+<!-- MODAL AGENDA -->
+<div class="overlay" id="ovAgenda"><div class="modal" style="width:500px;">
+  <div class="modal-head"><h3 id="agTit">&#128197; Novo Compromisso</h3><button class="modal-x" onclick="closeOv('ovAgenda')">&times;</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="agId">
+    <div class="f"><label>Titulo *</label><input id="agTitulo" placeholder="Ex: Ferias, Reuniao com fornecedor..."></div>
+    <div class="f"><label>Tipo</label>
+      <select id="agTipo">
+        <option value="ferias">&#127958; Ferias</option>
+        <option value="folga">&#127968; Folga</option>
+        <option value="atestado">&#127973; Atestado</option>
+        <option value="homeoffice">&#128187; Home Office</option>
+        <option value="reuniao">&#128101; Reuniao</option>
+        <option value="visita">&#128666; Visita a fornecedor</option>
+        <option value="treinamento">&#127891; Treinamento</option>
+        <option value="compromisso">&#128204; Outro</option>
+      </select>
+    </div>
+    <div class="f"><label>Pessoa *</label><select id="agPessoa"></select></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="f"><label>Data inicio *</label><input type="date" id="agDataIni"></div>
+      <div class="f"><label>Data fim</label><input type="date" id="agDataFim"></div>
+    </div>
+    <div class="f"><label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:12px;text-transform:none;letter-spacing:0;">
+      <input type="checkbox" id="agDiaTodo" checked onchange="toggleHoras()" style="width:auto;margin:0;"> Dia todo
+    </label></div>
+    <div id="agHorasWrap" style="display:none;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="f"><label>Hora inicio</label><input type="time" id="agHoraIni"></div>
+      <div class="f"><label>Hora fim</label><input type="time" id="agHoraFim"></div>
+    </div>
+    <div class="f"><label>Observacao</label><textarea id="agDesc" style="min-height:56px"></textarea></div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn-sec" onclick="closeOv('ovAgenda')">Cancelar</button>
+    <button class="btn-del" id="agDelBtn" onclick="delAgenda()" style="display:none">Excluir</button>
+    <button class="btn-pri" style="background:#0891B2;" onclick="saveAgenda()">Salvar</button>
+  </div>
 </div></div>
 
 <!-- MODAL EQUIPE -->
@@ -935,6 +999,60 @@ Com <strong>apenas registros em aberto</strong>, os mapas conclu&iacute;dos e ob
 </div>
 </div>
 
+<!-- ===== VIEW: AGENDA ===== -->
+<div class="view" id="view-agenda">
+<div class="wrap">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span style="font-size:28px;">&#128197;</span>
+      <div><h2 style="font-size:20px;font-weight:700;">Agenda da Equipe</h2><p style="font-size:13px;color:var(--muted);">Ausencias, ferias e compromissos compartilhados</p></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <button class="ag-toggle-btn on" id="agBtnCal" onclick="setAgendaVista('cal')">&#128197; Calendario</button>
+      <button class="ag-toggle-btn" id="agBtnLista" onclick="setAgendaVista('lista')">&#9776; Lista</button>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+    <select class="fsel" id="agFPessoa" onchange="renderAgenda()"><option value="">Toda a equipe</option></select>
+    <select class="fsel" id="agFTipo" onchange="renderAgenda()">
+      <option value="">Todos os tipos</option>
+      <option value="ferias">Ferias</option>
+      <option value="folga">Folga</option>
+      <option value="atestado">Atestado</option>
+      <option value="homeoffice">Home Office</option>
+      <option value="reuniao">Reuniao</option>
+      <option value="visita">Visita a fornecedor</option>
+      <option value="treinamento">Treinamento</option>
+      <option value="compromisso">Outro</option>
+    </select>
+  </div>
+
+  <!-- VISTA CALENDARIO -->
+  <div id="agVistaCal">
+    <div class="card" style="border-radius:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border);">
+        <button class="ag-toggle-btn" onclick="mudarMes(-1)">&#8249;</button>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span id="agMesLbl" style="font-size:15px;font-weight:700;"></span>
+          <button class="ag-toggle-btn" style="font-size:11px;padding:5px 11px;" onclick="irHoje()">Hoje</button>
+        </div>
+        <button class="ag-toggle-btn" onclick="mudarMes(1)">&#8250;</button>
+      </div>
+      <div class="cal-grid" id="agCalGrid"></div>
+    </div>
+  </div>
+
+  <!-- VISTA LISTA -->
+  <div id="agVistaLista" style="display:none;">
+    <div class="card">
+      <div class="tbl-head"><span style="font-size:13px;font-weight:600;">Proximos compromissos</span></div>
+      <div style="padding:6px 18px 14px;" id="agListaBody"></div>
+    </div>
+  </div>
+</div>
+</div>
+
 <button class="fab" id="fabBtn">+</button>
 <div class="toast" id="toast"></div>
 
@@ -1096,6 +1214,7 @@ function openModule(mod){
   if(mod==='nf')loadNF();
   if(mod==='obras'){loadObrasDivisao();document.getElementById('fabBtn').onclick=()=>openObraDiv();}
   if(mod==='aval'){loadAvaliacoes();document.getElementById('fabBtn').classList.remove('show');}
+  if(mod==='agenda'){loadAgenda();document.getElementById('fabBtn').onclick=()=>novoAgendaDia(today());}
 }
 function goHome(){
   curMod=null;
@@ -1202,6 +1321,7 @@ async function loadDash(){
       projetos=projetos.filter(p=>p.responsavel===currentUser);
       nfs=nfs.filter(n=>n.responsavel===currentUser);
     }
+    renderAusentesHoje();
     const ativos=mapas.filter(m=>!m.concluido);
     const crit=ativos.filter(m=>getMSt(m)==='vencido'||getMSt(m)==='critico').length;
     const pAtiv=projetos.filter(p=>p.status==='andamento');
@@ -3127,6 +3247,252 @@ async function executarTransferencia(){
     renderEquipeList();
     toast(tot+' registros transferidos para '+para+'!');
   }catch(e){toast('Erro na transferência: '+e.message.substring(0,60),'err');}
+}
+
+async function renderAusentesHoje(){
+  const el=document.getElementById('dashAusentes');
+  if(!el)return;
+  try{
+    const hoje=toISO(new Date());
+    if(!agendaDB.length){try{agendaDB=await sb.get('agenda','?order=data_inicio.asc')||[];}catch(e){return;}}
+    const hojeEvs=agendaDB.filter(function(e){
+      const fim=e.data_fim||e.data_inicio;
+      return hoje>=e.data_inicio&&hoje<=fim;
+    });
+    if(!hojeEvs.length){el.style.display='none';return;}
+    el.style.display='block';
+    el.innerHTML='<div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid #0891B2;border-radius:10px;padding:12px 18px;margin-bottom:18px;box-shadow:var(--shadow);">'+
+      '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'+
+      '<span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);">Hoje na agenda</span>'+
+      hojeEvs.map(function(e){
+        const t=AG_TIPOS[e.tipo]||AG_TIPOS.compromisso;
+        return '<span style="display:inline-flex;align-items:center;gap:6px;background:'+t.bg+';border-radius:20px;padding:4px 12px 4px 4px;font-size:12px;">'+
+          avEl(e.pessoa,22,9)+'<strong>'+e.pessoa+'</strong> <span style="color:'+t.cor+';font-weight:600;">'+t.ico+' '+t.lbl+'</span></span>';
+      }).join('')+
+      '<button onclick="openModule(\'agenda\')" style="margin-left:auto;background:transparent;border:none;color:#0891B2;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;">Ver agenda →</button>'+
+      '</div></div>';
+  }catch(e){el.style.display='none';}
+}
+
+// ── AGENDA COMPARTILHADA ──
+const AG_TIPOS={
+  ferias:{lbl:'Férias',ico:'🏖',cor:'#0891B2',bg:'rgba(8,145,178,.16)'},
+  folga:{lbl:'Folga',ico:'🏠',cor:'#7C3AED',bg:'rgba(124,58,237,.16)'},
+  atestado:{lbl:'Atestado',ico:'🏥',cor:'#DC2626',bg:'rgba(220,38,38,.16)'},
+  homeoffice:{lbl:'Home Office',ico:'💻',cor:'#0F766E',bg:'rgba(15,118,110,.16)'},
+  reuniao:{lbl:'Reunião',ico:'👥',cor:'#2563EB',bg:'rgba(37,99,235,.16)'},
+  visita:{lbl:'Visita',ico:'🚚',cor:'#B45309',bg:'rgba(180,83,9,.16)'},
+  treinamento:{lbl:'Treinamento',ico:'🎓',cor:'#16A34A',bg:'rgba(22,163,74,.16)'},
+  compromisso:{lbl:'Outro',ico:'📌',cor:'#6B7280',bg:'rgba(107,114,128,.16)'},
+};
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const WDS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+let agendaDB=[];
+let agMesRef=new Date();
+let agVista='cal';
+
+async function loadAgenda(){
+  try{
+    agendaDB=await sb.get('agenda','?order=data_inicio.asc')||[];
+  }catch(e){console.error('agenda:',e);agendaDB=[];}
+  const sel=document.getElementById('agFPessoa');
+  const v=sel.value;
+  sel.innerHTML='<option value="">Toda a equipe</option>'+TEAM.map(t=>'<option>'+t.name+'</option>').join('');
+  if(v)sel.value=v;
+  const selP=document.getElementById('agPessoa');
+  selP.innerHTML=TEAM.map(t=>'<option>'+t.name+'</option>').join('');
+  renderAgenda();
+}
+
+function setAgendaVista(v){
+  agVista=v;
+  document.getElementById('agVistaCal').style.display=v==='cal'?'':'none';
+  document.getElementById('agVistaLista').style.display=v==='lista'?'':'none';
+  document.getElementById('agBtnCal').classList.toggle('on',v==='cal');
+  document.getElementById('agBtnLista').classList.toggle('on',v==='lista');
+  renderAgenda();
+}
+
+function mudarMes(d){agMesRef.setMonth(agMesRef.getMonth()+d);renderAgenda();}
+function irHoje(){agMesRef=new Date();renderAgenda();}
+
+function eventosFiltrados(){
+  const fp=document.getElementById('agFPessoa').value;
+  const ft=document.getElementById('agFTipo').value;
+  return agendaDB.filter(function(e){
+    if(fp&&e.pessoa!==fp)return false;
+    if(ft&&e.tipo!==ft)return false;
+    return true;
+  });
+}
+
+function eventosNoDia(iso,evs){
+  return evs.filter(function(e){
+    const ini=e.data_inicio;
+    const fim=e.data_fim||e.data_inicio;
+    return iso>=ini&&iso<=fim;
+  });
+}
+
+function renderAgenda(){
+  const evs=eventosFiltrados();
+  if(agVista==='cal')renderCalendario(evs);
+  else renderListaAgenda(evs);
+}
+
+function renderCalendario(evs){
+  const ano=agMesRef.getFullYear(),mes=agMesRef.getMonth();
+  document.getElementById('agMesLbl').textContent=MESES[mes]+' '+ano;
+  const primeiro=new Date(ano,mes,1);
+  const inicio=new Date(primeiro);
+  inicio.setDate(inicio.getDate()-primeiro.getDay());
+  const hojeISO=toISO(new Date());
+  let html=WDS.map(w=>'<div class="cal-wd">'+w+'</div>').join('');
+  const d=new Date(inicio);
+  for(let i=0;i<42;i++){
+    const iso=toISO(d);
+    const outro=d.getMonth()!==mes;
+    const doDia=eventosNoDia(iso,evs);
+    let evsHtml='';
+    doDia.slice(0,3).forEach(function(e){
+      const t=AG_TIPOS[e.tipo]||AG_TIPOS.compromisso;
+      const p=TEAM.find(x=>x.name===e.pessoa);
+      evsHtml+='<div class="cal-ev" style="background:'+t.bg+';border-left-color:'+t.cor+';color:var(--text);" onclick="event.stopPropagation();editAgenda('+e.id+')" title="'+e.pessoa+' — '+e.titulo+'">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:'+(p?p.color:'#999')+';border:1px solid '+(p?p.border:'#666')+';flex-shrink:0;"></span>'+
+        '<span style="overflow:hidden;text-overflow:ellipsis;">'+t.ico+' '+e.titulo+'</span></div>';
+    });
+    if(doDia.length>3)evsHtml+='<div class="cal-more">+'+(doDia.length-3)+' mais</div>';
+    html+='<div class="cal-day'+(outro?' outro':'')+(iso===hojeISO?' hoje':'')+'" onclick="novoAgendaDia(\''+iso+'\')">'+
+      '<div class="cal-num">'+d.getDate()+'</div>'+evsHtml+'</div>';
+    d.setDate(d.getDate()+1);
+  }
+  document.getElementById('agCalGrid').innerHTML=html;
+}
+
+function renderListaAgenda(evs){
+  const hoje=toISO(new Date());
+  const futuros=evs.filter(e=>(e.data_fim||e.data_inicio)>=hoje)
+    .sort((a,b)=>a.data_inicio.localeCompare(b.data_inicio));
+  const el=document.getElementById('agListaBody');
+  if(!futuros.length){el.innerHTML='<div class="empty">Nenhum compromisso agendado</div>';return;}
+  el.innerHTML=futuros.map(function(e){
+    const t=AG_TIPOS[e.tipo]||AG_TIPOS.compromisso;
+    const p=TEAM.find(x=>x.name===e.pessoa);
+    const dt=e.data_inicio.split('-');
+    const emCurso=e.data_inicio<=hoje&&(e.data_fim||e.data_inicio)>=hoje;
+    const periodo=e.data_fim&&e.data_fim!==e.data_inicio
+      ? fmtBR(e.data_inicio)+' até '+fmtBR(e.data_fim)
+      : fmtBR(e.data_inicio);
+    const hora=!e.dia_todo&&e.hora_inicio?' · '+e.hora_inicio+(e.hora_fim?'–'+e.hora_fim:''):'';
+    return '<div class="ag-lista-item" onclick="editAgenda('+e.id+')">'+
+      '<div class="ag-data-box"><div class="ag-data-dia" style="color:'+t.cor+'">'+dt[2]+'</div>'+
+      '<div class="ag-data-mes">'+MESES[parseInt(dt[1])-1].substring(0,3)+'</div></div>'+
+      '<div style="flex:1;min-width:0;">'+
+        '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">'+
+          '<span style="font-size:13px;font-weight:600;">'+e.titulo+'</span>'+
+          '<span class="tipo-chip" style="background:'+t.bg+';color:'+t.cor+';">'+t.ico+' '+t.lbl+'</span>'+
+          (emCurso?'<span class="tipo-chip" style="background:rgba(22,163,74,.16);color:#16A34A;">● Em curso</span>':'')+
+        '</div>'+
+        '<div style="font-size:11px;color:var(--muted);margin-top:3px;">'+periodo+hora+'</div>'+
+        (e.descricao?'<div style="font-size:11px;color:var(--muted);margin-top:3px;font-style:italic;">'+e.descricao+'</div>':'')+
+      '</div>'+
+      '<div style="flex-shrink:0;">'+avEl(e.pessoa,28,10)+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+function toggleHoras(){
+  document.getElementById('agHorasWrap').style.display=document.getElementById('agDiaTodo').checked?'none':'grid';
+}
+
+function novoAgendaDia(iso){
+  document.getElementById('agId').value='';
+  document.getElementById('agTitulo').value='';
+  document.getElementById('agTipo').value='compromisso';
+  document.getElementById('agPessoa').value=currentUser;
+  document.getElementById('agDataIni').value=iso||today();
+  document.getElementById('agDataFim').value='';
+  document.getElementById('agDiaTodo').checked=true;
+  document.getElementById('agHoraIni').value='';
+  document.getElementById('agHoraFim').value='';
+  document.getElementById('agDesc').value='';
+  document.getElementById('agDelBtn').style.display='none';
+  document.getElementById('agTit').textContent='📅 Novo Compromisso';
+  toggleHoras();
+  openOv('ovAgenda');
+}
+
+function editAgenda(id){
+  const e=agendaDB.find(x=>x.id===id);if(!e)return;
+  document.getElementById('agId').value=id;
+  document.getElementById('agTitulo').value=e.titulo;
+  document.getElementById('agTipo').value=e.tipo||'compromisso';
+  document.getElementById('agPessoa').value=e.pessoa;
+  document.getElementById('agDataIni').value=e.data_inicio;
+  document.getElementById('agDataFim').value=e.data_fim||'';
+  document.getElementById('agDiaTodo').checked=e.dia_todo!==false;
+  document.getElementById('agHoraIni').value=e.hora_inicio||'';
+  document.getElementById('agHoraFim').value=e.hora_fim||'';
+  document.getElementById('agDesc').value=e.descricao||'';
+  const podeEditar=isAdmin||e.pessoa===currentUser||e.criado_por===currentUser;
+  document.getElementById('agDelBtn').style.display=podeEditar?'inline-block':'none';
+  document.getElementById('agTit').textContent=podeEditar?'✏️ Editar Compromisso':'📅 '+e.titulo;
+  toggleHoras();
+  openOv('ovAgenda');
+}
+
+async function saveAgenda(){
+  const titulo=document.getElementById('agTitulo').value.trim();
+  const dataIni=document.getElementById('agDataIni').value;
+  if(!titulo||!dataIni){toast('Informe o título e a data de início','err');return;}
+  const dataFim=document.getElementById('agDataFim').value;
+  if(dataFim&&dataFim<dataIni){toast('A data fim não pode ser antes da data início','err');return;}
+  const idV=document.getElementById('agId').value;
+  if(idV){
+    const orig=agendaDB.find(x=>x.id===parseInt(idV));
+    if(orig&&!isAdmin&&orig.pessoa!==currentUser&&orig.criado_por!==currentUser){
+      toast('Você só pode editar seus próprios compromissos','err');return;
+    }
+  }
+  const diaTodo=document.getElementById('agDiaTodo').checked;
+  const body={
+    titulo:titulo,
+    tipo:document.getElementById('agTipo').value,
+    pessoa:document.getElementById('agPessoa').value,
+    data_inicio:dataIni,
+    data_fim:dataFim||dataIni,
+    dia_todo:diaTodo,
+    hora_inicio:diaTodo?'':document.getElementById('agHoraIni').value,
+    hora_fim:diaTodo?'':document.getElementById('agHoraFim').value,
+    descricao:document.getElementById('agDesc').value.trim(),
+  };
+  try{
+    if(idV){
+      await sb.patch('agenda',parseInt(idV),body);
+      const i=agendaDB.findIndex(x=>x.id===parseInt(idV));
+      if(i>=0)agendaDB[i]=Object.assign({},agendaDB[i],body);
+      toast('Compromisso atualizado!');
+    }else{
+      body.id=Date.now();
+      body.criado_por=currentUser;
+      const n=await sb.post('agenda',body);
+      agendaDB.push(n[0]);
+      toast('Compromisso adicionado!');
+    }
+    closeOv('ovAgenda');renderAgenda();
+  }catch(e){toast('Erro: '+e.message.substring(0,60),'err');}
+}
+
+async function delAgenda(){
+  const id=parseInt(document.getElementById('agId').value);
+  const e=agendaDB.find(x=>x.id===id);if(!e)return;
+  if(!isAdmin&&e.pessoa!==currentUser&&e.criado_por!==currentUser){
+    toast('Você só pode excluir seus próprios compromissos','err');return;
+  }
+  if(!confirm('Excluir "'+e.titulo+'"?'))return;
+  await sb.del('agenda',id);
+  agendaDB=agendaDB.filter(x=>x.id!==id);
+  closeOv('ovAgenda');renderAgenda();toast('Compromisso excluído');
 }
 
 // ── INIT ──
