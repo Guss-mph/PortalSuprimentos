@@ -220,10 +220,15 @@ body.dark .etapa-opt:hover,body.dark .etapa-opt.selected{background:rgba(37,99,2
 .cal-day{background:var(--surface);min-height:104px;padding:5px 6px;position:relative;cursor:pointer;transition:background .12s;}
 .cal-day:hover{background:var(--surface2);}
 .cal-day.outro{opacity:.35;}
+.cal-day.fds{background:var(--surface2);}
+.cal-day.fds:hover{background:var(--border);}
+.cal-wd.fds{color:var(--red);}
 .cal-day.hoje{background:rgba(8,145,178,.10);}
 .cal-day.hoje .cal-num{background:#0891B2;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
 .cal-num{font-size:12px;font-weight:700;margin-bottom:3px;}
-.cal-ev{display:flex;align-items:center;gap:4px;font-size:10px;padding:2px 5px;border-radius:4px;margin-bottom:2px;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border-left:3px solid;}
+.cal-ev{display:flex;align-items:center;gap:5px;font-size:10px;padding:3px 6px;border-radius:4px;margin-bottom:3px;cursor:pointer;overflow:hidden;white-space:nowrap;border-left:3px solid;}
+.cal-ev-nome{font-weight:700;flex-shrink:0;}
+.cal-ev-txt{overflow:hidden;text-overflow:ellipsis;opacity:.85;}
 .cal-ev:hover{filter:brightness(.94);}
 .cal-more{font-size:9px;color:var(--muted);padding-left:5px;cursor:pointer;}
 .ag-lista-item{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);cursor:pointer;}
@@ -687,11 +692,14 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
       <div class="f"><label>Hora fim</label><input type="time" id="agHoraFim"></div>
     </div>
     <div class="f"><label>Observacao</label><textarea id="agDesc" style="min-height:56px"></textarea></div>
+    <div id="agAvisoLeitura" style="display:none;background:var(--surface2);border-left:3px solid var(--yellow);border-radius:0 6px 6px 0;padding:10px 14px;font-size:12px;color:var(--muted);">
+      &#128274; Somente leitura &mdash; apenas quem criou o compromisso ou um administrador pode alterar.
+    </div>
   </div>
   <div class="modal-foot">
-    <button class="btn-sec" onclick="closeOv('ovAgenda')">Cancelar</button>
+    <button class="btn-sec" onclick="closeOv('ovAgenda')">Fechar</button>
     <button class="btn-del" id="agDelBtn" onclick="delAgenda()" style="display:none">Excluir</button>
-    <button class="btn-pri" style="background:#0891B2;" onclick="saveAgenda()">Salvar</button>
+    <button class="btn-pri" id="agSaveBtn" style="background:#0891B2;" onclick="saveAgenda()">Salvar</button>
   </div>
 </div></div>
 
@@ -3347,7 +3355,7 @@ function renderCalendario(evs){
   const inicio=new Date(primeiro);
   inicio.setDate(inicio.getDate()-primeiro.getDay());
   const hojeISO=toISO(new Date());
-  let html=WDS.map(w=>'<div class="cal-wd">'+w+'</div>').join('');
+  let html=WDS.map(function(w,wi){return '<div class="cal-wd'+(wi===0||wi===6?' fds':'')+'">'+w+'</div>';}).join('');
   const d=new Date(inicio);
   for(let i=0;i<42;i++){
     const iso=toISO(d);
@@ -3357,12 +3365,14 @@ function renderCalendario(evs){
     doDia.slice(0,3).forEach(function(e){
       const t=AG_TIPOS[e.tipo]||AG_TIPOS.compromisso;
       const p=TEAM.find(x=>x.name===e.pessoa);
-      evsHtml+='<div class="cal-ev" style="background:'+t.bg+';border-left-color:'+t.cor+';color:var(--text);" onclick="event.stopPropagation();editAgenda('+e.id+')" title="'+e.pessoa+' — '+e.titulo+'">'+
-        '<span style="width:8px;height:8px;border-radius:50%;background:'+(p?p.color:'#999')+';border:1px solid '+(p?p.border:'#666')+';flex-shrink:0;"></span>'+
-        '<span style="overflow:hidden;text-overflow:ellipsis;">'+t.ico+' '+e.titulo+'</span></div>';
+      const pc=p?p.color:'#D9D9D9';const pb=p?p.border:'#9E9E9E';
+      evsHtml+='<div class="cal-ev" style="background:'+pc+';border-left-color:'+pb+';color:#333;" onclick="event.stopPropagation();editAgenda('+e.id+')" title="'+e.pessoa+' — '+t.lbl+': '+e.titulo+'">'+
+        '<span class="cal-ev-nome">'+e.pessoa+'</span>'+
+        '<span class="cal-ev-txt">'+t.ico+' '+e.titulo+'</span></div>';
     });
     if(doDia.length>3)evsHtml+='<div class="cal-more">+'+(doDia.length-3)+' mais</div>';
-    html+='<div class="cal-day'+(outro?' outro':'')+(iso===hojeISO?' hoje':'')+'" onclick="novoAgendaDia(\''+iso+'\')">'+
+    const wd=d.getDay();
+    html+='<div class="cal-day'+(outro?' outro':'')+(wd===0||wd===6?' fds':'')+(iso===hojeISO?' hoje':'')+'" onclick="novoAgendaDia(\''+iso+'\')">'+
       '<div class="cal-num">'+d.getDate()+'</div>'+evsHtml+'</div>';
     d.setDate(d.getDate()+1);
   }
@@ -3416,10 +3426,22 @@ function novoAgendaDia(iso){
   document.getElementById('agHoraIni').value='';
   document.getElementById('agHoraFim').value='';
   document.getElementById('agDesc').value='';
+  travaFormAgenda(false);
   document.getElementById('agDelBtn').style.display='none';
+  document.getElementById('agSaveBtn').style.display='inline-block';
+  document.getElementById('agAvisoLeitura').style.display='none';
   document.getElementById('agTit').textContent='📅 Novo Compromisso';
   toggleHoras();
   openOv('ovAgenda');
+}
+
+function travaFormAgenda(travar){
+  ['agTitulo','agTipo','agPessoa','agDataIni','agDataFim','agDiaTodo','agHoraIni','agHoraFim','agDesc'].forEach(function(id){
+    const el=document.getElementById(id);if(!el)return;
+    el.disabled=travar;
+    el.style.opacity=travar?'.7':'1';
+    el.style.cursor=travar?'not-allowed':'';
+  });
 }
 
 function editAgenda(id){
@@ -3435,8 +3457,11 @@ function editAgenda(id){
   document.getElementById('agHoraFim').value=e.hora_fim||'';
   document.getElementById('agDesc').value=e.descricao||'';
   const podeEditar=isAdmin||e.pessoa===currentUser||e.criado_por===currentUser;
+  travaFormAgenda(!podeEditar);
   document.getElementById('agDelBtn').style.display=podeEditar?'inline-block':'none';
-  document.getElementById('agTit').textContent=podeEditar?'✏️ Editar Compromisso':'📅 '+e.titulo;
+  document.getElementById('agSaveBtn').style.display=podeEditar?'inline-block':'none';
+  document.getElementById('agAvisoLeitura').style.display=podeEditar?'none':'block';
+  document.getElementById('agTit').textContent=podeEditar?'✏️ Editar Compromisso':'👁 Compromisso de '+e.pessoa;
   toggleHoras();
   openOv('ovAgenda');
 }
