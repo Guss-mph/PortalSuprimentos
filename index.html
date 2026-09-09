@@ -239,6 +239,14 @@ body.dark .etapa-opt:hover,body.dark .etapa-opt.selected{background:rgba(37,99,2
 .tipo-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
 .ag-toggle-btn{background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:7px 13px;cursor:pointer;font-family:inherit;font-size:12px;color:var(--text);}
 .ag-toggle-btn.on{background:#0891B2;color:#fff;border-color:#0891B2;}
+.ag-pessoa-chk{display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;font-size:13px;}
+.ag-pessoa-chk input{width:auto;margin:0;cursor:pointer;}
+.ag-equipe-row{display:flex;align-items:center;gap:8px;padding:6px 0;margin-bottom:5px;border-bottom:1px solid var(--border);cursor:pointer;font-size:13px;font-weight:700;}
+.ag-equipe-row input{width:auto;margin:0;cursor:pointer;}
+.ag-avatares-mini{display:inline-flex;align-items:center;}
+.ag-avatares-mini .av{margin-left:-6px;border-width:1.5px;}
+.ag-avatares-mini .av:first-child{margin-left:0;}
+.dash-lembrete{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--yellow);border-radius:10px;padding:12px 18px;margin-bottom:14px;box-shadow:var(--shadow);}
 
 /* FAB */
 .fab{position:fixed;bottom:32px;right:32px;width:62px;height:62px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:30px;cursor:pointer;box-shadow:0 6px 20px rgba(37,99,235,.5);display:none;align-items:center;justify-content:center;z-index:200;}
@@ -679,7 +687,9 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
         <option value="compromisso">&#128204; Outro</option>
       </select>
     </div>
-    <div class="f"><label>Pessoa *</label><select id="agPessoa"></select></div>
+    <div class="f"><label>Participantes *</label>
+      <div id="agPessoasBox" style="border:1.5px solid var(--border);border-radius:6px;padding:10px 12px;background:var(--surface);max-height:170px;overflow-y:auto;"></div>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
       <div class="f"><label>Data inicio *</label><input type="date" id="agDataIni"></div>
       <div class="f"><label>Data fim</label><input type="date" id="agDataFim"></div>
@@ -690,6 +700,16 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
     <div id="agHorasWrap" style="display:none;grid-template-columns:1fr 1fr;gap:12px;">
       <div class="f"><label>Hora inicio</label><input type="time" id="agHoraIni"></div>
       <div class="f"><label>Hora fim</label><input type="time" id="agHoraFim"></div>
+    </div>
+    <div class="f"><label>Lembrete</label>
+      <select id="agLembrete">
+        <option value="0">Sem lembrete</option>
+        <option value="1">1 dia antes</option>
+        <option value="3">3 dias antes</option>
+        <option value="7">1 semana antes</option>
+        <option value="15">15 dias antes</option>
+        <option value="30">1 m&ecirc;s antes</option>
+      </select>
     </div>
     <div class="f"><label>Observacao</label><textarea id="agDesc" style="min-height:56px"></textarea></div>
     <div id="agAvisoLeitura" style="display:none;background:var(--surface2);border-left:3px solid var(--yellow);border-radius:0 6px 6px 0;padding:10px 14px;font-size:12px;color:var(--muted);">
@@ -3261,24 +3281,61 @@ async function renderAusentesHoje(){
   const el=document.getElementById('dashAusentes');
   if(!el)return;
   try{
-    const hoje=toISO(new Date());
+    const hoje=new Date();hoje.setHours(0,0,0,0);
+    const hojeISO=toISO(hoje);
     if(!agendaDB.length){try{agendaDB=await sb.get('agenda','?order=data_inicio.asc')||[];}catch(e){return;}}
+
+    // ── Lembretes: só para quem participa ──
+    const lembretes=agendaDB.filter(function(e){
+      if(!e.lembrete||e.lembrete<=0)return false;
+      if(!pessoasDo(e).includes(currentUser))return false;
+      const ini=new Date(e.data_inicio+'T12:00:00');ini.setHours(0,0,0,0);
+      const diff=Math.round((ini-hoje)/86400000);
+      return diff>=0&&diff<=e.lembrete;
+    }).sort((a,b)=>a.data_inicio.localeCompare(b.data_inicio));
+
+    // ── Quem está hoje na agenda ──
     const hojeEvs=agendaDB.filter(function(e){
       const fim=e.data_fim||e.data_inicio;
-      return hoje>=e.data_inicio&&hoje<=fim;
+      return hojeISO>=e.data_inicio&&hojeISO<=fim;
     });
-    if(!hojeEvs.length){el.style.display='none';return;}
+
+    if(!lembretes.length&&!hojeEvs.length){el.style.display='none';return;}
     el.style.display='block';
-    el.innerHTML='<div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid #0891B2;border-radius:10px;padding:12px 18px;margin-bottom:18px;box-shadow:var(--shadow);">'+
-      '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'+
-      '<span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);">Hoje na agenda</span>'+
-      hojeEvs.map(function(e){
-        const t=AG_TIPOS[e.tipo]||AG_TIPOS.compromisso;
-        return '<span style="display:inline-flex;align-items:center;gap:6px;background:'+t.bg+';border-radius:20px;padding:4px 12px 4px 4px;font-size:12px;">'+
-          avEl(e.pessoa,22,9)+'<strong>'+e.pessoa+'</strong> <span style="color:'+t.cor+';font-weight:600;">'+t.ico+' '+t.lbl+'</span></span>';
-      }).join('')+
-      '<button onclick="openModule(\'agenda\')" style="margin-left:auto;background:transparent;border:none;color:#0891B2;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;">Ver agenda →</button>'+
+    let html='';
+
+    if(lembretes.length){
+      html+='<div class="dash-lembrete"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'+
+        '<span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--yellow);">🔔 Seus lembretes</span>'+
+        lembretes.map(function(e){
+          const t=AG_TIPOS[e.tipo]||AG_TIPOS.compromisso;
+          const ini=new Date(e.data_inicio+'T12:00:00');ini.setHours(0,0,0,0);
+          const dias=Math.round((ini-hoje)/86400000);
+          const quando=dias===0?'hoje':dias===1?'amanhã':'em '+dias+' dias';
+          return '<span style="display:inline-flex;align-items:center;gap:6px;background:'+t.bg+';border-radius:20px;padding:5px 13px;font-size:12px;cursor:pointer;" onclick="openModule(\'agenda\')">'+
+            '<span style="color:'+t.cor+';font-weight:600;">'+t.ico+' '+e.titulo+'</span>'+
+            '<span style="color:var(--muted);">· '+quando+' ('+fmtBR(e.data_inicio)+')</span></span>';
+        }).join('')+
       '</div></div>';
+    }
+
+    if(hojeEvs.length){
+      html+='<div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid #0891B2;border-radius:10px;padding:12px 18px;margin-bottom:18px;box-shadow:var(--shadow);">'+
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'+
+        '<span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);">Hoje na agenda</span>'+
+        hojeEvs.map(function(e){
+          const t=AG_TIPOS[e.tipo]||AG_TIPOS.compromisso;
+          const lst=pessoasDo(e);
+          const rot=ehEquipeToda(lst)?'👥 EQUIPE':lst.length>1?lst[0]+' +'+(lst.length-1):lst[0];
+          const avs=ehEquipeToda(lst)?'':lst.slice(0,3).map(n=>avEl(n,22,9)).join('');
+          return '<span style="display:inline-flex;align-items:center;gap:6px;background:'+t.bg+';border-radius:20px;padding:4px 12px 4px '+(avs?'4px':'12px')+';font-size:12px;">'+
+            (avs?'<span class="ag-avatares-mini">'+avs+'</span>':'')+
+            '<strong>'+rot+'</strong> <span style="color:'+t.cor+';font-weight:600;">'+t.ico+' '+t.lbl+'</span></span>';
+        }).join('')+
+        '<button onclick="openModule(\'agenda\')" style="margin-left:auto;background:transparent;border:none;color:#0891B2;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;">Ver agenda →</button>'+
+        '</div></div>';
+    }
+    el.innerHTML=html;
   }catch(e){el.style.display='none';}
 }
 
@@ -3307,8 +3364,6 @@ async function loadAgenda(){
   const v=sel.value;
   sel.innerHTML='<option value="">Toda a equipe</option>'+TEAM.map(t=>'<option>'+t.name+'</option>').join('');
   if(v)sel.value=v;
-  const selP=document.getElementById('agPessoa');
-  selP.innerHTML=TEAM.map(t=>'<option>'+t.name+'</option>').join('');
   renderAgenda();
 }
 
@@ -3328,7 +3383,7 @@ function eventosFiltrados(){
   const fp=document.getElementById('agFPessoa').value;
   const ft=document.getElementById('agFTipo').value;
   return agendaDB.filter(function(e){
-    if(fp&&e.pessoa!==fp)return false;
+    if(fp&&!pessoasDo(e).includes(fp))return false;
     if(ft&&e.tipo!==ft)return false;
     return true;
   });
@@ -3365,9 +3420,15 @@ function renderCalendario(evs){
     doDia.slice(0,3).forEach(function(e){
       const t=AG_TIPOS[e.tipo]||AG_TIPOS.compromisso;
       const p=TEAM.find(x=>x.name===e.pessoa);
-      const pc=p?p.color:'#D9D9D9';const pb=p?p.border:'#9E9E9E';
-      evsHtml+='<div class="cal-ev" style="background:'+pc+';border-left-color:'+pb+';color:#333;" onclick="event.stopPropagation();editAgenda('+e.id+')" title="'+e.pessoa+' — '+t.lbl+': '+e.titulo+'">'+
-        '<span class="cal-ev-nome">'+e.pessoa+'</span>'+
+      const lst=pessoasDo(e);
+      const equipe=ehEquipeToda(lst);
+      const p1=TEAM.find(x=>x.name===lst[0]);
+      const pc=equipe?'#374151':(p1?p1.color:'#D9D9D9');
+      const pb=equipe?'#111827':(p1?p1.border:'#9E9E9E');
+      const txtCor=equipe?'#F0F0F0':'#333';
+      const rot=equipe?'👥 EQUIPE':(lst.length>1?lst[0]+' +'+(lst.length-1):lst[0]||'');
+      evsHtml+='<div class="cal-ev" style="background:'+pc+';border-left-color:'+pb+';color:'+txtCor+';" onclick="event.stopPropagation();editAgenda('+e.id+')" title="'+lst.join(', ')+' — '+t.lbl+': '+e.titulo+'">'+
+        '<span class="cal-ev-nome">'+rot+'</span>'+
         '<span class="cal-ev-txt">'+t.ico+' '+e.titulo+'</span></div>';
     });
     if(doDia.length>3)evsHtml+='<div class="cal-more">+'+(doDia.length-3)+' mais</div>';
@@ -3406,9 +3467,52 @@ function renderListaAgenda(evs){
         '<div style="font-size:11px;color:var(--muted);margin-top:3px;">'+periodo+hora+'</div>'+
         (e.descricao?'<div style="font-size:11px;color:var(--muted);margin-top:3px;font-style:italic;">'+e.descricao+'</div>':'')+
       '</div>'+
-      '<div style="flex-shrink:0;">'+avEl(e.pessoa,28,10)+'</div>'+
+      '<div style="flex-shrink:0;">'+(function(){
+        const lst=pessoasDo(e);
+        if(ehEquipeToda(lst))return '<span class="tipo-chip" style="background:rgba(55,65,81,.16);color:var(--text);">👥 EQUIPE</span>';
+        return '<span class="ag-avatares-mini">'+lst.slice(0,4).map(n=>avEl(n,26,9)).join('')+(lst.length>4?'<span style="font-size:10px;color:var(--muted);margin-left:4px;">+'+(lst.length-4)+'</span>':'')+'</span>';
+      })()+'</div>'+
     '</div>';
   }).join('');
+}
+
+// Lista de participantes de um evento (compat com registros antigos)
+function pessoasDo(e){
+  if(e.pessoas&&Array.isArray(e.pessoas)&&e.pessoas.length)return e.pessoas;
+  return e.pessoa?[e.pessoa]:[];
+}
+function ehEquipeToda(lista){
+  if(!lista.length)return false;
+  return TEAM.every(t=>lista.includes(t.name));
+}
+function rotuloParticipantes(e){
+  const p=pessoasDo(e);
+  if(ehEquipeToda(p))return 'EQUIPE';
+  if(p.length===1)return p[0];
+  return p.length+' pessoas';
+}
+
+function renderPessoasBox(selecionados){
+  const sel=selecionados||[];
+  const todos=ehEquipeToda(sel);
+  let html='<label class="ag-equipe-row"><input type="checkbox" id="agChkEquipe" '+(todos?'checked':'')+' onchange="toggleEquipeToda()"> 👥 Equipe toda</label>';
+  html+=TEAM.map(function(t){
+    return '<label class="ag-pessoa-chk"><input type="checkbox" class="ag-chk-pessoa" value="'+t.name+'" '+(sel.includes(t.name)?'checked':'')+' onchange="syncChkEquipe()">'+
+      '<span class="av" style="background:'+t.color+';border-color:'+t.border+';width:22px;height:22px;font-size:8px;">'+ini(t.name)+'</span>'+t.name+'</label>';
+  }).join('');
+  document.getElementById('agPessoasBox').innerHTML=html;
+}
+function toggleEquipeToda(){
+  const on=document.getElementById('agChkEquipe').checked;
+  document.querySelectorAll('.ag-chk-pessoa').forEach(c=>{c.checked=on;});
+}
+function syncChkEquipe(){
+  const todos=[...document.querySelectorAll('.ag-chk-pessoa')].every(c=>c.checked);
+  const eq=document.getElementById('agChkEquipe');
+  if(eq)eq.checked=todos;
+}
+function pessoasSelecionadas(){
+  return [...document.querySelectorAll('.ag-chk-pessoa:checked')].map(c=>c.value);
 }
 
 function toggleHoras(){
@@ -3419,7 +3523,8 @@ function novoAgendaDia(iso){
   document.getElementById('agId').value='';
   document.getElementById('agTitulo').value='';
   document.getElementById('agTipo').value='compromisso';
-  document.getElementById('agPessoa').value=currentUser;
+  renderPessoasBox([currentUser]);
+  document.getElementById('agLembrete').value='0';
   document.getElementById('agDataIni').value=iso||today();
   document.getElementById('agDataFim').value='';
   document.getElementById('agDiaTodo').checked=true;
@@ -3436,12 +3541,15 @@ function novoAgendaDia(iso){
 }
 
 function travaFormAgenda(travar){
-  ['agTitulo','agTipo','agPessoa','agDataIni','agDataFim','agDiaTodo','agHoraIni','agHoraFim','agDesc'].forEach(function(id){
+  ['agTitulo','agTipo','agDataIni','agDataFim','agDiaTodo','agHoraIni','agHoraFim','agDesc','agLembrete'].forEach(function(id){
     const el=document.getElementById(id);if(!el)return;
     el.disabled=travar;
     el.style.opacity=travar?'.7':'1';
     el.style.cursor=travar?'not-allowed':'';
   });
+  document.querySelectorAll('.ag-chk-pessoa, #agChkEquipe').forEach(function(c){c.disabled=travar;});
+  const box=document.getElementById('agPessoasBox');
+  if(box)box.style.opacity=travar?'.7':'1';
 }
 
 function editAgenda(id){
@@ -3449,14 +3557,15 @@ function editAgenda(id){
   document.getElementById('agId').value=id;
   document.getElementById('agTitulo').value=e.titulo;
   document.getElementById('agTipo').value=e.tipo||'compromisso';
-  document.getElementById('agPessoa').value=e.pessoa;
+  renderPessoasBox(pessoasDo(e));
+  document.getElementById('agLembrete').value=String(e.lembrete||0);
   document.getElementById('agDataIni').value=e.data_inicio;
   document.getElementById('agDataFim').value=e.data_fim||'';
   document.getElementById('agDiaTodo').checked=e.dia_todo!==false;
   document.getElementById('agHoraIni').value=e.hora_inicio||'';
   document.getElementById('agHoraFim').value=e.hora_fim||'';
   document.getElementById('agDesc').value=e.descricao||'';
-  const podeEditar=isAdmin||e.pessoa===currentUser||e.criado_por===currentUser;
+  const podeEditar=isAdmin||pessoasDo(e).includes(currentUser)||e.criado_por===currentUser;
   travaFormAgenda(!podeEditar);
   document.getElementById('agDelBtn').style.display=podeEditar?'inline-block':'none';
   document.getElementById('agSaveBtn').style.display=podeEditar?'inline-block':'none';
@@ -3475,15 +3584,19 @@ async function saveAgenda(){
   const idV=document.getElementById('agId').value;
   if(idV){
     const orig=agendaDB.find(x=>x.id===parseInt(idV));
-    if(orig&&!isAdmin&&orig.pessoa!==currentUser&&orig.criado_por!==currentUser){
+    if(orig&&!isAdmin&&!pessoasDo(orig).includes(currentUser)&&orig.criado_por!==currentUser){
       toast('Você só pode editar seus próprios compromissos','err');return;
     }
   }
+  const participantes=pessoasSelecionadas();
+  if(!participantes.length){toast('Selecione ao menos um participante','err');return;}
   const diaTodo=document.getElementById('agDiaTodo').checked;
   const body={
     titulo:titulo,
     tipo:document.getElementById('agTipo').value,
-    pessoa:document.getElementById('agPessoa').value,
+    pessoa:participantes[0],
+    pessoas:participantes,
+    lembrete:parseInt(document.getElementById('agLembrete').value)||0,
     data_inicio:dataIni,
     data_fim:dataFim||dataIni,
     dia_todo:diaTodo,
@@ -3511,8 +3624,8 @@ async function saveAgenda(){
 async function delAgenda(){
   const id=parseInt(document.getElementById('agId').value);
   const e=agendaDB.find(x=>x.id===id);if(!e)return;
-  if(!isAdmin&&e.pessoa!==currentUser&&e.criado_por!==currentUser){
-    toast('Você só pode excluir seus próprios compromissos','err');return;
+  if(!isAdmin&&!pessoasDo(e).includes(currentUser)&&e.criado_por!==currentUser){
+    toast('Você só pode excluir compromissos dos quais participa','err');return;
   }
   if(!confirm('Excluir "'+e.titulo+'"?'))return;
   await sb.del('agenda',id);
