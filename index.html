@@ -248,6 +248,27 @@ body.dark .etapa-opt:hover,body.dark .etapa-opt.selected{background:rgba(37,99,2
 .ag-avatares-mini .av:first-child{margin-left:0;}
 .dash-lembrete{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--yellow);border-radius:10px;padding:12px 18px;margin-bottom:14px;box-shadow:var(--shadow);}
 
+
+/* AUDITORIA */
+.aud-filtros{display:flex;gap:7px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:6px;}
+.aud-item{display:flex;gap:11px;padding:12px 0;border-bottom:1px solid var(--border);}
+.aud-item:last-child{border-bottom:none;}
+.aud-ico{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;margin-top:2px;}
+.aud-corpo{flex:1;min-width:0;}
+.aud-linha1{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:13px;}
+.aud-ref{font-weight:600;}
+.aud-ent{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);background:var(--surface2);padding:1px 7px;border-radius:9px;}
+.aud-quando{font-size:11px;color:var(--muted);margin-top:2px;}
+.aud-difs{margin-top:7px;display:flex;flex-direction:column;gap:3px;}
+.aud-dif{font-size:11.5px;display:flex;gap:7px;align-items:baseline;flex-wrap:wrap;background:var(--surface2);padding:4px 9px;border-radius:4px;}
+.aud-dif b{font-weight:600;min-width:118px;}
+.aud-de{color:var(--red);text-decoration:line-through;opacity:.8;}
+.aud-para{color:var(--green);font-weight:600;}
+.aud-seta{color:var(--muted);}
+.aud-alerta{background:var(--red-light);border-left:3px solid var(--red);padding:9px 13px;border-radius:0 5px 5px 0;margin-bottom:14px;font-size:12.5px;}
+body.dark .aud-alerta{background:rgba(239,50,54,.14);}
+body.dark .aud-dif{background:#20243A;}
+
 /* FAB */
 .fab{position:fixed;bottom:32px;right:32px;width:62px;height:62px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:30px;cursor:pointer;box-shadow:0 6px 20px rgba(37,99,235,.5);display:none;align-items:center;justify-content:center;z-index:200;}
 .fab.show{display:flex;}
@@ -395,6 +416,7 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
     <button class="logout-btn" id="btnRelatorio" onclick="openOv('ovRelatorio')" style="display:none;background:#2A2A2A;border-color:#555;color:#22C55E;" title="Gerar relatório">📄 Relatório</button>
     <button class="logout-btn" id="btnAcessos" onclick="openAcessos()" style="display:none;background:#2A2A2A;border-color:#555;color:#A78BFA;" title="Histórico de acessos">👁 Acessos</button>
     <button class="logout-btn" id="btnEquipe" onclick="openEquipe()" style="display:none;background:#2A2A2A;border-color:#555;color:#60A5FA;" title="Gerenciar equipe">👥 Equipe</button>
+    <button class="logout-btn" id="btnAuditoria" onclick="openAuditoria()" style="display:none;background:#2A2A2A;border-color:#555;color:#F87171;" title="Trilha de auditoria">🛡 Auditoria</button>
     <button class="logout-btn" onclick="doLogout()">Sair</button>
     <button class="btn-back" id="backBtn" onclick="goHome()">Início</button>
     <button class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
@@ -667,6 +689,50 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
     <div class="f"><label>Cor</label><select id="tipoCor"><option value="blue">Azul</option><option value="green">Verde</option><option value="yellow">Amarelo</option><option value="red">Vermelho</option><option value="purple">Roxo</option><option value="gray">Cinza</option></select></div>
   </div>
   <div class="modal-foot"><button class="btn-sec" onclick="closeOv('ovTipo')">Cancelar</button><button class="btn-del" id="tipoDelBtn" onclick="delTipo()" style="display:none">Excluir</button><button class="btn-pri" onclick="saveTipo()">Salvar</button></div>
+</div></div>
+
+<!-- MODAL AUDITORIA -->
+<div class="overlay" id="ovAuditoria"><div class="modal" style="width:720px;max-width:97vw;">
+  <div class="modal-head"><h3>&#128737; Trilha de Auditoria</h3><button class="modal-x" onclick="closeOv('ovAuditoria')">&times;</button></div>
+  <div class="modal-body">
+    <div class="aud-filtros">
+      <select class="fsel" id="audFUser" onchange="renderAuditoria()"><option value="">Todos os usuarios</option></select>
+      <select class="fsel" id="audFAcao" onchange="renderAuditoria()">
+        <option value="">Todas as acoes</option>
+        <option value="criar">Criacao</option>
+        <option value="editar">Edicao</option>
+        <option value="excluir">Exclusao</option>
+        <option value="concluir">Conclusao</option>
+        <option value="reabrir">Reabertura</option>
+        <option value="etapa">Mudanca de etapa</option>
+        <option value="transferir">Transferencia</option>
+      </select>
+      <select class="fsel" id="audFEnt" onchange="renderAuditoria()">
+        <option value="">Tudo</option>
+        <option value="mapa">Mapas</option>
+        <option value="obra">Obras</option>
+        <option value="projeto">Projetos</option>
+        <option value="nf">Notas fiscais</option>
+        <option value="avaliacao">Avaliações</option>
+        <option value="agenda">Agenda</option>
+        <option value="tipo">Tipos e prazos</option>
+        <option value="equipe">Equipe</option>
+      </select>
+      <select class="fsel" id="audFPer" onchange="renderAuditoria()">
+        <option value="7">Ultimos 7 dias</option>
+        <option value="30" selected>Ultimos 30 dias</option>
+        <option value="90">Ultimos 90 dias</option>
+        <option value="0">Tudo</option>
+      </select>
+      <input class="fsearch" id="audBusca" placeholder="&#128269; Buscar..." oninput="renderAuditoria()" style="flex:1;min-width:130px;">
+    </div>
+    <div id="audCritico"></div>
+    <div id="audLista"><div style="text-align:center;padding:34px;color:var(--muted)">Carregando...</div></div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn-sec" onclick="closeOv('ovAuditoria')">Fechar</button>
+    <button class="btn-pri" style="background:#22C55E;" onclick="gerarRelatorioAuditoria()">&#128196; Exportar PDF</button>
+  </div>
 </div></div>
 
 <!-- MODAL AGENDA -->
@@ -1595,7 +1661,13 @@ async function addMapa(){
       n=await sb.post('mapas',body2);
       n[0].etapa='nao_iniciado';n[0].motivo_suspenso='';
     }
-    mapas.unshift(n[0]);closeOv('ovNovoMapa');
+    mapas.unshift(n[0]);
+    audLog('criar','mapa',n[0].id,`MC ${num} — ${obra}`,[
+      {campo:'numero',de:'',para:num},{campo:'obra',de:'',para:obra},
+      {campo:'tipo',de:'',para:tipo},{campo:'responsavel',de:'',para:resp},
+      {campo:'data_solicitacao',de:'',para:data},{campo:'prazo',de:'',para:prazo}
+    ]);
+    closeOv('ovNovoMapa');
     ['fNum','fDesc','fObs'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('fTipo').value='';document.getElementById('fObra').value='';
     document.getElementById('fResp').disabled=false;document.getElementById('fData').value=today();
@@ -1608,16 +1680,34 @@ async function addMapa(){
 }
 async function toggleMapa(id){
   const m=mapas.find(x=>x.id===id);if(!m)return;
+  const antesEm=m.concluido_em||'';
   m.concluido=!m.concluido;
   const patch={concluido:m.concluido};
   if(m.concluido){m.concluido_em=new Date().toISOString();patch.concluido_em=m.concluido_em;}
   else{m.concluido_em=null;patch.concluido_em=null;}
   await sb.patch('mapas',id,patch);
+  audLog(m.concluido?'concluir':'reabrir','mapa',id,`MC ${m.numero} — ${m.obra}`,[
+    {campo:'concluido',de:m.concluido?'não':'sim',para:m.concluido?'sim':'não'},
+    {campo:'concluido_em',de:antesEm,para:m.concluido_em||''}
+  ]);
   renderMapas();renderMCStats();toast(m.concluido?`Mapa ${m.numero} concluído!`:`Mapa ${m.numero} reaberto`);
 }
 async function delMapa(id){
   if(!isAdmin){toast('Apenas administradores podem excluir mapas','err');return;}
+  const m=mapas.find(x=>x.id===id);
   if(!confirm('Excluir este mapa?'))return;
+  // Snapshot completo antes de apagar
+  const snap=m?[
+    {campo:'numero',de:m.numero||'',para:''},
+    {campo:'obra',de:m.obra||'',para:''},
+    {campo:'tipo',de:m.tipo||'',para:''},
+    {campo:'responsavel',de:m.responsavel||'',para:''},
+    {campo:'data_solicitacao',de:m.data_solicitacao||'',para:''},
+    {campo:'prazo',de:m.prazo||'',para:''},
+    {campo:'etapa',de:m.etapa||'',para:''},
+    {campo:'concluido',de:m.concluido?'sim':'não',para:''}
+  ]:[];
+  await audLog('excluir','mapa',id,m?`MC ${m.numero} — ${m.obra}`:`ID ${id}`,snap);
   await sb.del('mapas',id);mapas=mapas.filter(x=>x.id!==id);renderMapas();renderMCStats();toast('Mapa excluído');
 }
 function editMapa(id){
@@ -1649,7 +1739,9 @@ async function saveEditMapa(){
   const mOrig=mapas.find(x=>x.id===parseInt(document.getElementById('eMId').value));
   const dataSolicitacao=isAdmin?document.getElementById('eMData').value:(mOrig?mOrig.data_solicitacao:document.getElementById('eMData').value);
   const b={numero:document.getElementById('eMNum').value.trim(),obra:document.getElementById('eMObra').value,tipo:document.getElementById('eMTipo').value,descricao:document.getElementById('eMDesc').value.trim(),responsavel:document.getElementById('eMResp').value,data_solicitacao:dataSolicitacao,prazo:document.getElementById('eMPrazo').value,obs:document.getElementById('eMObs').value.trim()};
+  const difs=audDiff(mOrig,b);
   await sb.patch('mapas',id,b);const i=mapas.findIndex(x=>x.id===id);if(i>=0)mapas[i]={...mapas[i],...b};
+  if(difs.length)audLog('editar','mapa',id,`MC ${b.numero} — ${b.obra}`,difs);
   closeOv('ovEditMapa');renderMapas();renderMCStats();toast('Mapa atualizado!');
 }
 
@@ -1704,7 +1796,9 @@ async function selEtapa(v){
   document.getElementById('eop-'+v).classList.add('selected');
   document.getElementById('motivoWrap').style.display='none';
   try{
+    const etAntes=m.etapa||'nao_iniciado';
     await sb.patch('mapas',id,{etapa:v,motivo_suspenso:''});
+    audLog('etapa','mapa',id,`MC ${m.numero} — ${m.obra}`,[{campo:'etapa',de:etAntes,para:v}]);
     m.etapa=v;m.motivo_suspenso='';
     closeOv('ovEtapa');
     renderMapas();
@@ -1722,14 +1816,21 @@ async function selEtapa(v){
 async function saveEtapa(){
   const id=parseInt(document.getElementById('etapaId').value);
   const m=mapas.find(x=>x.id===id);if(!m)return;
+  const etAnt=m.etapa||'nao_iniciado';
+  const motAnt=m.motivo_suspenso||'';
   if(curEtapa==='suspenso'){
     const mot=document.getElementById('motivoTxt').value.trim();
     if(!mot){toast('Informe o motivo','err');return;}
     m.etapa=curEtapa;m.motivo_suspenso=mot;
     await sb.patch('mapas',id,{etapa:curEtapa,motivo_suspenso:mot});
+    audLog('etapa','mapa',id,`MC ${m.numero} — ${m.obra}`,[
+      {campo:'etapa',de:etAnt,para:curEtapa},
+      {campo:'motivo_suspenso',de:motAnt,para:mot}
+    ]);
   }else{
     m.etapa=curEtapa;m.motivo_suspenso='';
     await sb.patch('mapas',id,{etapa:curEtapa,motivo_suspenso:''});
+    audLog('etapa','mapa',id,`MC ${m.numero} — ${m.obra}`,[{campo:'etapa',de:etAnt,para:curEtapa}]);
   }
   closeOv('ovEtapa');renderMapas();toast('Etapa atualizada!');
 }
@@ -1743,12 +1844,14 @@ async function saveObra(){
   const comp=document.getElementById('obraComp').value;
   const obs=document.getElementById('obraObs').value.trim();
   if(!nome){toast('Informe o nome','err');return;}
-  if(idV){const id=parseInt(idV);await sb.patch('obras',id,{nome,comprador:comp,obs});const i=obras.findIndex(x=>x.id===id);if(i>=0)obras[i]={...obras[i],nome,comprador:comp,obs};}
+  if(idV){const id=parseInt(idV);const obOrig=obras.find(x=>x.id===id);const difsOb=audDiff(obOrig,{nome,comprador:comp,obs});await sb.patch('obras',id,{nome,comprador:comp,obs});if(difsOb.length)audLog('editar','obra',id,nome,difsOb);const i=obras.findIndex(x=>x.id===id);if(i>=0)obras[i]={...obras[i],nome,comprador:comp,obs};}
   else{if(obras.find(o=>o.nome.toLowerCase()===nome.toLowerCase())){toast('Obra já existe!','err');return;}const n=await sb.post('obras',{id:Date.now(),nome,comprador:comp,obs});obras.push(n[0]);}
   closeOv('ovObra');popObras();renderObras();toast(idV?'Obra atualizada!':'Obra cadastrada!');
 }
 async function delObra(){
   const id=parseInt(document.getElementById('obraId').value);if(!confirm('Excluir?'))return;
+  const obDel=obras.find(x=>x.id===id);
+  await audLog('excluir','obra',id,obDel?obDel.nome:`ID ${id}`,obDel?[{campo:'nome',de:obDel.nome,para:''},{campo:'comprador',de:obDel.comprador||'',para:''}]:[]);
   await sb.del('obras',id);obras=obras.filter(x=>x.id!==id);closeOv('ovObra');popObras();renderObras();toast('Obra excluída');
 }
 function editObra(id){
@@ -1772,12 +1875,14 @@ async function saveTipo(){
   const dias=parseInt(document.getElementById('tipoDias').value);
   const cor_key=document.getElementById('tipoCor').value;
   if(!nome||isNaN(dias)||dias<1){toast('Preencha nome e prazo','err');return;}
-  if(idV){const id=parseInt(idV);await sb.patch('tipos',id,{nome,dias,cor_key});const i=tipos.findIndex(x=>x.id===id);if(i>=0)tipos[i]={...tipos[i],nome,dias,cor_key};}
-  else{if(tipos.find(t=>t.nome.toLowerCase()===nome.toLowerCase())){toast('Tipo já existe!','err');return;}const n=await sb.post('tipos',{id:Date.now(),nome,dias,cor_key});tipos.push(n[0]);}
+  if(idV){const id=parseInt(idV);const tOrig=tipos.find(x=>x.id===id);const difsT=audDiff(tOrig,{nome,dias,cor_key});await sb.patch('tipos',id,{nome,dias,cor_key});const i=tipos.findIndex(x=>x.id===id);if(i>=0)tipos[i]={...tipos[i],nome,dias,cor_key};if(difsT.length)audLog('editar','tipo',id,nome,difsT);}
+  else{if(tipos.find(t=>t.nome.toLowerCase()===nome.toLowerCase())){toast('Tipo já existe!','err');return;}const n=await sb.post('tipos',{id:Date.now(),nome,dias,cor_key});tipos.push(n[0]);audLog('criar','tipo',n[0].id,nome,[{campo:'nome',de:'',para:nome},{campo:'dias',de:'',para:String(dias)}]);}
   closeOv('ovTipo');popTipos();renderTipos();renderMapas();toast(idV?'Tipo atualizado!':'Tipo adicionado!');
 }
 async function delTipo(){
   const id=parseInt(document.getElementById('tipoId').value);if(!confirm('Excluir?'))return;
+  const tDel=tipos.find(x=>x.id===id);
+  await audLog('excluir','tipo',id,tDel?tDel.nome:`ID ${id}`,tDel?[{campo:'nome',de:tDel.nome,para:''},{campo:'dias',de:String(tDel.dias),para:''}]:[]);
   await sb.del('tipos',id);tipos=tipos.filter(x=>x.id!==id);closeOv('ovTipo');popTipos();renderTipos();renderMapas();toast('Tipo excluído');
 }
 function editTipo(id){
@@ -1852,6 +1957,7 @@ async function addProj(){
   const statusInicial=cat==='Contínuo'?'continuo':'andamento';
   const b={id:Date.now(),nome,categoria:cat,responsavel:document.getElementById('pResp').value,prioridade:document.getElementById('pPrior').value,status:statusInicial,inicio:document.getElementById('pInicio').value,prazo:document.getElementById('pPrazo').value,descricao:document.getElementById('pDesc').value.trim()};
   const n=await sb.post('projetos',b);projetos.unshift(n[0]);
+  audLog('criar','projeto',n[0].id,nome,[{campo:'nome',de:'',para:nome},{campo:'responsavel',de:'',para:b.responsavel}]);
   closeOv('ovProj');renderProjetos();renderProjStats();toast(`"${nome}" criado!`);
   document.getElementById('pNome').value='';document.getElementById('pDesc').value='';
 }
@@ -1866,11 +1972,16 @@ function editProjModal(id){
 async function saveEditProj(){
   const id=parseInt(document.getElementById('ePId').value);
   const b={nome:document.getElementById('ePNome').value.trim(),categoria:document.getElementById('ePCat').value,responsavel:document.getElementById('ePResp').value,status:document.getElementById('ePSt').value,prioridade:document.getElementById('ePPr').value,inicio:document.getElementById('ePIni').value,prazo:document.getElementById('ePPrazo').value,descricao:document.getElementById('ePDesc').value.trim()};
+  const pOrig=projetos.find(x=>x.id===id);
+  const difsP=audDiff(pOrig,b);
   await sb.patch('projetos',id,b);const i=projetos.findIndex(x=>x.id===id);if(i>=0)projetos[i]={...projetos[i],...b};
+  if(difsP.length)audLog('editar','projeto',id,b.nome,difsP);
   closeOv('ovEditProj');renderProjetos();renderProjStats();toast('Projeto atualizado!');
 }
 async function delProj(){
   const id=parseInt(document.getElementById('ePId').value);if(!confirm('Excluir?'))return;
+  const pDel=projetos.find(x=>x.id===id);
+  await audLog('excluir','projeto',id,pDel?pDel.nome:`ID ${id}`,pDel?[{campo:'nome',de:pDel.nome||'',para:''},{campo:'responsavel',de:pDel.responsavel||'',para:''}]:[]);
   await sb.del('projetos',id);projetos=projetos.filter(x=>x.id!==id);closeOv('ovEditProj');renderProjetos();renderProjStats();toast('Projeto excluído');
 }
 
@@ -1959,6 +2070,7 @@ async function addNF(){
   if(!num||!forn||!obra){toast('Preencha Nº da NF, Fornecedor e Obra','err');return;}
   const b={id:Date.now(),numero:num,fornecedor:forn,obra:document.getElementById('nfObra').value,valor:document.getElementById('nfVal').value.trim(),responsavel:document.getElementById('nfResp').value,descricao:document.getElementById('nfDesc').value.trim(),vencimento:document.getElementById('nfVenc').value,status:'aberta',updates:[]};
   const n=await sb.post('nfs',b);nfs.unshift(n[0]);
+  audLog('criar','nf',n[0].id,`NF ${num} — ${forn}`,[{campo:'numero',de:'',para:num},{campo:'fornecedor',de:'',para:forn},{campo:'obra',de:'',para:obra}]);
   closeOv('ovNF');renderNFs();renderNFStats();toast(`NF ${num} registrada!`);
   ['nfNum','nfForn','nfVal','nfDesc'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('nfVenc').value='';
@@ -1989,12 +2101,16 @@ async function addNFUpd(){
   const textoFinal=txt||(st==='aguardando_retorno'?'Status: Aguardando retorno':st==='aguardando_pagamento'?'Status: Aguardando pagamento':'Status: Resolvido');
   const upd=[...(n.updates||[]),{texto:textoFinal,data:new Date().toISOString()}];
   const newSt=st==='resolvida'?'resolvida':st?'aberta':n.status;
+  const stAntes=n.status;
   await sb.patch('nfs',id,{updates:upd,status:newSt});
+  audLog('editar','nf',id,`NF ${n.numero} — ${n.fornecedor}`,[{campo:'status',de:stAntes,para:newSt},{campo:'atualização',de:'',para:textoFinal.substring(0,90)}]);
   n.updates=upd;n.status=newSt;
   openNFUpd(id);renderNFs();renderNFStats();toast('Atualização registrada!');
 }
 async function delNF(){
   const id=parseInt(document.getElementById('nfUpdId').value);if(!confirm('Excluir?'))return;
+  const nDel=nfs.find(x=>x.id===id);
+  await audLog('excluir','nf',id,nDel?`NF ${nDel.numero} — ${nDel.fornecedor}`:`ID ${id}`,nDel?[{campo:'numero',de:nDel.numero||'',para:''},{campo:'obra',de:nDel.obra||'',para:''},{campo:'valor',de:nDel.valor||'',para:''}]:[]);
   await sb.del('nfs',id);nfs=nfs.filter(x=>x.id!==id);closeOv('ovNFUpdate');renderNFs();renderNFStats();toast('NF excluída');
 }
 
@@ -2067,6 +2183,7 @@ function loginSuccess(user,admin){
   document.getElementById('btnAcessos').style.display=admin?'inline-block':'none';
   const ba=document.getElementById('btnAvaliacoes');if(ba)ba.style.display=admin?'inline-block':'none';
   const be=document.getElementById('btnEquipe');if(be)be.style.display=admin?'inline-block':'none';
+  const bau=document.getElementById('btnAuditoria');if(bau)bau.style.display=admin?'inline-block':'none';
   // Salva sessão
   sessionStorage.setItem('mph_user',user);
   sessionStorage.setItem('mph_admin',admin?'1':'0');
@@ -2097,6 +2214,7 @@ function openResetSenhas(){
 function resetSenha(user){
   if(!confirm(`Resetar a senha de ${user}? Na próxima vez que ${user} entrar, precisará criar uma nova senha.`))return;
   localStorage.removeItem('mph_pass_'+user);
+  audLog('editar','equipe',null,user,[{campo:'senha',de:'cadastrada',para:'resetada'}]);
   toast(`Senha de ${user} resetada! Próximo acesso pedirá nova senha.`,'ok');
   // Atualiza a lista
   openResetSenhas();
@@ -2589,14 +2707,18 @@ async function saveObraDiv(){
   }
   try{
     if(idV){
+      const oOrig=obrasDivisao.find(x=>x.id===parseInt(idV));
+      const difsO=audDiff(oOrig,body);
       await sb.patch('obras_divisao',parseInt(idV),body);
       const i=obrasDivisao.findIndex(x=>x.id===parseInt(idV));
       if(i>=0)obrasDivisao[i]={...obrasDivisao[i],...body};
+      if(difsO.length)audLog('editar','obra',parseInt(idV),oOrig?oOrig.nome:nome,difsO);
       toast('Obra atualizada!');
     }else{
       body.id=Date.now();
       const n=await sb.post('obras_divisao',body);
       obrasDivisao.unshift(n[0]);
+      audLog('criar','obra',n[0].id,nome,[{campo:'nome',de:'',para:nome},{campo:'comprador',de:'',para:body.comprador}]);
       toast(`Obra "${nome}" cadastrada!`);
     }
     closeOv('ovObraDiv');
@@ -2775,9 +2897,71 @@ async function gerarRelatorioObras(){
 async function delObraDiv(){
   const id=parseInt(document.getElementById('odId').value);
   if(!confirm('Excluir esta obra permanentemente?'))return;
+  const oDel=obrasDivisao.find(x=>x.id===id);
+  await audLog('excluir','obra',id,oDel?oDel.nome:`ID ${id}`,oDel?[
+    {campo:'nome',de:oDel.nome||'',para:''},
+    {campo:'comprador',de:oDel.comprador||'',para:''},
+    {campo:'status',de:oDel.status||'',para:''}
+  ]:[]);
   await sb.del('obras_divisao',id);
   obrasDivisao=obrasDivisao.filter(x=>x.id!==id);
   closeOv('ovObraDiv');renderObrasDivisao();renderObrasDivisaoStats();toast('Obra excluída');
+}
+
+// ── AUDITORIA ──
+const AUD_CAMPOS={
+  numero:'Nº do mapa', obra:'Obra', tipo:'Tipo', descricao:'Descrição',
+  responsavel:'Responsável', data_solicitacao:'Data de solicitação',
+  prazo:'Prazo de entrega', obs:'Observação', etapa:'Etapa',
+  motivo_suspenso:'Motivo da suspensão', concluido:'Concluído',
+  nome:'Nome', comprador:'Comprador', ano:'Ano', fat1:'Faturamento 1',
+  fat2:'Faturamento 2', endereco:'Endereço', cidade:'Cidade',
+  coordenador:'Coordenador', apoio:'Apoio', eng_ini:'Engenheiro',
+  status:'Status', categoria:'Categoria', prioridade:'Prioridade',
+  inicio:'Início', fornecedor:'Fornecedor', valor:'Valor',
+  vencimento:'Vencimento', nivel:'Nível', admin:'Perfil admin', ativo:'Ativo',
+};
+const AUD_ACOES={
+  criar:{lbl:'Criou',cor:'var(--green)',ico:'＋'},
+  editar:{lbl:'Editou',cor:'var(--blue)',ico:'✎'},
+  excluir:{lbl:'Excluiu',cor:'var(--red)',ico:'✕'},
+  concluir:{lbl:'Concluiu',cor:'var(--green)',ico:'✓'},
+  reabrir:{lbl:'Reabriu',cor:'var(--yellow)',ico:'↩'},
+  etapa:{lbl:'Mudou etapa',cor:'var(--purple)',ico:'◑'},
+  transferir:{lbl:'Transferiu',cor:'var(--orange)',ico:'⇄'},
+};
+const AUD_ENT={
+  mapa:'Mapa de cotação', obra:'Obra', projeto:'Projeto',
+  nf:'Nota fiscal', avaliacao:'Avaliação', agenda:'Agenda', equipe:'Equipe', tipo:'Tipo/prazo',
+};
+
+// Compara dois objetos e devolve só o que mudou
+function audDiff(antes,depois){
+  const out=[];
+  Object.keys(depois||{}).forEach(function(k){
+    if(k==='id'||k==='criado_em'||k==='updates')return;
+    const a=antes?antes[k]:undefined;
+    const b=depois[k];
+    const na=(a===null||a===undefined)?'':String(a);
+    const nb=(b===null||b===undefined)?'':String(b);
+    if(na!==nb)out.push({campo:k,de:na,para:nb});
+  });
+  return out;
+}
+
+// Grava a trilha. Nunca derruba a operação principal se falhar.
+async function audLog(acao,entidade,registroId,ref,alteracoes){
+  try{
+    await sb.post('auditoria',{
+      id:Date.now()+Math.floor(Math.random()*999),
+      usuario:currentUser||'desconhecido',
+      acao:acao,
+      entidade:entidade,
+      registro_id:registroId||null,
+      registro_ref:ref||'',
+      alteracoes:alteracoes||[],
+    });
+  }catch(e){console.warn('auditoria:',e.message);}
 }
 
 // ── AVALIAÇÕES DA ENGENHARIA ──
@@ -2998,14 +3182,26 @@ async function saveAvaliacao(){
   };
   try{
     if(idV){
+      const avOrig=avaliacoes.find(x=>x.id===parseInt(idV));
+      const difsAv=[];
+      if(avOrig&&parseFloat(avOrig.media)!==body.media)difsAv.push({campo:'media',de:String(avOrig.media||''),para:String(body.media)});
+      if(avOrig&&(avOrig.nivel||'')!==body.nivel)difsAv.push({campo:'nivel',de:avOrig.nivel||'',para:body.nivel});
+      if(avOrig&&(avOrig.observacoes||'')!==body.observacoes)difsAv.push({campo:'observacoes',de:avOrig.observacoes||'',para:body.observacoes});
       await sb.patch('avaliacoes',parseInt(idV),body);
       const i=avaliacoes.findIndex(x=>x.id===parseInt(idV));
       if(i>=0)avaliacoes[i]=Object.assign({},avaliacoes[i],body);
+      audLog('editar','avaliacao',parseInt(idV),obraNome+' — '+body.comprador+' (ciclo '+ciclo+')',difsAv.length?difsAv:[{campo:'notas',de:'',para:'revisão dos critérios'}]);
       toast('Avaliacao atualizada!');
     }else{
       body.id=Date.now();
       const n=await sb.post('avaliacoes',body);
       avaliacoes.unshift(n[0]);
+      audLog('criar','avaliacao',n[0].id,obraNome+' — '+body.comprador+' (ciclo '+ciclo+')',[
+        {campo:'comprador',de:'',para:body.comprador},
+        {campo:'engenheiro',de:'',para:body.engenheiro||'—'},
+        {campo:'nivel',de:'',para:body.nivel},
+        {campo:'media',de:'',para:String(body.media)}
+      ]);
       toast('Avaliacao registrada!');
     }
     closeOv('ovAval');renderAvaliacoes();
@@ -3015,6 +3211,12 @@ async function saveAvaliacao(){
 async function delAvaliacao(){
   const id=parseInt(document.getElementById('avId').value);
   if(!confirm('Excluir esta avaliacao?'))return;
+  const avDel=avaliacoes.find(x=>x.id===id);
+  await audLog('excluir','avaliacao',id,avDel?avDel.obra_nome+' — '+avDel.comprador+' (ciclo '+avDel.ciclo+')':`ID ${id}`,avDel?[
+    {campo:'comprador',de:avDel.comprador||'',para:''},
+    {campo:'engenheiro',de:avDel.engenheiro||'',para:''},
+    {campo:'media',de:String(avDel.media||''),para:''}
+  ]:[]);
   await sb.del('avaliacoes',id);
   avaliacoes=avaliacoes.filter(x=>x.id!==id);
   closeOv('ovAval');renderAvaliacoes();toast('Avaliacao excluida');
@@ -3178,7 +3380,10 @@ async function saveMembro(){
         const totAb=ab.obras.length+ab.mapas.length+ab.proj.length+ab.nfs.length;
         if(totAb>0&&!confirm(alvoM.nome+' ainda tem '+totAb+' registros em aberto.\n\nDesativar mesmo assim? O histórico será preservado e você pode transferir depois.'))return;
       }
+      const eOrig=equipeDB.find(x=>x.id===parseInt(idV));
+      const difsE=audDiff(eOrig,body);
       await sb.patch('equipe',parseInt(idV),body);
+      if(difsE.length)audLog('editar','equipe',parseInt(idV),nome,difsE);
       const i=equipeDB.findIndex(x=>x.id===parseInt(idV));
       if(i>=0)equipeDB[i]=Object.assign({},equipeDB[i],body);
       toast('Membro atualizado!');
@@ -3187,6 +3392,7 @@ async function saveMembro(){
       body.ordem=equipeDB.length+1;
       const n=await sb.post('equipe',body);
       equipeDB.push(n[0]);
+      audLog('criar','equipe',n[0].id,nome,[{campo:'nome',de:'',para:nome},{campo:'nivel',de:'',para:body.nivel},{campo:'admin',de:'',para:body.admin?'sim':'não'}]);
       toast(nome+' adicionado à equipe!');
     }
     // Recarrega TEAM
@@ -3213,6 +3419,7 @@ async function delMembro(){
   }
   if(!confirm('Excluir '+m.nome+' permanentemente da equipe?\n\nEsta ação não pode ser desfeita.'))return;
   try{
+    await audLog('excluir','equipe',id,m.nome,[{campo:'nome',de:m.nome,para:''},{campo:'nivel',de:m.nivel||'',para:''}]);
     await sb.del('equipe',id);
     equipeDB=equipeDB.filter(x=>x.id!==id);
     localStorage.removeItem('mph_pass_'+m.nome);
@@ -3271,6 +3478,12 @@ async function executarTransferencia(){
     for(const m of it.mapas){await sb.patch('mapas',m.id,{responsavel:para});m.responsavel=para;}
     for(const p of it.proj){await sb.patch('projetos',p.id,{responsavel:para});p.responsavel=para;}
     for(const n of it.nfs){await sb.patch('nfs',n.id,{responsavel:para});n.responsavel=para;}
+    audLog('transferir','equipe',null,de+' → '+para,[
+      {campo:'obras',de:de,para:para+' ('+it.obras.length+')'},
+      {campo:'mapas',de:de,para:para+' ('+it.mapas.length+')'},
+      {campo:'projetos',de:de,para:para+' ('+it.proj.length+')'},
+      {campo:'nfs',de:de,para:para+' ('+it.nfs.length+')'}
+    ]);
     closeOv('ovTransfer');
     renderEquipeList();
     toast(tot+' registros transferidos para '+para+'!');
@@ -3606,15 +3819,26 @@ async function saveAgenda(){
   };
   try{
     if(idV){
+      const agOrig=agendaDB.find(x=>x.id===parseInt(idV));
+      const difsAg=audDiff(agOrig,body).filter(d=>d.campo!=='pessoas');
+      if(agOrig&&JSON.stringify(pessoasDo(agOrig))!==JSON.stringify(participantes))
+        difsAg.push({campo:'participantes',de:pessoasDo(agOrig).join(', '),para:participantes.join(', ')});
       await sb.patch('agenda',parseInt(idV),body);
       const i=agendaDB.findIndex(x=>x.id===parseInt(idV));
       if(i>=0)agendaDB[i]=Object.assign({},agendaDB[i],body);
+      if(difsAg.length)audLog('editar','agenda',parseInt(idV),titulo,difsAg);
       toast('Compromisso atualizado!');
     }else{
       body.id=Date.now();
       body.criado_por=currentUser;
       const n=await sb.post('agenda',body);
       agendaDB.push(n[0]);
+      audLog('criar','agenda',n[0].id,titulo,[
+        {campo:'tipo',de:'',para:body.tipo},
+        {campo:'participantes',de:'',para:participantes.join(', ')},
+        {campo:'data_inicio',de:'',para:dataIni},
+        {campo:'data_fim',de:'',para:body.data_fim}
+      ]);
       toast('Compromisso adicionado!');
     }
     closeOv('ovAgenda');renderAgenda();
@@ -3628,9 +3852,167 @@ async function delAgenda(){
     toast('Você só pode excluir compromissos dos quais participa','err');return;
   }
   if(!confirm('Excluir "'+e.titulo+'"?'))return;
+  await audLog('excluir','agenda',id,e.titulo,[
+    {campo:'tipo',de:e.tipo||'',para:''},
+    {campo:'participantes',de:pessoasDo(e).join(', '),para:''},
+    {campo:'data_inicio',de:e.data_inicio||'',para:''},
+    {campo:'data_fim',de:e.data_fim||'',para:''}
+  ]);
   await sb.del('agenda',id);
   agendaDB=agendaDB.filter(x=>x.id!==id);
   closeOv('ovAgenda');renderAgenda();toast('Compromisso excluído');
+}
+
+// ── PAINEL DE AUDITORIA ──
+let auditoriaDB=[];
+
+async function openAuditoria(){
+  if(!isAdmin){toast('Apenas administradores','err');return;}
+  openOv('ovAuditoria');
+  const el=document.getElementById('audLista');
+  el.innerHTML='<div style="text-align:center;padding:34px;color:var(--muted)">Carregando...</div>';
+  try{
+    auditoriaDB=await sb.get('auditoria','?order=criado_em.desc&limit=600')||[];
+    const users=[...new Set(auditoriaDB.map(a=>a.usuario))].sort();
+    const sel=document.getElementById('audFUser');
+    const v=sel.value;
+    sel.innerHTML='<option value="">Todos os usuários</option>'+users.map(u=>'<option>'+u+'</option>').join('');
+    if(v)sel.value=v;
+    renderAuditoria();
+  }catch(e){
+    el.innerHTML='<div style="padding:20px;text-align:center;"><div style="color:var(--red);font-size:13px;font-weight:600;margin-bottom:8px;">Não foi possível carregar</div><div style="font-size:12px;color:var(--muted);">'+(e.message||'').substring(0,150)+'</div></div>';
+  }
+}
+
+function audFiltrada(){
+  const u=document.getElementById('audFUser').value;
+  const a=document.getElementById('audFAcao').value;
+  const en=document.getElementById('audFEnt').value;
+  const per=parseInt(document.getElementById('audFPer').value);
+  const s=document.getElementById('audBusca').value.toLowerCase();
+  let corte=null;
+  if(per>0){corte=new Date();corte.setDate(corte.getDate()-per);}
+  return auditoriaDB.filter(function(r){
+    if(u&&r.usuario!==u)return false;
+    if(a&&r.acao!==a)return false;
+    if(en&&r.entidade!==en)return false;
+    if(corte&&new Date(r.criado_em)<corte)return false;
+    if(s){
+      const alvo=(r.usuario+' '+r.registro_ref+' '+(r.alteracoes||[]).map(function(d){return (AUD_CAMPOS[d.campo]||d.campo)+' '+d.de+' '+d.para;}).join(' ')).toLowerCase();
+      if(!alvo.includes(s))return false;
+    }
+    return true;
+  });
+}
+
+function audQuando(iso){
+  const d=new Date(iso);
+  const min=Math.floor((Date.now()-d)/60000);
+  if(min<1)return'agora';
+  if(min<60)return min+' min atrás';
+  const hrs=Math.floor(min/60);
+  if(hrs<24)return hrs+(hrs===1?' hora atrás':' horas atrás');
+  const dias=Math.floor(hrs/24);
+  if(dias<7)return dias+(dias===1?' dia atrás':' dias atrás');
+  return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+function audValor(v){
+  if(!v)return'<span style="color:var(--muted);font-style:italic">vazio</span>';
+  if(/^\d{4}-\d{2}-\d{2}$/.test(v))return fmtBR(v);
+  if(/^\d{4}-\d{2}-\d{2}T/.test(v))return new Date(v).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const et=ETAPA[v];if(et)return et.label;
+  return v.length>58?v.substring(0,58)+'…':v;
+}
+
+function renderAuditoria(){
+  const regs=audFiltrada();
+
+  // Alerta: exclusões e mudanças de data no período
+  const criticos=regs.filter(function(r){
+    if(r.acao==='excluir')return true;
+    return (r.alteracoes||[]).some(function(d){return d.campo==='data_solicitacao'||d.campo==='prazo';});
+  });
+  const elC=document.getElementById('audCritico');
+  elC.innerHTML=criticos.length
+    ? '<div class="aud-alerta"><strong>'+criticos.length+' evento'+(criticos.length>1?'s':'')+' de atenção</strong> no período — exclusões ou alterações de data. Use o filtro de ação para isolar.</div>'
+    : '';
+
+  const el=document.getElementById('audLista');
+  if(!regs.length){el.innerHTML='<div class="empty" style="padding:30px">Nenhum registro com esses filtros</div>';return;}
+
+  el.innerHTML=regs.map(function(r){
+    const ac=AUD_ACOES[r.acao]||{lbl:r.acao,cor:'var(--muted)',ico:'•'};
+    const difs=(r.alteracoes||[]).map(function(d){
+      const lbl=AUD_CAMPOS[d.campo]||d.campo;
+      const critico=(d.campo==='data_solicitacao'||d.campo==='prazo');
+      if(r.acao==='criar'||r.acao==='excluir'){
+        const val=r.acao==='criar'?d.para:d.de;
+        return '<div class="aud-dif"><b>'+lbl+'</b><span>'+audValor(val)+'</span></div>';
+      }
+      return '<div class="aud-dif"'+(critico?' style="border-left:2px solid var(--red)"':'')+'><b>'+lbl+'</b>'+
+        '<span class="aud-de">'+audValor(d.de)+'</span>'+
+        '<span class="aud-seta">→</span>'+
+        '<span class="aud-para">'+audValor(d.para)+'</span></div>';
+    }).join('');
+    return '<div class="aud-item">'+
+      '<div class="aud-ico" style="background:'+ac.cor+'">'+ac.ico+'</div>'+
+      '<div class="aud-corpo">'+
+        '<div class="aud-linha1">'+
+          avEl(r.usuario,20,8)+
+          '<span><strong>'+r.usuario+'</strong> '+ac.lbl.toLowerCase()+'</span>'+
+          '<span class="aud-ref">'+(r.registro_ref||'—')+'</span>'+
+          '<span class="aud-ent">'+(AUD_ENT[r.entidade]||r.entidade)+'</span>'+
+        '</div>'+
+        '<div class="aud-quando">'+audQuando(r.criado_em)+' · '+new Date(r.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})+'</div>'+
+        (difs?'<div class="aud-difs">'+difs+'</div>':'')+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function gerarRelatorioAuditoria(){
+  const regs=audFiltrada();
+  if(!regs.length){toast('Nada para exportar com esses filtros','err');return;}
+  const agora=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const per=document.getElementById('audFPer').value;
+  const perLbl=per==='0'?'Todo o período':'Últimos '+per+' dias';
+
+  let html='<div class="print-header"><div>'+
+    '<div class="print-title">MpH Engenharia — Portal de Suprimentos</div>'+
+    '<div class="print-sub">Trilha de Auditoria — '+perLbl+'</div></div>'+
+    '<div class="print-date">Gerado em '+agora+'</div></div>';
+
+  const exc=regs.filter(function(r){return r.acao==='excluir';}).length;
+  const datas=regs.filter(function(r){return (r.alteracoes||[]).some(function(d){return d.campo==='data_solicitacao'||d.campo==='prazo';});}).length;
+  html+='<div class="print-section"><div class="print-section-title">Resumo</div>'+
+    '<table><thead><tr><th>Eventos</th><th>Exclusões</th><th>Alterações de data</th><th>Usuários</th></tr></thead>'+
+    '<tbody><tr><td>'+regs.length+'</td>'+
+    '<td style="font-weight:bold;background:'+(exc?'#FEE2E2':'#fff')+'">'+exc+'</td>'+
+    '<td style="font-weight:bold;background:'+(datas?'#FEF3C7':'#fff')+'">'+datas+'</td>'+
+    '<td>'+[...new Set(regs.map(function(r){return r.usuario;}))].length+'</td></tr></tbody></table></div>';
+
+  html+='<div class="print-section"><div class="print-section-title">Eventos ('+regs.length+')</div>'+
+    '<table><thead><tr><th>Data/hora</th><th>Usuário</th><th>Ação</th><th>Registro</th><th>Alterações</th></tr></thead><tbody>';
+  regs.forEach(function(r){
+    const ac=AUD_ACOES[r.acao]||{lbl:r.acao};
+    const bg=r.acao==='excluir'?'#FEE2E2':(r.alteracoes||[]).some(function(d){return d.campo==='data_solicitacao'||d.campo==='prazo';})?'#FEF3C7':'#fff';
+    const txt=(r.alteracoes||[]).map(function(d){
+      const lbl=AUD_CAMPOS[d.campo]||d.campo;
+      if(r.acao==='criar')return lbl+': '+(d.para||'—');
+      if(r.acao==='excluir')return lbl+': '+(d.de||'—');
+      return lbl+': '+(d.de||'vazio')+' → '+(d.para||'vazio');
+    }).join(' | ');
+    html+='<tr style="background:'+bg+'">'+
+      '<td style="font-size:10px;white-space:nowrap">'+new Date(r.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})+'</td>'+
+      '<td style="font-weight:bold">'+r.usuario+'</td>'+
+      '<td>'+ac.lbl+'</td>'+
+      '<td>'+(r.registro_ref||'—')+'</td>'+
+      '<td style="font-size:10px">'+(txt||'—')+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+
+  document.getElementById('printArea').innerHTML=html;
+  setTimeout(function(){window.print();},200);
 }
 
 // ── INIT ──
@@ -3650,6 +4032,7 @@ window.onload=async()=>{
     document.getElementById('btnAcessos').style.display=isAdmin?'inline-block':'none';
     const ba2=document.getElementById('btnAvaliacoes');if(ba2)ba2.style.display=isAdmin?'inline-block':'none';
     const be2=document.getElementById('btnEquipe');if(be2)be2.style.display=isAdmin?'inline-block':'none';
+    const bau2=document.getElementById('btnAuditoria');if(bau2)bau2.style.display=isAdmin?'inline-block':'none';
     loadDash();
   }
 };
