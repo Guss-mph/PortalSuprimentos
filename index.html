@@ -269,6 +269,15 @@ body.dark .etapa-opt:hover,body.dark .etapa-opt.selected{background:rgba(37,99,2
 body.dark .aud-alerta{background:rgba(239,50,54,.14);}
 body.dark .aud-dif{background:#20243A;}
 
+
+/* ATUALIZACAO */
+#barAtualiza{position:fixed;left:0;right:0;bottom:0;background:#0F766E;color:#fff;padding:13px 22px;display:none;align-items:center;justify-content:center;gap:16px;z-index:9998;box-shadow:0 -4px 18px rgba(0,0,0,.28);font-size:14px;flex-wrap:wrap;}
+#barAtualiza.show{display:flex;}
+#barAtualiza b{font-weight:700;}
+#barAtualiza button{background:#fff;color:#0F766E;border:none;border-radius:7px;padding:8px 20px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;}
+#barAtualiza button:hover{opacity:.9;}
+#barAtualiza .depois{background:transparent;color:#B8E6E1;border:1px solid rgba(255,255,255,.35);font-weight:500;}
+
 /* FAB */
 .fab{position:fixed;bottom:32px;right:32px;width:62px;height:62px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:30px;cursor:pointer;box-shadow:0 6px 20px rgba(37,99,235,.5);display:none;align-items:center;justify-content:center;z-index:200;}
 .fab.show{display:flex;}
@@ -417,6 +426,7 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
     <button class="logout-btn" id="btnAcessos" onclick="openAcessos()" style="display:none;background:#2A2A2A;border-color:#555;color:#A78BFA;" title="Histórico de acessos">👁 Acessos</button>
     <button class="logout-btn" id="btnEquipe" onclick="openEquipe()" style="display:none;background:#2A2A2A;border-color:#555;color:#60A5FA;" title="Gerenciar equipe">👥 Equipe</button>
     <button class="logout-btn" id="btnAuditoria" onclick="openAuditoria()" style="display:none;background:#2A2A2A;border-color:#555;color:#F87171;" title="Trilha de auditoria">🛡 Auditoria</button>
+    <button class="logout-btn" id="btnForcar" onclick="forcarLogoutGeral()" style="display:none;background:#2A2A2A;border-color:#555;color:#2DD4BF;" title="Derrubar todas as sessões">🔄 Atualizar todos</button>
     <button class="logout-btn" onclick="doLogout()">Sair</button>
     <button class="btn-back" id="backBtn" onclick="goHome()">Início</button>
     <button class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
@@ -1145,6 +1155,12 @@ Com <strong>apenas registros em aberto</strong>, os mapas conclu&iacute;dos e ob
     </div>
   </div>
 </div>
+</div>
+
+<div id="barAtualiza">
+  <span>&#128260; <b>Nova versao do portal disponivel.</b> Recarregue para usar as atualizacoes.</span>
+  <button onclick="location.reload(true)">Atualizar agora</button>
+  <button class="depois" onclick="document.getElementById('barAtualiza').classList.remove('show')">Depois</button>
 </div>
 
 <button class="fab" id="fabBtn">+</button>
@@ -2184,11 +2200,14 @@ function loginSuccess(user,admin){
   const ba=document.getElementById('btnAvaliacoes');if(ba)ba.style.display=admin?'inline-block':'none';
   const be=document.getElementById('btnEquipe');if(be)be.style.display=admin?'inline-block':'none';
   const bau=document.getElementById('btnAuditoria');if(bau)bau.style.display=admin?'inline-block':'none';
+  const bfo=document.getElementById('btnForcar');if(bfo)bfo.style.display=admin?'inline-block':'none';
   // Salva sessão
   sessionStorage.setItem('mph_user',user);
   sessionStorage.setItem('mph_admin',admin?'1':'0');
   // Registra acesso no banco
   sb.post('acessos',{id:Date.now(),usuario:user}).catch(e=>console.warn('Acesso:',e));
+  sessaoIniciadaEm=Date.now();
+  setTimeout(function(){checarAtualizacoes(true);},45000);
   loadDash();
 }
 
@@ -4015,6 +4034,84 @@ function gerarRelatorioAuditoria(){
   setTimeout(function(){window.print();},200);
 }
 
+// ── CONTROLE DE VERSAO E SESSAO ──
+// Marcador da build. Trocado a cada publicação.
+const APP_VER='2026.09.15.2007'; /*BUILD*/
+let sessaoIniciadaEm=Date.now();
+let ultimaChecagem=0;
+let avisoVersaoMostrado=false;
+
+// Compara a versão carregada com a que está no ar
+async function checarVersao(){
+  try{
+    const r=await fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'});
+    if(!r.ok)return;
+    const txt=await r.text();
+    const m=txt.match(/APP_VER='([^']+)'; \/\*BUILD\*\//);
+    if(m&&m[1]&&m[1]!==APP_VER&&!avisoVersaoMostrado){
+      avisoVersaoMostrado=true;
+      document.getElementById('barAtualiza').classList.add('show');
+    }
+  }catch(e){/* offline ou bloqueado: ignora */}
+}
+
+// Verifica se o admin mandou derrubar as sessões
+async function checarLogoutGeral(){
+  try{
+    const rows=await sb.get('config','?chave=eq.logout_geral');
+    if(!rows||!rows.length)return;
+    const marca=parseInt(rows[0].valor)||0;
+    if(marca>sessaoIniciadaEm){
+      alert('O portal foi atualizado. Você será redirecionado para o login.');
+      sessionStorage.removeItem('mph_user');
+      sessionStorage.removeItem('mph_admin');
+      location.reload(true);
+    }
+  }catch(e){/* tabela pode não existir ainda */}
+}
+
+// Roda as duas checagens, com limite de frequência
+async function checarAtualizacoes(forcar){
+  const agora=Date.now();
+  if(!forcar&&agora-ultimaChecagem<5*60*1000)return;
+  ultimaChecagem=agora;
+  if(!currentUser)return;
+  await checarLogoutGeral();
+  await checarVersao();
+}
+
+// Admin derruba todas as sessões
+async function forcarLogoutGeral(){
+  if(!isAdmin){toast('Apenas administradores','err');return;}
+  if(!confirm('Derrubar a sessão de todos os usuários?\n\nCada um voltará para o login e vai carregar a versão nova do portal.\nVocê também será desconectado.'))return;
+  try{
+    const marca=String(Date.now()+2000);
+    const existe=await sb.get('config','?chave=eq.logout_geral');
+    if(existe&&existe.length){
+      await sbReq('config','PATCH',{valor:marca,atualizado_em:new Date().toISOString()},'?chave=eq.logout_geral');
+    }else{
+      await sb.post('config',{chave:'logout_geral',valor:marca});
+    }
+    audLog('editar','equipe',null,'Atualização geral',[{campo:'sessões',de:'ativas',para:'encerradas'}]);
+    toast('Sessões encerradas. Recarregando...','ok');
+    setTimeout(function(){
+      sessionStorage.removeItem('mph_user');
+      sessionStorage.removeItem('mph_admin');
+      location.reload(true);
+    },1400);
+  }catch(e){
+    toast('Erro: '+(e.message||'').substring(0,70),'err');
+  }
+}
+
+// Checa quando a aba volta ao foco — o momento que importa
+document.addEventListener('visibilitychange',function(){
+  if(!document.hidden)checarAtualizacoes(false);
+});
+window.addEventListener('focus',function(){checarAtualizacoes(false);});
+// E de tempos em tempos, para quem deixa a aba aberta na frente
+setInterval(function(){checarAtualizacoes(false);},5*60*1000);
+
 // ── INIT ──
 window.onload=async()=>{
   applyTheme();
@@ -4033,6 +4130,9 @@ window.onload=async()=>{
     const ba2=document.getElementById('btnAvaliacoes');if(ba2)ba2.style.display=isAdmin?'inline-block':'none';
     const be2=document.getElementById('btnEquipe');if(be2)be2.style.display=isAdmin?'inline-block':'none';
     const bau2=document.getElementById('btnAuditoria');if(bau2)bau2.style.display=isAdmin?'inline-block':'none';
+    const bfo2=document.getElementById('btnForcar');if(bfo2)bfo2.style.display=isAdmin?'inline-block':'none';
+    sessaoIniciadaEm=Date.now();
+    setTimeout(function(){checarAtualizacoes(true);},45000);
     loadDash();
   }
 };
