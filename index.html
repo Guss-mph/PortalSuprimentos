@@ -2207,7 +2207,7 @@ function loginSuccess(user,admin){
   // Registra acesso no banco
   sb.post('acessos',{id:Date.now(),usuario:user}).catch(e=>console.warn('Acesso:',e));
   sessaoIniciadaEm=Date.now();
-  setTimeout(function(){checarAtualizacoes(true);},45000);
+  setTimeout(function(){checarAtualizacoes(true);},8000);
   loadDash();
 }
 
@@ -4036,7 +4036,7 @@ function gerarRelatorioAuditoria(){
 
 // ── CONTROLE DE VERSAO E SESSAO ──
 // Marcador da build. Trocado a cada publicação.
-const APP_VER='2026.09.15.2007'; /*BUILD*/
+const APP_VER='2026.09.15.2024'; /*BUILD*/
 let sessaoIniciadaEm=Date.now();
 let ultimaChecagem=0;
 let avisoVersaoMostrado=false;
@@ -4072,11 +4072,13 @@ async function checarLogoutGeral(){
 
 // Roda as duas checagens, com limite de frequência
 async function checarAtualizacoes(forcar){
-  const agora=Date.now();
-  if(!forcar&&agora-ultimaChecagem<5*60*1000)return;
-  ultimaChecagem=agora;
   if(!currentUser)return;
+  // Logout geral tem prioridade: sempre verifica
   await checarLogoutGeral();
+  // Comparação de versão baixa o HTML, então respeita o limitador
+  const agora=Date.now();
+  if(!forcar&&agora-ultimaChecagem<60*1000)return;
+  ultimaChecagem=agora;
   await checarVersao();
 }
 
@@ -4110,7 +4112,7 @@ document.addEventListener('visibilitychange',function(){
 });
 window.addEventListener('focus',function(){checarAtualizacoes(false);});
 // E de tempos em tempos, para quem deixa a aba aberta na frente
-setInterval(function(){checarAtualizacoes(false);},5*60*1000);
+setInterval(function(){checarAtualizacoes(false);},2*60*1000);
 
 // ── INIT ──
 window.onload=async()=>{
@@ -4132,7 +4134,7 @@ window.onload=async()=>{
     const bau2=document.getElementById('btnAuditoria');if(bau2)bau2.style.display=isAdmin?'inline-block':'none';
     const bfo2=document.getElementById('btnForcar');if(bfo2)bfo2.style.display=isAdmin?'inline-block':'none';
     sessaoIniciadaEm=Date.now();
-    setTimeout(function(){checarAtualizacoes(true);},45000);
+    setTimeout(function(){checarAtualizacoes(true);},8000);
     loadDash();
   }
 };
