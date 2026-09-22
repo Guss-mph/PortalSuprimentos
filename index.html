@@ -2527,7 +2527,7 @@ let obrasDivisao=[];
 async function loadObrasDivisao(){
   try{
     const all=await sb.get('obras_divisao','?order=criado_em.desc')||[];
-    obrasDivisao=isAdmin?all:all.filter(o=>o.comprador===currentUser);
+    obrasDivisao=all;   // todos veem todas as obras; edição continua restrita ao dono ou admin
     renderObrasDivisao();renderObrasDivisaoStats();
   }catch(e){console.error('obras div err:',e);}
 }
@@ -2547,7 +2547,7 @@ function renderObrasDivisaoStats(){
   // Faixa de resumo por comprador
   const teamEl=document.getElementById('obras-team-bar');
   if(!teamEl)return;
-  const membros=isAdmin?TEAM:TEAM.filter(t=>t.name===currentUser);
+  const membros=TEAM;
   teamEl.innerHTML=membros.map(m=>{
     const total=obrasDivisao.filter(o=>o.comprador===m.name).length;
     const mAnd=obrasDivisao.filter(o=>o.comprador===m.name&&o.status==='andamento').length;
@@ -4036,7 +4036,7 @@ function gerarRelatorioAuditoria(){
 
 // ── CONTROLE DE VERSAO E SESSAO ──
 // Marcador da build. Trocado a cada publicação.
-const APP_VER='2026.09.15.2024'; /*BUILD*/
+const APP_VER='2026.09.22.1343'; /*BUILD*/
 let sessaoIniciadaEm=Date.now();
 let ultimaChecagem=0;
 let avisoVersaoMostrado=false;
