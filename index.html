@@ -1038,7 +1038,7 @@ Com <strong>apenas registros em aberto</strong>, os mapas conclu&iacute;dos e ob
     <div class="tbl-head">
       <span style="font-size:13px;font-weight:600;">Obras em Andamento</span>
       <div class="filters">
-        <input class="fsearch" id="obrasDivSearch" placeholder="🔍 Buscar obra..." oninput="renderObrasDivisao()">
+        <input class="fsearch" id="obrasDivSearch" placeholder="🔍 Obra, rua, cidade, engenheiro..." oninput="renderObrasDivisao()">
         <select class="fsel" id="obrasDivFComp" onchange="renderObrasDivisao()">
           <option value="">Todos</option>
           <option>Andressa</option><option>Gustavo</option><option>Gisele</option><option>Novaes</option><option>Henrique</option>
@@ -2570,7 +2570,8 @@ function renderObrasDivisao(){
   const fst=document.getElementById('obrasDivFStatus').value;
   const ativas=obrasDivisao.filter(o=>{
     if(!fst&&o.status==='finalizada')return false;
-    if(s&&!`${o.nome} ${o.comprador} ${o.cidade||''} ${o.coordenador||''} ${o.fat1||''}`.toLowerCase().includes(s))return false;
+    const alvo=`${o.nome} ${o.comprador} ${o.endereco||''} ${o.cidade||''} ${o.coordenador||''} ${o.apoio||''} ${o.eng_ini||''} ${o.tipo||''} ${o.fat1||''} ${o.fat2||''} ${o.ano||''}`;
+    if(s&&!alvo.toLowerCase().includes(s))return false;
     if(fc&&o.comprador!==fc)return false;
     if(ft&&o.tipo!==ft)return false;
     if(fst){
@@ -2594,7 +2595,7 @@ function renderObrasDivisao(){
   const cv=(v)=>v?`<span style="font-size:12px">${v}</span>`:falta;
   const canEdit=o=>isAdmin||o.comprador===currentUser;
   const renderRow=o=>`<tr style="${o.status==='checklist'?'background:var(--row-warn)':''}">
-    <td style="font-weight:600;font-size:13px">${o.nome}</td>
+    <td style="font-weight:600;font-size:13px">${o.nome}${o.endereco?`<div style="font-weight:400;font-size:11px;color:var(--muted);margin-top:2px">${o.endereco}</div>`:''}</td>
     <td><div class="avc">${avEl(o.comprador)}${o.comprador}</div></td>
     <td style="font-size:12px;color:var(--muted)">${o.ano||'—'}</td>
     <td>${cv(o.fat1)}${o.fat2?`<br><span style="color:var(--muted);font-size:11px">${o.fat2}</span>`:''}</td>
@@ -2620,7 +2621,7 @@ function renderObrasDivisao(){
     </button>
     <div class="concl-body">
       ${thead+finalizadas.map(o=>`<tr style="opacity:.6">
-        <td style="font-weight:600;font-size:13px">${o.nome}</td>
+        <td style="font-weight:600;font-size:13px">${o.nome}${o.endereco?`<div style="font-weight:400;font-size:11px;color:var(--muted);margin-top:2px">${o.endereco}</div>`:''}</td>
         <td><div class="avc">${avEl(o.comprador)}${o.comprador}</div></td>
         <td style="font-size:12px;color:var(--muted)">${o.ano||'—'}</td>
         <td style="font-size:12px">${o.fat1||'—'}</td>
@@ -4036,7 +4037,7 @@ function gerarRelatorioAuditoria(){
 
 // ── CONTROLE DE VERSAO E SESSAO ──
 // Marcador da build. Trocado a cada publicação.
-const APP_VER='2026.09.22.1343'; /*BUILD*/
+const APP_VER='2026.09.23.1730'; /*BUILD*/
 let sessaoIniciadaEm=Date.now();
 let ultimaChecagem=0;
 let avisoVersaoMostrado=false;
