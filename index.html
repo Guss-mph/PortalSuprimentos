@@ -7,8 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--red:#EF3236;--red-light:#FEE2E2;--green:#16A34A;--green-light:#DCFCE7;--yellow:#D97706;--yellow-light:#FEF3C7;--blue:#2563EB;--blue-light:#DBEAFE;--purple:#7C3AED;--purple-light:#EDE9FE;--orange:#EA580C;--orange-light:#FFEDD5;--gray:#6B7280;--dark:#2C2C2C;}
-body.light{--bg:#EBEBEB;--surface:#FFFFFF;--surface2:#F5F5F5;--border:#E0E0E0;--text:#1A1A1A;--muted:#6B6B6B;--shadow:0 1px 4px rgba(0,0,0,.08);--row-alert:#FEE9E9;--row-warn:#FDF3DC;}
-body.dark{--bg:#0D0F18;--surface:#161927;--surface2:#1E2235;--border:#2A2F45;--text:#E8EAF0;--muted:#7A80A0;--shadow:0 1px 4px rgba(0,0,0,.4);--row-alert:#3A1D22;--row-warn:#3A2E18;}
+body.light{--bg:#EBEBEB;--surface:#FFFFFF;--surface2:#F5F5F5;--border:#E0E0E0;--text:#1A1A1A;--muted:#6B6B6B;--shadow:0 1px 4px rgba(0,0,0,.08);--row-alert:#FEE9E9;--row-warn:#FDF3DC;--row-info:#E8F1FB;--row-reg:#F2EBFC;}
+body.dark{--bg:#0D0F18;--surface:#161927;--surface2:#1E2235;--border:#2A2F45;--text:#E8EAF0;--muted:#7A80A0;--shadow:0 1px 4px rgba(0,0,0,.4);--row-alert:#3A1D22;--row-warn:#3A2E18;--row-info:#172539;--row-reg:#241B38;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
@@ -49,6 +49,7 @@ header{background:var(--dark);padding:0 24px;display:flex;align-items:center;jus
 
 /* STATS ROW */
 .stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+#obras-stats{grid-template-columns:repeat(7,1fr);}
 .stat-c{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;box-shadow:var(--shadow);}
 .stat-c .sl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);}
 .stat-c .sv{font-size:26px;font-weight:700;margin-top:3px;}
@@ -75,6 +76,10 @@ body.dark .badge{filter:brightness(.55) saturate(1.4);}
 .s-atencao{background:var(--yellow-light);color:var(--yellow);}.s-atencao::before{background:var(--yellow);}
 .s-ok{background:var(--green-light);color:var(--green);}.s-ok::before{background:var(--green);}
 .s-concluido{background:#F3F4F6;color:var(--gray);}.s-concluido::before{background:var(--gray);}
+.s-manut{background:#DBEAFE;color:#1D4ED8;}.s-manut::before{background:#1D4ED8;}
+.s-regul{background:#EDE9FE;color:#6D28D9;}.s-regul::before{background:#6D28D9;}
+body.dark .s-manut{background:rgba(59,130,246,.22);color:#93C5FD;}
+body.dark .s-regul{background:rgba(139,92,246,.22);color:#C4B5FD;}
 body.dark .s-concluido,body.dark .s-concluido2{background:#2A2F45;color:#9CA3AF;}
 body.dark .s-vencido{background:rgba(239,50,54,.22);color:#FCA5A5;}
 body.dark .s-critico{background:rgba(239,50,54,.22);color:#FCA5A5;}
@@ -360,6 +365,7 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
 @media(max-width:900px){
   .kpi-grid{grid-template-columns:1fr 1fr;}
   .stats-row{grid-template-columns:1fr 1fr;}
+  #obras-stats{grid-template-columns:1fr 1fr;}
   .dash-tables{grid-template-columns:1fr;}
   .dash-painel-body{grid-template-columns:1fr;}
   .proj-board{grid-template-columns:1fr 1fr;}
@@ -908,7 +914,7 @@ Com <strong>apenas registros em aberto</strong>, os mapas conclu&iacute;dos e ob
     <div class="f"><label>Coordenador</label><input id="odCoordenador" placeholder="Nome do coordenador"></div>
     <div class="f"><label>Apoio</label><input id="odApoio" placeholder="Nome do apoio"></div>
     <div class="f" style="grid-column:span 2"><label>Engenheiro</label><input id="odEngIni" placeholder="Nome do engenheiro"></div>
-    <div class="f"><label>Status</label><select id="odStatus"><option value="andamento">Em andamento</option><option value="checklist">Checklist</option><option value="finalizada">Finalizada</option></select></div>
+    <div class="f"><label>Status</label><select id="odStatus"><option value="andamento">Em andamento</option><option value="checklist">Checklist</option><option value="manutencao">Manuten&ccedil;&atilde;o</option><option value="regularizacao">Regulariza&ccedil;&atilde;o</option><option value="finalizada">Finalizada</option></select></div>
   </div>
   <div class="modal-foot">
     <button class="btn-sec" onclick="closeOv('ovObraDiv')">Cancelar</button>
@@ -1051,6 +1057,8 @@ Com <strong>apenas registros em aberto</strong>, os mapas conclu&iacute;dos e ob
           <option value="">Todos status</option>
           <option value="andamento">Em andamento</option>
           <option value="checklist">Checklist</option>
+          <option value="manutencao">Manuten&ccedil;&atilde;o</option>
+          <option value="regularizacao">Regulariza&ccedil;&atilde;o</option>
           <option value="finalizada">Finalizada</option>
         </select>
       </div>
@@ -2536,10 +2544,14 @@ function renderObrasDivisaoStats(){
   const el=document.getElementById('obras-stats');if(!el)return;
   const and=obrasDivisao.filter(o=>o.status==='andamento').length;
   const chk=obrasDivisao.filter(o=>o.status==='checklist').length;
+  const man=obrasDivisao.filter(o=>o.status==='manutencao').length;
+  const reg=obrasDivisao.filter(o=>o.status==='regularizacao').length;
   const fin=obrasDivisao.filter(o=>o.status==='finalizada').length;
   el.innerHTML=`
     <div class="stat-c" style="border-left:4px solid #0F766E"><div class="sl">Em Andamento</div><div class="sv" style="color:#0F766E">${and}</div></div>
     <div class="stat-c" style="border-left:4px solid var(--yellow)"><div class="sl">Checklist</div><div class="sv" style="color:var(--yellow)">${chk}</div></div>
+    <div class="stat-c" style="border-left:4px solid #1D4ED8"><div class="sl">Manuten&ccedil;&atilde;o</div><div class="sv" style="color:#1D4ED8">${man}</div></div>
+    <div class="stat-c" style="border-left:4px solid #6D28D9"><div class="sl">Regulariza&ccedil;&atilde;o</div><div class="sv" style="color:#6D28D9">${reg}</div></div>
     <div class="stat-c" style="border-left:4px solid var(--green)"><div class="sl">Finalizadas</div><div class="sv c-green">${fin}</div></div>
     <div class="stat-c"><div class="sl">Total</div><div class="sv c-text">${obrasDivisao.length}</div></div>
     <div class="stat-c"><div class="sl">Compradores</div><div class="sv c-text">${[...new Set(obrasDivisao.map(o=>o.comprador))].length}</div></div>`;
@@ -2552,12 +2564,20 @@ function renderObrasDivisaoStats(){
     const total=obrasDivisao.filter(o=>o.comprador===m.name).length;
     const mAnd=obrasDivisao.filter(o=>o.comprador===m.name&&o.status==='andamento').length;
     const mChk=obrasDivisao.filter(o=>o.comprador===m.name&&o.status==='checklist').length;
+    const mMan=obrasDivisao.filter(o=>o.comprador===m.name&&o.status==='manutencao').length;
+    const mReg=obrasDivisao.filter(o=>o.comprador===m.name&&o.status==='regularizacao').length;
     const mFin=obrasDivisao.filter(o=>o.comprador===m.name&&o.status==='finalizada').length;
+    const partes=[];
+    if(mAnd)partes.push(mAnd+' andamento');
+    if(mChk)partes.push(mChk+' checklist');
+    if(mMan)partes.push(mMan+' manuten\u00e7\u00e3o');
+    if(mReg)partes.push(mReg+' regulariza\u00e7\u00e3o');
+    if(mFin)partes.push(mFin+' finalizada'+(mFin!==1?'s':''));
     return`<div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:10px 16px;display:flex;align-items:center;gap:10px;min-width:170px;">
       <div class="av-md" style="background:${m.color};border:2.5px solid ${m.border||'#9E9E9E'}">${ini(m.name)}</div>
       <div>
         <div style="font-size:13px;font-weight:700;color:var(--text)">${m.name}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${total} obra${total!==1?'s':''} · ${mAnd} andamento · ${mChk} checklist · ${mFin} finalizada${mFin!==1?'s':''}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${total} obra${total!==1?'s':''}${partes.length?' · '+partes.join(' · '):''}</div>
       </div>
     </div>`;
   }).join('');
@@ -2588,13 +2608,16 @@ function renderObrasDivisao(){
 
   const stBadge=o=>{
     if(o.status==='checklist')return'<span class="sbadge s-atencao">📋 Checklist</span>';
+    if(o.status==='manutencao')return'<span class="sbadge s-manut">🔧 Manuten\u00e7\u00e3o</span>';
+    if(o.status==='regularizacao')return'<span class="sbadge s-regul">📑 Regulariza\u00e7\u00e3o</span>';
     return '<span class="sbadge s-ok">✅ Em andamento</span>';
   };
+  const stRowBg=o=>o.status==='checklist'?'background:var(--row-warn)':o.status==='manutencao'?'background:var(--row-info)':o.status==='regularizacao'?'background:var(--row-reg)':'';
 
   const falta='<span style="color:var(--red);font-size:10px;font-weight:700;">FALTA INFORMAR</span>';
   const cv=(v)=>v?`<span style="font-size:12px">${v}</span>`:falta;
   const canEdit=o=>isAdmin||o.comprador===currentUser;
-  const renderRow=o=>`<tr style="${o.status==='checklist'?'background:var(--row-warn)':''}">
+  const renderRow=o=>`<tr style="${stRowBg(o)}">
     <td style="font-weight:600;font-size:13px">${o.nome}${o.endereco?`<div style="font-weight:400;font-size:11px;color:var(--muted);margin-top:2px">${o.endereco}</div>`:''}</td>
     <td><div class="avc">${avEl(o.comprador)}${o.comprador}</div></td>
     <td style="font-size:12px;color:var(--muted)">${o.ano||'—'}</td>
@@ -2858,8 +2881,8 @@ async function gerarRelatorioObras(){
 
   // Agrupa por comprador em ordem alfabética
   const compradores=[...new Set(all.map(o=>o.comprador))].sort();
-  const STATUS_LABEL={andamento:'Em andamento',checklist:'Checklist',finalizada:'Finalizada'};
-  const STATUS_BG={andamento:'#DCFCE7',checklist:'#FEF3C7',finalizada:'#F3F4F6'};
+  const STATUS_LABEL={andamento:'Em andamento',checklist:'Checklist',manutencao:'Manuten\u00e7\u00e3o',regularizacao:'Regulariza\u00e7\u00e3o',finalizada:'Finalizada'};
+  const STATUS_BG={andamento:'#DCFCE7',checklist:'#FEF3C7',manutencao:'#DBEAFE',regularizacao:'#EDE9FE',finalizada:'#F3F4F6'};
 
   const stBadgePrint=s=>{
     const bg=STATUS_BG[s]||'#fff';
@@ -2878,11 +2901,13 @@ async function gerarRelatorioObras(){
   </div>
   <div class="print-section">
     <div class="print-section-title">Resumo Geral</div>
-    <table><thead><tr><th>Total de Obras</th><th>Em Andamento</th><th>Checklist</th><th>Finalizadas</th></tr></thead>
+    <table><thead><tr><th>Total de Obras</th><th>Em Andamento</th><th>Checklist</th><th>Manuten\u00e7\u00e3o</th><th>Regulariza\u00e7\u00e3o</th><th>Finalizadas</th></tr></thead>
     <tbody><tr>
       <td>${all.length}</td>
       <td>${all.filter(o=>o.status==='andamento').length}</td>
       <td>${all.filter(o=>o.status==='checklist').length}</td>
+      <td>${all.filter(o=>o.status==='manutencao').length}</td>
+      <td>${all.filter(o=>o.status==='regularizacao').length}</td>
       <td>${all.filter(o=>o.status==='finalizada').length}</td>
     </tr></tbody></table>
   </div>`;
@@ -4037,7 +4062,7 @@ function gerarRelatorioAuditoria(){
 
 // ── CONTROLE DE VERSAO E SESSAO ──
 // Marcador da build. Trocado a cada publicação.
-const APP_VER='2026.09.23.1730'; /*BUILD*/
+const APP_VER='2026.10.19.1540'; /*BUILD*/
 let sessaoIniciadaEm=Date.now();
 let ultimaChecagem=0;
 let avisoVersaoMostrado=false;
