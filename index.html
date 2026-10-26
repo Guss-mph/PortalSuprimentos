@@ -320,6 +320,9 @@ body.dark .di-neu{background:#2A2F45;color:#9CA3AF;}
 .di-lock{font-size:10px;color:var(--muted);}
 .di-edit{background:transparent;border:1px solid var(--border);color:#B45309;border-radius:5px;padding:2px 9px;font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;margin-left:auto;}
 .di-edit:hover{background:rgba(180,83,9,.12);}
+.di-del{background:transparent;border:1px solid var(--border);color:var(--red);border-radius:5px;padding:2px 9px;font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;margin-left:6px;}
+.di-del:hover{background:var(--red-light);}
+body.dark .di-del:hover{background:rgba(239,50,54,.18);}
 .di-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
 .di-row:last-child{border-bottom:none;}
 .di-row .nm{flex:1;min-width:170px;font-size:13px;font-weight:600;}
@@ -3340,8 +3343,29 @@ function renderDiario(){
         (r.engenheiro?'<span>\u00b7 Eng. '+r.engenheiro+'</span>':'')+
         '<span class="di-lock">\u00b7 '+(editavel?(horasRestantes(r)):'\ud83d\udd12 travado')+'</span>'+
         (editavel?'<button class="di-edit" onclick="editarRegistroDiario('+r.id+')">\u270f\ufe0f editar</button>':'')+
+        (editavel?'<button class="di-del" onclick="excluirRegistroDiario('+r.id+')">\ud83d\uddd1 excluir</button>':'')+
       '</div></div>';
   }).join('');
+}
+
+// ── Excluir um registro (mesma regra da edicao) ──
+async function excluirRegistroDiario(id){
+  const r=diario.find(x=>x.id===id);
+  if(!r){toast('Registro n\u00e3o encontrado','err');return;}
+  if(!podeEditarDiario(r)){toast('Este registro j\u00e1 est\u00e1 travado','err');return;}
+  const resumo=(r.texto||'').substring(0,70)+((r.texto||'').length>70?'...':'');
+  if(!confirm('Excluir este registro do di\u00e1rio?\n\n'+r.obra_nome+' \u2014 '+fmtBR(r.data)+'\n"'+resumo+'"\n\nA exclus\u00e3o fica registrada na Auditoria.'))return;
+  try{
+    await sb.del('diario',id);
+    await audLog('excluir','diario',id,r.obra_nome+' \u2014 '+fmtBR(r.data),
+      [{campo:'texto',de:(r.texto||'').substring(0,80),para:''},
+       {campo:'impacto',de:diImpTxt(r.impacto),para:''},
+       {campo:'autor',de:r.comprador,para:''}]);
+    toast('Registro exclu\u00eddo');
+    await loadDiario();atualizaFabDiario();
+    if(document.getElementById('ovDiarioSemana').classList.contains('open'))renderRevisaoSemanal();
+    if(window.avalObraAtual)renderGabarito(window.avalObraAtual);
+  }catch(e){toast('Erro ao excluir: '+String(e.message||e).substring(0,50),'err');}
 }
 
 // ── Editar um registro existente ──
@@ -4733,7 +4757,7 @@ function gerarRelatorioAuditoria(){
 
 // ── CONTROLE DE VERSAO E SESSAO ──
 // Marcador da build. Trocado a cada publicação.
-const APP_VER='2026.10.26.1655'; /*BUILD*/
+const APP_VER='2026.10.26.1705'; /*BUILD*/
 let sessaoIniciadaEm=Date.now();
 let ultimaChecagem=0;
 let avisoVersaoMostrado=false;
