@@ -290,6 +290,75 @@ body.dark .aud-dif{background:#20243A;}
 .fab.show{display:flex;}
 .fab:hover{transform:scale(1.08);}
 
+/* ── DIARIO DE OBRA ── */
+.fab-diario{position:fixed;bottom:104px;right:32px;width:62px;height:62px;border-radius:50%;background:#B45309;color:#fff;border:none;font-size:26px;cursor:pointer;box-shadow:0 6px 20px rgba(180,83,9,.45);display:none;align-items:center;justify-content:center;z-index:201;transition:transform .15s;}
+.fab-diario.show{display:flex;}
+.fab-diario:hover{transform:scale(1.08);}
+.fab-dot{position:absolute;top:4px;right:4px;width:14px;height:14px;border-radius:50%;background:var(--red);border:2px solid var(--surface);display:none;}
+.fab-dot.on{display:block;}
+.di-banner{background:var(--surface);border:1px solid var(--border);border-left:4px solid #B45309;border-radius:10px;padding:14px 18px;margin-bottom:18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.di-banner .tit{font-size:13px;font-weight:700;color:#B45309;}
+.di-banner .sub{font-size:12px;color:var(--muted);}
+.di-b-btn{background:#B45309;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;}
+.di-b-btn.sec{background:transparent;color:var(--muted);border:1px solid var(--border);}
+.di-imp{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:600;white-space:nowrap;}
+.di-pos{background:var(--green-light);color:var(--green);}
+.di-neg{background:var(--red-light);color:var(--red);}
+.di-neu{background:#F3F4F6;color:var(--gray);}
+body.dark .di-pos{background:rgba(22,163,74,.22);color:#86EFAC;}
+body.dark .di-neg{background:rgba(239,50,54,.22);color:#FCA5A5;}
+body.dark .di-neu{background:#2A2F45;color:#9CA3AF;}
+.di-tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600;background:var(--surface2);border:1px solid var(--border);color:var(--muted);}
+.di-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 16px;margin-bottom:9px;box-shadow:var(--shadow);border-left:3px solid var(--border);}
+.di-card.pos{border-left-color:var(--green);}
+.di-card.neg{border-left-color:var(--red);}
+.di-card.neu{border-left-color:var(--gray);}
+.di-card .di-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:6px;}
+.di-card .di-obra{font-size:13px;font-weight:700;color:var(--text);}
+.di-card .di-txt{font-size:13px;color:var(--text);line-height:1.55;}
+.di-card .di-meta{font-size:11px;color:var(--muted);margin-top:6px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.di-lock{font-size:10px;color:var(--muted);}
+.di-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.di-row:last-child{border-bottom:none;}
+.di-row .nm{flex:1;min-width:170px;font-size:13px;font-weight:600;}
+.di-row .ult{font-size:11px;color:var(--muted);}
+.di-b{border:1px solid var(--border);background:var(--surface2);border-radius:7px;padding:6px 13px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;color:var(--text);}
+.di-b:hover{filter:brightness(1.08);}
+.di-b.ok{border-color:var(--green);color:var(--green);}
+.di-b.bad{border-color:var(--red);color:var(--red);}
+.di-b.done{opacity:.45;cursor:default;}
+.di-streak{display:flex;align-items:center;gap:9px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:9px 15px;}
+.di-streak .n{font-size:19px;font-weight:800;color:#B45309;}
+.di-tagpick{display:flex;flex-wrap:wrap;gap:7px;}
+.di-tagpick button{border:1.5px solid var(--border);background:var(--surface2);color:var(--text);border-radius:18px;padding:6px 13px;font-family:inherit;font-size:12px;cursor:pointer;}
+.di-tagpick button.sel{border-color:#B45309;background:rgba(180,83,9,.14);color:#B45309;font-weight:700;}
+.di-imppick{display:flex;gap:9px;}
+.di-imppick button{flex:1;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);border-radius:9px;padding:11px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;}
+.di-imppick button.sel-pos{border-color:var(--green);background:var(--green-light);color:var(--green);}
+.di-imppick button.sel-neu{border-color:var(--gray);background:#F3F4F6;color:var(--gray);}
+.di-imppick button.sel-neg{border-color:var(--red);background:var(--red-light);color:var(--red);}
+body.dark .di-imppick button.sel-neu{background:#2A2F45;color:#9CA3AF;}
+.aval-split{display:grid;grid-template-columns:1fr 390px;gap:18px;align-items:start;}
+.aval-col-gab{position:sticky;top:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 15px;max-height:62vh;overflow-y:auto;}
+.gab-head{font-size:13px;font-weight:800;color:#B45309;margin-bottom:3px;}
+.gab-sub{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:12px;}
+.gab-vazio{font-size:12px;color:var(--muted);line-height:1.6;background:var(--surface);border:1px dashed var(--border);border-radius:8px;padding:14px;}
+.gab-cat{border-top:1px solid var(--border);}
+.gab-cat-tit{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:.3px;color:var(--text);}
+.gab-cnt{font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap;}
+.gab-body{display:none;padding-bottom:8px;}
+.gab-cat.open .gab-body{display:block;}
+.gab-cat.open .gab-cnt{opacity:.5;}
+.gab-item{border-left:3px solid var(--border);padding:5px 0 5px 9px;margin-bottom:7px;}
+.gab-item.pos{border-left-color:var(--green);}
+.gab-item.neg{border-left-color:var(--red);}
+.gab-item.neu{border-left-color:var(--gray);}
+.gab-item-top{font-size:11px;color:var(--muted);margin-bottom:2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.gab-item-txt{font-size:12px;color:var(--text);line-height:1.5;}
+.gab-quiet{border-top:1px solid var(--border);margin-top:4px;padding-top:9px;font-size:11px;color:var(--muted);}
+@media(max-width:1050px){.aval-split{grid-template-columns:1fr;}.aval-col-gab{position:static;max-height:none;}}
+
+
 /* TOAST */
 .toast{position:fixed;bottom:20px;right:20px;background:var(--dark);color:#fff;padding:11px 16px;border-radius:8px;font-size:13px;font-weight:500;z-index:600;display:none;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.3);}
 .toast.show{display:flex;animation:slideUp .2s;}
@@ -456,11 +525,13 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
       <button onclick="openModule('nf')" style="background:var(--orange);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">🧾 Pendências de NF</button>
       <button id="btnObrasDiv" onclick="openModule('obras')" style="background:#0F766E;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">🏗 Divisão de Obras</button>
       <button onclick="openModule('agenda')" style="background:#0891B2;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">📅 Agenda</button>
+      <button onclick="openModule('diario')" style="background:#B45309;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">&#128214; Di&aacute;rio de Obra</button>
       <button id="btnAvaliacoes" onclick="openModule('aval')" style="display:none;background:#B45309;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">⭐ Avaliações</button>
     </div>
   </div>
 
   <!-- KPIs -->
+    <div id="dashDiario" style="display:none;"></div>
     <div id="dashAusentes" style="display:none;"></div>
 
   <div class="kpi-grid">
@@ -870,7 +941,7 @@ Com <strong>apenas registros em aberto</strong>, os mapas conclu&iacute;dos e ob
 </div></div>
 
 <!-- MODAL AVALIACAO -->
-<div class="overlay" id="ovAval"><div class="modal" style="width:760px;max-width:97vw;">
+<div class="overlay" id="ovAval"><div class="modal" style="width:1180px;max-width:97vw;">
   <div class="modal-head"><h3 id="avalTit">&#11088; Lancar Avaliacao</h3><button class="modal-x" onclick="closeOv('ovAval')">&times;</button></div>
   <div class="modal-body">
     <input type="hidden" id="avId">
@@ -886,8 +957,13 @@ Com <strong>apenas registros em aberto</strong>, os mapas conclu&iacute;dos e ob
       <div class="f"><label>Data da avaliacao</label><input type="date" id="avData"></div>
       <div class="f"><label>Nível do comprador</label><select id="avNivel"><option>Comprador Júnior</option><option>Comprador Pleno</option><option>Comprador Sênior</option></select></div>
     </div>
-    <div id="avalCriterios"></div>
-    <div class="f" style="margin-top:14px;"><label>Observacoes</label><textarea id="avObs" style="min-height:70px"></textarea></div>
+    <div class="aval-split">
+      <div class="aval-col-crit">
+        <div id="avalCriterios"></div>
+        <div class="f" style="margin-top:14px;"><label>Observacoes</label><textarea id="avObs" style="min-height:70px"></textarea></div>
+      </div>
+      <aside class="aval-col-gab" id="avalGabarito"></aside>
+    </div>
     <div style="background:var(--surface2);border-radius:8px;padding:14px 16px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;">
       <span style="font-size:13px;font-weight:600;">Nota final</span>
       <span id="avMediaLbl" style="font-size:26px;font-weight:800;color:var(--blue)">&mdash;</span>
@@ -1168,12 +1244,106 @@ Com <strong>apenas registros em aberto</strong>, os mapas conclu&iacute;dos e ob
 </div>
 </div>
 
+<!-- ===== VIEW: DIARIO DE OBRA ===== -->
+<div class="view" id="view-diario">
+<div class="wrap">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span style="font-size:28px;">&#128214;</span>
+      <div><h2 style="font-size:20px;font-weight:700;">Di&aacute;rio de Obra</h2><p style="font-size:13px;color:var(--muted);">Registro do dia a dia que sustenta a nota da avalia&ccedil;&atilde;o</p></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <button class="di-b-btn" onclick="abrirRevisaoSemanal()">&#9889; Revis&atilde;o da semana</button>
+      <button class="di-b-btn sec" onclick="abrirCfgDiario()">&#128276; Meu lembrete</button>
+      <button class="di-b-btn sec" onclick="gerarRelatorioDiario()">&#128424; PDF por obra</button>
+    </div>
+  </div>
+
+  <div class="stats-row" id="diario-stats"></div>
+
+  <div class="card" style="margin-bottom:18px;">
+    <div class="tbl-head"><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);">Quem j&aacute; registrou esta semana</span></div>
+    <div style="padding:14px 18px;display:flex;gap:12px;flex-wrap:wrap;" id="diario-team"></div>
+  </div>
+
+  <div class="card">
+    <div class="tbl-head" style="gap:8px;flex-wrap:wrap;">
+      <span style="font-size:13px;font-weight:600;">Registros</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-left:auto;">
+        <input class="fsel" id="diFBusca" oninput="renderDiario()" placeholder="&#128269; Obra, engenheiro, texto..." style="min-width:210px;">
+        <select class="fsel" id="diFComp" onchange="renderDiario()"></select>
+        <select class="fsel" id="diFObra" onchange="renderDiario()"></select>
+        <select class="fsel" id="diFImp" onchange="renderDiario()">
+          <option value="">Todos impactos</option>
+          <option value="pos">&#128077; Positivos</option>
+          <option value="neu">&#9898; Neutros</option>
+          <option value="neg">&#128078; Negativos</option>
+        </select>
+      </div>
+    </div>
+    <div style="padding:16px 18px;" id="diarioLista"></div>
+  </div>
+</div>
+</div>
+
+<!-- NOVO REGISTRO -->
+<div class="overlay" id="ovDiario"><div class="modal" style="width:620px;">
+  <div class="modal-head"><h3>&#128214; Registro no Di&aacute;rio</h3><button class="modal-x" onclick="closeOv('ovDiario')">&times;</button></div>
+  <div class="modal-body">
+    <div class="f"><label>Obra</label><select id="diObra" onchange="diObraMudou()"></select></div>
+    <div class="f"><label>Engenheiro</label><input id="diEng" readonly style="opacity:.7;"></div>
+    <div class="f"><label>O que foi?</label><div class="di-tagpick" id="diTags"></div></div>
+    <div class="f"><label>Impacto</label>
+      <div class="di-imppick">
+        <button type="button" id="diImpPos" onclick="setImpacto('pos')">&#128077; Positivo</button>
+        <button type="button" id="diImpNeu" onclick="setImpacto('neu')">&#9898; Neutro</button>
+        <button type="button" id="diImpNeg" onclick="setImpacto('neg')">&#128078; Negativo</button>
+      </div>
+    </div>
+    <div class="f"><label>O que aconteceu <span style="font-size:10px;color:var(--muted)">(1 a 3 linhas, sem frescura)</span></label><textarea id="diTexto" style="min-height:80px;" placeholder="Ex: Mapa de lou&ccedil;as parado h&aacute; 6 dias aguardando aprova&ccedil;&atilde;o."></textarea></div>
+    <div class="f" style="display:flex;align-items:center;gap:8px;">
+      <input type="checkbox" id="diReservado" style="width:auto;">
+      <label for="diReservado" style="margin:0;font-size:12px;">Reservado &mdash; s&oacute; eu e os administradores vemos</label>
+    </div>
+    <div style="font-size:11px;color:var(--muted);background:var(--surface2);border-radius:7px;padding:9px 12px;">
+      &#128274; Edit&aacute;vel por 48h. Depois trava, e toda altera&ccedil;&atilde;o fica na Auditoria.
+    </div>
+  </div>
+  <div class="modal-foot"><button class="btn-sec" onclick="closeOv('ovDiario')">Cancelar</button><button class="btn-pri" style="background:#B45309;" onclick="salvarRegistroDiario()">Registrar</button></div>
+</div></div>
+
+<!-- REVISAO DA SEMANA -->
+<div class="overlay" id="ovDiarioSemana"><div class="modal" style="width:680px;">
+  <div class="modal-head"><h3>&#9889; Revis&atilde;o da semana</h3><button class="modal-x" onclick="closeOv('ovDiarioSemana')">&times;</button></div>
+  <div class="modal-body">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Passe pelas suas obras. <b>Sem novidade</b> registra na hora &mdash; semana tranquila tamb&eacute;m &eacute; informa&ccedil;&atilde;o.</div>
+    <div id="diSemanaLista"></div>
+  </div>
+  <div class="modal-foot"><button class="btn-sec" onclick="closeOv('ovDiarioSemana')">Fechar</button></div>
+</div></div>
+
+<!-- CONFIG DO LEMBRETE -->
+<div class="overlay" id="ovDiarioCfg"><div class="modal" style="width:480px;">
+  <div class="modal-head"><h3>&#128276; Meu lembrete do Di&aacute;rio</h3><button class="modal-x" onclick="closeOv('ovDiarioCfg')">&times;</button></div>
+  <div class="modal-body">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Voc&ecirc; escolhe o dia e a hora. No dia marcado aparece um aviso no Dashboard &mdash; sem travar nada.</div>
+    <div class="f"><label>Dias da semana</label><div class="di-tagpick" id="diCfgDias"></div></div>
+    <div class="f"><label>Hor&aacute;rio</label><input type="time" id="diCfgHora" value="16:00"></div>
+    <div class="f" style="display:flex;align-items:center;gap:8px;">
+      <input type="checkbox" id="diCfgAtivo" checked style="width:auto;">
+      <label for="diCfgAtivo" style="margin:0;font-size:12px;">Quero ser lembrado</label>
+    </div>
+  </div>
+  <div class="modal-foot"><button class="btn-sec" onclick="closeOv('ovDiarioCfg')">Cancelar</button><button class="btn-pri" style="background:#B45309;" onclick="salvarCfgDiario()">Salvar</button></div>
+</div></div>
+
 <div id="barAtualiza">
   <span>&#128260; <b>Nova versao do portal disponivel.</b> Recarregue para usar as atualizacoes.</span>
   <button onclick="location.reload(true)">Atualizar agora</button>
   <button class="depois" onclick="document.getElementById('barAtualiza').classList.remove('show')">Depois</button>
 </div>
 
+<button class="fab fab-diario" id="fabDiario" onclick="abrirRegistroDiario()" title="Registrar no Diário de Obra">&#128214;<span class="fab-dot" id="fabDiarioDot"></span></button>
 <button class="fab" id="fabBtn">+</button>
 <div class="toast" id="toast"></div>
 
@@ -1336,6 +1506,8 @@ function openModule(mod){
   if(mod==='obras'){loadObrasDivisao();document.getElementById('fabBtn').onclick=()=>openObraDiv();}
   if(mod==='aval'){loadAvaliacoes();document.getElementById('fabBtn').classList.remove('show');}
   if(mod==='agenda'){loadAgenda();document.getElementById('fabBtn').onclick=()=>novoAgendaDia(today());}
+  if(mod==='diario'){loadDiario();document.getElementById('fabBtn').classList.remove('show');}
+  atualizaFabDiario();
 }
 function goHome(){
   curMod=null;
@@ -1343,6 +1515,7 @@ function goHome(){
   document.getElementById('view-home').classList.add('active');
   document.getElementById('backBtn').classList.remove('show');
   document.getElementById('fabBtn').classList.remove('show');
+  atualizaFabDiario();
   loadDash();
 }
 
@@ -1443,6 +1616,7 @@ async function loadDash(){
       nfs=nfs.filter(n=>n.responsavel===currentUser);
     }
     renderAusentesHoje();
+    renderDiarioBanner();
     const ativos=mapas.filter(m=>!m.concluido);
     const crit=ativos.filter(m=>getMSt(m)==='vencido'||getMSt(m)==='critico').length;
     const pAtiv=projetos.filter(p=>p.status==='andamento');
@@ -2219,6 +2393,7 @@ function loginSuccess(user,admin){
   sb.post('acessos',{id:Date.now(),usuario:user}).catch(e=>console.warn('Acesso:',e));
   sessaoIniciadaEm=Date.now();
   setTimeout(function(){checarAtualizacoes(true);},8000);
+  loadDiario().then(atualizaFabDiario).catch(function(){});
   loadDash();
 }
 
@@ -2251,6 +2426,7 @@ function resetSenha(user){
 }
 
 function doLogout(){
+  const _fd=document.getElementById('fabDiario');if(_fd)_fd.classList.remove('show');
   currentUser=null;isAdmin=false;
   sessionStorage.removeItem('mph_user');
   sessionStorage.removeItem('mph_admin');
@@ -3001,6 +3177,418 @@ function audDiff(antes,depois){
 }
 
 // Grava a trilha. Nunca derruba a operação principal se falhar.
+// ══════════════════════════════════════════
+//  DIARIO DE OBRA
+// ══════════════════════════════════════════
+// Cada etiqueta aponta para os criterios da avaliacao (indices c0..c19)
+const DI_TAGS=[
+  {id:'retorno',        lbl:'Retorno de aprovação', ico:'\u23f1', crits:[0,1,2]},
+  {id:'escopo',         lbl:'Alteração de escopo',  ico:'\ud83d\udd01', crits:[3,7,16]},
+  {id:'info',           lbl:'Informação incompleta',ico:'\u2753', crits:[7,17,11]},
+  {id:'prazo',          lbl:'Prazo',                ico:'\ud83d\udcc5', crits:[0,1,3]},
+  {id:'relacionamento', lbl:'Relacionamento',       ico:'\ud83e\udd1d', crits:[12,13,14,15]},
+  {id:'doc',            lbl:'Documentação',         ico:'\ud83d\udcc4', crits:[3,7,17]},
+];
+const DI_DIAS=[{n:1,l:'Seg'},{n:2,l:'Ter'},{n:3,l:'Qua'},{n:4,l:'Qui'},{n:5,l:'Sex'}];
+const DI_IMP={pos:{lbl:'Positivo',ico:'\ud83d\udc4d',cls:'di-pos'},neu:{lbl:'Neutro',ico:'\u26aa',cls:'di-neu'},neg:{lbl:'Negativo',ico:'\ud83d\udc4e',cls:'di-neu'}};
+let diario=[], diarioCfg=[], diImpSel='neu', diTagSel='', diCfgDiasSel=[];
+
+function diTag(id){return DI_TAGS.find(t=>t.id===id);}
+function diImpCls(i){return i==='pos'?'di-pos':i==='neg'?'di-neg':'di-neu';}
+function diImpTxt(i){return i==='pos'?'\ud83d\udc4d Positivo':i==='neg'?'\ud83d\udc4e Negativo':'\u26aa Neutro';}
+
+// Obras que a pessoa acompanha (admin ve todas)
+function diMinhasObras(){
+  const lista=obrasDivisao.filter(o=>o.status!=='finalizada');
+  return isAdmin?lista:lista.filter(o=>o.comprador===currentUser);
+}
+function diSegundaDaSemana(){
+  const d=new Date();d.setHours(0,0,0,0);
+  const w=d.getDay();                      // 0=dom
+  d.setDate(d.getDate()-((w+6)%7));        // volta para segunda
+  return d;
+}
+function diCfgDe(nome){
+  const c=diarioCfg.find(x=>x.comprador===nome);
+  return c||{comprador:nome,dias:[5],hora:'16:00',ativo:true};
+}
+// Quantas semanas seguidas a pessoa registrou algo
+function diSequencia(nome){
+  const regs=diario.filter(r=>r.comprador===nome);
+  if(!regs.length)return 0;
+  let seq=0, ini=diSegundaDaSemana();
+  for(let k=0;k<60;k++){
+    const a=new Date(ini);a.setDate(a.getDate()-7*k);
+    const b=new Date(a);b.setDate(b.getDate()+6);
+    const ai=toISO(a), bi=toISO(b);
+    if(regs.some(r=>r.data>=ai&&r.data<=bi))seq++;
+    else break;
+  }
+  return seq;
+}
+function diFezSemana(nome){
+  const a=toISO(diSegundaDaSemana());
+  return diario.some(r=>r.comprador===nome&&r.data>=a);
+}
+
+async function loadDiario(){
+  try{
+    if(!obrasDivisao.length){try{obrasDivisao=await sb.get('obras_divisao','?order=criado_em.desc')||[];}catch(e){}}
+    const all=await sb.get('diario','?order=data.desc')||[];
+    diario=all.filter(r=>!r.reservado||isAdmin||r.comprador===currentUser);
+    diarioCfg=await sb.get('diario_config','')||[];
+    popDiarioFiltros();
+    renderDiarioStats();renderDiario();
+  }catch(e){
+    console.error('diario:',e);
+    const c=document.getElementById('diarioLista');
+    if(c)c.innerHTML='<div class="empty">N\u00e3o foi poss\u00edvel carregar o di\u00e1rio.<br>'+
+      '<span style="font-size:12px;">'+String(e.message||e).substring(0,140)+'</span><br><br>'+
+      '<button class="di-b-btn" onclick="loadDiario()">Tentar de novo</button></div>';
+  }
+}
+
+function popDiarioFiltros(){
+  const fc=document.getElementById('diFComp');
+  if(fc){const v=fc.value;fc.innerHTML='<option value="">Todos compradores</option>'+TEAM.map(t=>'<option>'+t.name+'</option>').join('');fc.value=v;}
+  const fo=document.getElementById('diFObra');
+  if(fo){const v=fo.value;const obras=[...new Set(diario.map(r=>r.obra_nome))].sort();
+    fo.innerHTML='<option value="">Todas obras</option>'+obras.map(o=>'<option>'+o+'</option>').join('');fo.value=v;}
+}
+
+function renderDiarioStats(){
+  const el=document.getElementById('diario-stats');if(!el)return;
+  const meus=isAdmin?diario:diario.filter(r=>r.comprador===currentUser);
+  const ini=toISO(diSegundaDaSemana());
+  const semana=meus.filter(r=>r.data>=ini).length;
+  const pos=meus.filter(r=>r.impacto==='pos').length;
+  const neg=meus.filter(r=>r.impacto==='neg').length;
+  const obras=diMinhasObras();
+  const comReg=obras.filter(o=>meus.some(r=>r.obra_nome===o.nome)).length;
+  const cob=obras.length?Math.round(comReg/obras.length*100):0;
+  const seq=diSequencia(currentUser);
+  el.innerHTML=
+    '<div class="stat-c" style="border-left:4px solid #B45309"><div class="sl">Esta semana</div><div class="sv" style="color:#B45309">'+semana+'</div></div>'+
+    '<div class="stat-c" style="border-left:4px solid var(--green)"><div class="sl">Positivos</div><div class="sv c-green">'+pos+'</div></div>'+
+    '<div class="stat-c" style="border-left:4px solid var(--red)"><div class="sl">Negativos</div><div class="sv c-red">'+neg+'</div></div>'+
+    '<div class="stat-c"><div class="sl">Cobertura das obras</div><div class="sv c-text">'+cob+'%</div></div>'+
+    '<div class="stat-c"><div class="sl">Total no ciclo</div><div class="sv c-text">'+meus.length+'</div></div>';
+
+  const te=document.getElementById('diario-team');
+  if(te){
+    te.innerHTML=TEAM.map(function(m){
+      const fez=diFezSemana(m.name), sq=diSequencia(m.name);
+      return '<div class="di-streak" style="'+(fez?'':'opacity:.55;')+'">'+
+        '<div class="av-md" style="background:'+m.color+';border:2.5px solid '+(m.border||'#9E9E9E')+'">'+ini2(m.name)+'</div>'+
+        '<div><div style="font-size:13px;font-weight:700;">'+m.name+'</div>'+
+        '<div style="font-size:11px;color:var(--muted);">'+(fez?'\u2705 registrou':'\u2014 pendente')+(sq>1?' \u00b7 '+sq+' sem \ud83d\udd25':'')+'</div></div></div>';
+    }).join('');
+  }
+}
+function ini2(n){return n?n[0].toUpperCase():'?';}
+
+function renderDiario(){
+  const c=document.getElementById('diarioLista');if(!c)return;
+  const bu=(document.getElementById('diFBusca').value||'').toLowerCase();
+  const fc=document.getElementById('diFComp').value;
+  const fo=document.getElementById('diFObra').value;
+  const fi=document.getElementById('diFImp').value;
+  let lista=diario.slice();
+  if(fc)lista=lista.filter(r=>r.comprador===fc);
+  if(fo)lista=lista.filter(r=>r.obra_nome===fo);
+  if(fi)lista=lista.filter(r=>r.impacto===fi);
+  if(bu)lista=lista.filter(r=>((r.obra_nome||'')+' '+(r.engenheiro||'')+' '+(r.texto||'')).toLowerCase().includes(bu));
+  lista.sort((a,b)=>b.data.localeCompare(a.data));
+  if(!lista.length){c.innerHTML='<div class="empty">Nenhum registro encontrado</div>';return;}
+  const agora=Date.now();
+  c.innerHTML=lista.map(function(r){
+    const t=diTag(r.tag);
+    const editavel=r.comprador===currentUser&&(agora-new Date(r.criado_em).getTime())<48*3600*1000;
+    return '<div class="di-card '+(r.impacto||'neu')+'">'+
+      '<div class="di-top">'+
+        '<span class="di-obra">'+r.obra_nome+'</span>'+
+        '<span class="di-imp '+diImpCls(r.impacto)+'">'+diImpTxt(r.impacto)+'</span>'+
+        (t?'<span class="di-tag">'+t.ico+' '+t.lbl+'</span>':'')+
+        (r.reservado?'<span class="di-tag" style="color:var(--red);border-color:var(--red);">\ud83d\udd12 Reservado</span>':'')+
+      '</div>'+
+      '<div class="di-txt">'+(r.texto||'')+'</div>'+
+      '<div class="di-meta">'+
+        '<span>'+avEl(r.comprador)+' '+r.comprador+'</span>'+
+        '<span>\u00b7 '+fmtBR(r.data)+'</span>'+
+        (r.engenheiro?'<span>\u00b7 Eng. '+r.engenheiro+'</span>':'')+
+        '<span class="di-lock">\u00b7 '+(editavel?'edit\u00e1vel por 48h':'\ud83d\udd12 travado')+'</span>'+
+      '</div></div>';
+  }).join('');
+}
+
+// ── Novo registro (FAB em qualquer tela) ──
+function abrirRegistroDiario(obraNome){
+  if(!currentUser)return;
+  const sel=document.getElementById('diObra');
+  const obras=diMinhasObras();
+  if(!obras.length){toast('Nenhuma obra ativa na sua carteira','err');return;}
+  sel.innerHTML=obras.map(o=>'<option>'+o.nome+'</option>').join('');
+  // contexto: obra passada, ou a que estiver em foco na tela atual
+  const ctx=obraNome||diObraDoContexto();
+  if(ctx&&obras.some(o=>o.nome===ctx))sel.value=ctx;
+  diObraMudou();
+  diTagSel='';diImpSel='neu';
+  document.getElementById('diTexto').value='';
+  document.getElementById('diReservado').checked=false;
+  renderDiTags();setImpacto('neu');
+  openOv('ovDiario');
+}
+// Tenta descobrir a obra em foco na tela atual
+function diObraDoContexto(){
+  try{
+    if(curMod==='obras'){const f=document.getElementById('obrasDivFBusca');}
+    if(curMod==='aval'&&window.avalObraAtual)return window.avalObraAtual;
+  }catch(e){}
+  return '';
+}
+function renderDiTags(){
+  document.getElementById('diTags').innerHTML=DI_TAGS.map(function(t){
+    return '<button type="button" class="'+(diTagSel===t.id?'sel':'')+'" onclick="setDiTag(\''+t.id+'\')">'+t.ico+' '+t.lbl+'</button>';
+  }).join('');
+}
+function setDiTag(id){diTagSel=(diTagSel===id?'':id);renderDiTags();}
+function setImpacto(i){
+  diImpSel=i;
+  ['pos','neu','neg'].forEach(function(k){
+    const b=document.getElementById('diImp'+k[0].toUpperCase()+k.slice(1));
+    if(b)b.className=(k===i?'sel-'+k:'');
+  });
+}
+function diObraMudou(){
+  const nome=document.getElementById('diObra').value;
+  const o=obrasDivisao.find(x=>x.nome===nome);
+  document.getElementById('diEng').value=o&&o.eng_ini?o.eng_ini:'\u2014 n\u00e3o informado no cadastro';
+}
+async function salvarRegistroDiario(){
+  const obra=document.getElementById('diObra').value;
+  const txt=document.getElementById('diTexto').value.trim();
+  if(!txt){toast('Escreva o que aconteceu','err');return;}
+  const o=obrasDivisao.find(x=>x.nome===obra);
+  const reg={
+    id:Date.now(), obra_nome:obra, comprador:currentUser,
+    engenheiro:o&&o.eng_ini?o.eng_ini:'', data:today(), tag:diTagSel,
+    impacto:diImpSel, texto:txt,
+    reservado:document.getElementById('diReservado').checked,
+    ciclo:cicloAtual(),
+  };
+  try{
+    await sb.post('diario',reg);
+    await audLog('criar','diario',reg.id,obra+' \u2014 '+(diTag(diTagSel)?diTag(diTagSel).lbl:'registro'),
+      [{campo:'impacto',de:'',para:diImpTxt(diImpSel)},{campo:'texto',de:'',para:txt.substring(0,80)}]);
+    closeOv('ovDiario');
+    toast('Registrado no di\u00e1rio!');
+    await loadDiario();atualizaFabDiario();
+    if(curMod==='diario'){renderDiarioStats();renderDiario();}
+  }catch(e){toast('Erro ao salvar: '+e.message.substring(0,50),'err');}
+}
+
+// ── Revisao da semana: 3 cliques por obra ──
+function abrirRevisaoSemanal(){
+  renderRevisaoSemanal();
+  openOv('ovDiarioSemana');
+}
+function renderRevisaoSemanal(){
+  const ini=toISO(diSegundaDaSemana());
+  const obras=diMinhasObras();
+  const el=document.getElementById('diSemanaLista');
+  if(!obras.length){el.innerHTML='<div class="empty">Nenhuma obra ativa</div>';return;}
+  el.innerHTML=obras.map(function(o){
+    const jaFez=diario.some(r=>r.obra_nome===o.nome&&r.comprador===currentUser&&r.data>=ini);
+    const ult=diario.filter(r=>r.obra_nome===o.nome).sort((a,b)=>b.data.localeCompare(a.data))[0];
+    return '<div class="di-row">'+
+      '<div class="nm">'+o.nome+'<div class="ult">'+(ult?'\u00faltimo: '+fmtBR(ult.data):'nunca registrado')+'</div></div>'+
+      (jaFez
+        ? '<span class="di-imp di-pos">\u2705 feito esta semana</span>'
+        : '<button class="di-b ok" onclick="abrirRegistroDiario(\''+o.nome.replace(/'/g,"\\'")+'\');setImpacto(\'pos\')">\ud83d\udc4d</button>'+
+          '<button class="di-b bad" onclick="abrirRegistroDiario(\''+o.nome.replace(/'/g,"\\'")+'\');setImpacto(\'neg\')">\ud83d\udc4e</button>'+
+          '<button class="di-b" onclick="semNovidade('+o.id+')">Sem novidade</button>')+
+    '</div>';
+  }).join('');
+}
+async function semNovidade(obraId){
+  const o=obrasDivisao.find(x=>x.id===obraId);if(!o)return;
+  const reg={id:Date.now(),obra_nome:o.nome,comprador:currentUser,engenheiro:o.eng_ini||'',
+    data:today(),tag:'',impacto:'neu',texto:'Semana sem ocorrencias.',reservado:false,ciclo:cicloAtual()};
+  try{
+    await sb.post('diario',reg);
+    await audLog('criar','diario',reg.id,o.nome+' \u2014 sem novidade',[{campo:'texto',de:'',para:'Semana sem ocorrencias'}]);
+    await loadDiario();renderRevisaoSemanal();atualizaFabDiario();
+    toast(o.nome+': semana sem ocorr\u00eancias');
+  }catch(e){toast('Erro: '+e.message.substring(0,50),'err');}
+}
+
+// ── Lembrete configuravel ──
+function abrirCfgDiario(){
+  const c=diCfgDe(currentUser);
+  diCfgDiasSel=(c.dias||[5]).slice();
+  renderCfgDias();
+  document.getElementById('diCfgHora').value=c.hora||'16:00';
+  document.getElementById('diCfgAtivo').checked=c.ativo!==false;
+  openOv('ovDiarioCfg');
+}
+function renderCfgDias(){
+  document.getElementById('diCfgDias').innerHTML=DI_DIAS.map(function(d){
+    return '<button type="button" class="'+(diCfgDiasSel.includes(d.n)?'sel':'')+'" onclick="toggleCfgDia('+d.n+')">'+d.l+'</button>';
+  }).join('');
+}
+function toggleCfgDia(n){
+  const i=diCfgDiasSel.indexOf(n);
+  if(i>=0)diCfgDiasSel.splice(i,1);else diCfgDiasSel.push(n);
+  renderCfgDias();
+}
+async function salvarCfgDiario(){
+  if(!diCfgDiasSel.length){toast('Escolha ao menos um dia','err');return;}
+  const body={comprador:currentUser,dias:diCfgDiasSel.slice().sort(),
+    hora:document.getElementById('diCfgHora').value,ativo:document.getElementById('diCfgAtivo').checked};
+  try{
+    const ex=diarioCfg.find(c=>c.comprador===currentUser);
+    if(ex){
+      await sbReq('diario_config','PATCH',{dias:body.dias,hora:body.hora,ativo:body.ativo},
+        '?comprador=eq.'+encodeURIComponent(currentUser));
+      Object.assign(ex,body);
+    }else{
+      await sb.post('diario_config',body);
+      diarioCfg.push(body);
+    }
+    closeOv('ovDiarioCfg');
+    toast('Lembrete salvo: '+diCfgDiasSel.map(n=>DI_DIAS.find(d=>d.n===n).l).join(', ')+' \u00e0s '+body.hora);
+    renderDiarioBanner();
+  }catch(e){toast('Erro ao salvar','err');}
+}
+
+// ── Faixa no Dashboard no dia do lembrete ──
+async function renderDiarioBanner(){
+  const el=document.getElementById('dashDiario');if(!el||!currentUser)return;
+  if(!diario.length){try{
+    diario=await sb.get('diario','?order=data.desc')||[];
+    diarioCfg=await sb.get('diario_config','')||[];
+  }catch(e){return;}}
+  if(!obrasDivisao.length){try{obrasDivisao=await sb.get('obras_divisao','?order=criado_em.desc')||[];}catch(e){}}
+  const cfg=diCfgDe(currentUser);
+  const hoje=new Date().getDay();
+  const ini=toISO(diSegundaDaSemana());
+  const obras=diMinhasObras();
+  const pend=obras.filter(o=>!diario.some(r=>r.obra_nome===o.nome&&r.comprador===currentUser&&r.data>=ini));
+  const ehDia=cfg.ativo!==false&&(cfg.dias||[]).includes(hoje);
+  if(!ehDia||!pend.length){el.style.display='none';return;}
+  el.style.display='block';
+  const seq=diSequencia(currentUser);
+  el.innerHTML='<div class="di-banner">'+
+    '<span style="font-size:22px;">\ud83d\udcd6</span>'+
+    '<div style="flex:1;min-width:200px;">'+
+      '<div class="tit">Di\u00e1rio da semana</div>'+
+      '<div class="sub">'+pend.length+' obra'+(pend.length!==1?'s':'')+' sem registro esta semana'+(seq>1?' \u00b7 voc\u00ea est\u00e1 h\u00e1 '+seq+' semanas seguidas \ud83d\udd25':'')+'</div>'+
+    '</div>'+
+    '<button class="di-b-btn" onclick="abrirRevisaoSemanal()">Fazer agora \u2014 leva 30s</button>'+
+    '<button class="di-b-btn sec" onclick="document.getElementById(\'dashDiario\').style.display=\'none\'">Depois</button>'+
+  '</div>';
+}
+
+// ── Pontinho vermelho no botao flutuante ──
+function atualizaFabDiario(){
+  const f=document.getElementById('fabDiario');if(!f)return;
+  if(!currentUser){f.classList.remove('show');return;}
+  f.classList.add('show');
+  const dot=document.getElementById('fabDiarioDot');if(!dot)return;
+  const cfg=diCfgDe(currentUser);
+  const ini=toISO(diSegundaDaSemana());
+  const pend=diMinhasObras().filter(o=>!diario.some(r=>r.obra_nome===o.nome&&r.comprador===currentUser&&r.data>=ini));
+  const ehDia=cfg.ativo!==false&&(cfg.dias||[]).includes(new Date().getDay());
+  dot.className='fab-dot'+((ehDia&&pend.length)?' on':'');
+}
+
+// ── Evidencias por criterio (usado na tela de Avaliacao) ──
+function diEvidencias(obraNome,critIdx){
+  return diario.filter(function(r){
+    if(r.obra_nome!==obraNome)return false;
+    const t=diTag(r.tag);
+    return t&&t.crits.includes(critIdx);
+  }).sort((a,b)=>b.data.localeCompare(a.data));
+}
+// Registros da obra agrupados pelas 5 categorias da avaliacao
+function renderGabarito(obraNome){
+  const el=document.getElementById('avalGabarito');if(!el)return;
+  const regs=diario.filter(r=>r.obra_nome===obraNome);
+  const quietas=regs.filter(r=>!r.tag).length;
+  const comTag=regs.filter(r=>r.tag);
+  if(!regs.length){
+    el.innerHTML='<div class="gab-head">\ud83d\udcd6 Gabarito</div>'+
+      '<div class="gab-vazio">Nenhum registro no di\u00e1rio para esta obra.<br><br>'+
+      'O gabarito serve de apoio na hora de justificar a nota \u2014 sem ele, a avalia\u00e7\u00e3o fica s\u00f3 na mem\u00f3ria.</div>';
+    return;
+  }
+  let html='<div class="gab-head">\ud83d\udcd6 Gabarito \u00b7 '+regs.length+' registro'+(regs.length!==1?'s':'')+'</div>'+
+    '<div class="gab-sub">Hist\u00f3rico do ano nesta obra, por tema. Serve de apoio para explicar a nota.</div>';
+  AVAL_CATS.forEach(function(cat,ci){
+    const idxs=[ci*4,ci*4+1,ci*4+2,ci*4+3];
+    const evs=comTag.filter(function(r){
+      const t=diTag(r.tag);
+      return t&&t.crits.some(c=>idxs.includes(c));
+    }).sort((a,b)=>b.data.localeCompare(a.data));
+    const p=evs.filter(e=>e.impacto==='pos').length, n=evs.filter(e=>e.impacto==='neg').length;
+    html+='<div class="gab-cat">'+
+      '<div class="gab-cat-tit" onclick="this.parentNode.classList.toggle(\'open\')">'+
+        '<span>'+cat.nome+'</span>'+
+        '<span class="gab-cnt">'+(evs.length?p+' \ud83d\udc4d / '+n+' \ud83d\udc4e':'\u2014')+' \u25be</span>'+
+      '</div>'+
+      '<div class="gab-body">'+
+        (evs.length
+          ? evs.map(function(e){
+              const t=diTag(e.tag);
+              return '<div class="gab-item '+(e.impacto||'neu')+'">'+
+                '<div class="gab-item-top">'+(e.impacto==='pos'?'\ud83d\udc4d':e.impacto==='neg'?'\ud83d\udc4e':'\u26aa')+
+                ' <b>'+fmtBR(e.data)+'</b>'+(t?' <span class="di-tag">'+t.lbl+'</span>':'')+'</div>'+
+                '<div class="gab-item-txt">'+e.texto+'</div></div>';
+            }).join('')
+          : '<div class="gab-item-txt" style="opacity:.6;padding:6px 0;">Nada registrado neste tema durante o ciclo.</div>')+
+      '</div></div>';
+  });
+  if(quietas)html+='<div class="gab-quiet">\u26aa '+quietas+' semana'+(quietas!==1?'s':'')+' registrada'+(quietas!==1?'s':'')+' sem ocorr\u00eancias</div>';
+  el.innerHTML=html;
+  const primeira=el.querySelector('.gab-cat');if(primeira)primeira.classList.add('open');
+}
+
+function toggleEv(id){
+  const el=document.getElementById(id);
+  if(el)el.classList.toggle('open');
+}
+
+// ── Relatorio PDF do diario por obra ──
+function gerarRelatorioDiario(){
+  const obras=[...new Set(diario.map(r=>r.obra_nome))].sort();
+  if(!obras.length){toast('Nenhum registro para imprimir','err');return;}
+  const hoje=new Date().toLocaleDateString('pt-BR');
+  let html='<div class="print-header"><div>'+
+    '<div class="print-title">MpH Engenharia \u2014 Portal de Suprimentos</div>'+
+    '<div class="print-sub">Di\u00e1rio de Obra \u2014 ciclo '+cicloAtual()+'/'+(parseInt(cicloAtual())+1)+'</div>'+
+    '</div><div class="print-date">Gerado em '+hoje+'</div></div>';
+  obras.forEach(function(nome){
+    const regs=diario.filter(r=>r.obra_nome===nome&&!r.reservado).sort((a,b)=>a.data.localeCompare(b.data));
+    if(!regs.length)return;
+    const pos=regs.filter(r=>r.impacto==='pos').length, neg=regs.filter(r=>r.impacto==='neg').length;
+    const eng=(regs.find(r=>r.engenheiro)||{}).engenheiro||'\u2014';
+    html+='<div class="print-section" style="page-break-inside:avoid;">'+
+      '<div class="print-section-title" style="color:#B45309;">\ud83d\udcd6 '+nome+'  \u00b7  Eng. '+eng+'  \u00b7  '+regs.length+' registros ('+pos+' positivos / '+neg+' negativos)</div>'+
+      '<table><thead><tr><th style="width:80px">Data</th><th style="width:120px">Tipo</th><th style="width:70px">Impacto</th><th>Ocorr\u00eancia</th><th style="width:90px">Comprador</th></tr></thead><tbody>'+
+      regs.map(function(r){
+        const t=diTag(r.tag);
+        const bg=r.impacto==='pos'?'#DCFCE7':r.impacto==='neg'?'#FEE2E2':'#fff';
+        return '<tr style="background:'+bg+'"><td>'+fmtBR(r.data)+'</td><td>'+(t?t.lbl:'\u2014')+'</td>'+
+          '<td>'+(r.impacto==='pos'?'Positivo':r.impacto==='neg'?'Negativo':'Neutro')+'</td>'+
+          '<td>'+(r.texto||'')+'</td><td>'+r.comprador+'</td></tr>';
+      }).join('')+'</tbody></table></div>';
+  });
+  document.getElementById('printArea').innerHTML=html;
+  document.getElementById('printArea').style.display='block';
+  window.print();
+  setTimeout(function(){document.getElementById('printArea').style.display='none';},400);
+}
+
 async function audLog(acao,entidade,registroId,ref,alteracoes){
   try{
     await sb.post('auditoria',{
@@ -3153,6 +3741,7 @@ function renderAvaliacoes(){
 }
 
 function openAvaliacao(obraNome){
+  window.avalObraAtual=obraNome;
   const ciclo=document.getElementById('avalCiclo').value||cicloAtual();
   const obra=obrasDivisao.find(o=>o.nome===obraNome);
   if(!obra)return;
@@ -3169,6 +3758,7 @@ function openAvaliacao(obraNome){
   document.getElementById('avalTit').textContent=(av?'✏️ Editar':'⭐ Lançar')+' Avaliação — Ciclo '+ciclo;
   avalNotas=av&&av.notas?Object.assign({},av.notas):{};
   renderCriterios();
+  renderGabarito(obraNome);
   openOv('ovAval');
 }
 
@@ -4068,7 +4658,7 @@ function gerarRelatorioAuditoria(){
 
 // ── CONTROLE DE VERSAO E SESSAO ──
 // Marcador da build. Trocado a cada publicação.
-const APP_VER='2026.10.20.1120'; /*BUILD*/
+const APP_VER='2026.10.26.1615'; /*BUILD*/
 let sessaoIniciadaEm=Date.now();
 let ultimaChecagem=0;
 let avisoVersaoMostrado=false;
