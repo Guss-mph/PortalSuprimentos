@@ -318,6 +318,8 @@ body.dark .di-neu{background:#2A2F45;color:#9CA3AF;}
 .di-card .di-txt{font-size:13px;color:var(--text);line-height:1.55;}
 .di-card .di-meta{font-size:11px;color:var(--muted);margin-top:6px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
 .di-lock{font-size:10px;color:var(--muted);}
+.di-edit{background:transparent;border:1px solid var(--border);color:#B45309;border-radius:5px;padding:2px 9px;font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;margin-left:auto;}
+.di-edit:hover{background:rgba(180,83,9,.12);}
 .di-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
 .di-row:last-child{border-bottom:none;}
 .di-row .nm{flex:1;min-width:170px;font-size:13px;font-weight:600;}
@@ -526,7 +528,7 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
       <button id="btnObrasDiv" onclick="openModule('obras')" style="background:#0F766E;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">🏗 Divisão de Obras</button>
       <button onclick="openModule('agenda')" style="background:#0891B2;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">📅 Agenda</button>
       <button onclick="openModule('diario')" style="background:#B45309;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">&#128214; Di&aacute;rio de Obra</button>
-      <button id="btnAvaliacoes" onclick="openModule('aval')" style="display:none;background:#B45309;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">⭐ Avaliações</button>
+      <button id="btnAvaliacoes" onclick="openModule('aval')" style="background:#B45309;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">⭐ Avaliações</button>
     </div>
   </div>
 
@@ -1288,7 +1290,7 @@ Com <strong>apenas registros em aberto</strong>, os mapas conclu&iacute;dos e ob
 
 <!-- NOVO REGISTRO -->
 <div class="overlay" id="ovDiario"><div class="modal" style="width:620px;">
-  <div class="modal-head"><h3>&#128214; Registro no Di&aacute;rio</h3><button class="modal-x" onclick="closeOv('ovDiario')">&times;</button></div>
+  <div class="modal-head"><h3 id="diTit">&#128214; Registro no Di&aacute;rio</h3><button class="modal-x" onclick="closeOv('ovDiario')">&times;</button></div>
   <div class="modal-body">
     <div class="f"><label>Obra</label><select id="diObra" onchange="diObraMudou()"></select></div>
     <div class="f"><label>Engenheiro</label><input id="diEng" readonly style="opacity:.7;"></div>
@@ -1305,11 +1307,14 @@ Com <strong>apenas registros em aberto</strong>, os mapas conclu&iacute;dos e ob
       <input type="checkbox" id="diReservado" style="width:auto;">
       <label for="diReservado" style="margin:0;font-size:12px;">Reservado &mdash; s&oacute; eu e os administradores vemos</label>
     </div>
+    <div id="diAvisoEdit" style="display:none;font-size:11px;color:#B45309;background:rgba(180,83,9,.12);border:1px solid rgba(180,83,9,.35);border-radius:7px;padding:9px 12px;">
+      &#9999;&#65039; Voc&ecirc; est&aacute; corrigindo um registro j&aacute; gravado. A altera&ccedil;&atilde;o fica registrada na Auditoria.
+    </div>
     <div style="font-size:11px;color:var(--muted);background:var(--surface2);border-radius:7px;padding:9px 12px;">
       &#128274; Edit&aacute;vel por 48h. Depois trava, e toda altera&ccedil;&atilde;o fica na Auditoria.
     </div>
   </div>
-  <div class="modal-foot"><button class="btn-sec" onclick="closeOv('ovDiario')">Cancelar</button><button class="btn-pri" style="background:#B45309;" onclick="salvarRegistroDiario()">Registrar</button></div>
+  <div class="modal-foot"><button class="btn-sec" onclick="closeOv('ovDiario')">Cancelar</button><button class="btn-pri" style="background:#B45309;" id="diBtnSalvar" onclick="salvarRegistroDiario()">Registrar</button></div>
 </div></div>
 
 <!-- REVISAO DA SEMANA -->
@@ -2382,7 +2387,7 @@ function loginSuccess(user,admin){
   document.getElementById('btnResetSenhas').style.display=admin?'inline-block':'none';
   document.getElementById('btnRelatorio').style.display=admin?'inline-block':'none';
   document.getElementById('btnAcessos').style.display=admin?'inline-block':'none';
-  const ba=document.getElementById('btnAvaliacoes');if(ba)ba.style.display=admin?'inline-block':'none';
+  const ba=document.getElementById('btnAvaliacoes');if(ba)ba.style.display='inline-block';
   const be=document.getElementById('btnEquipe');if(be)be.style.display=admin?'inline-block':'none';
   const bau=document.getElementById('btnAuditoria');if(bau)bau.style.display=admin?'inline-block':'none';
   const bfo=document.getElementById('btnForcar');if(bfo)bfo.style.display=admin?'inline-block':'none';
@@ -3191,9 +3196,22 @@ const DI_TAGS=[
 ];
 const DI_DIAS=[{n:1,l:'Seg'},{n:2,l:'Ter'},{n:3,l:'Qua'},{n:4,l:'Qui'},{n:5,l:'Sex'}];
 const DI_IMP={pos:{lbl:'Positivo',ico:'\ud83d\udc4d',cls:'di-pos'},neu:{lbl:'Neutro',ico:'\u26aa',cls:'di-neu'},neg:{lbl:'Negativo',ico:'\ud83d\udc4e',cls:'di-neu'}};
-let diario=[], diarioCfg=[], diImpSel='neu', diTagSel='', diCfgDiasSel=[];
+let diario=[], diarioCfg=[], diImpSel='neu', diTagSel='', diCfgDiasSel=[], diEditId=null;
 
 function diTag(id){return DI_TAGS.find(t=>t.id===id);}
+// Autor pode corrigir por 48h; admin pode a qualquer momento (sempre com auditoria)
+function podeEditarDiario(r){
+  if(isAdmin)return true;
+  if(r.comprador!==currentUser)return false;
+  return (Date.now()-new Date(r.criado_em).getTime())<48*3600*1000;
+}
+function horasRestantes(r){
+  if(r.comprador!==currentUser)return 'edit\u00e1vel (admin)';
+  const h=48-(Date.now()-new Date(r.criado_em).getTime())/3600000;
+  if(h<=0)return 'edit\u00e1vel (admin)';
+  if(h<1)return 'edit\u00e1vel por mais '+Math.max(1,Math.round(h*60))+' min';
+  return 'edit\u00e1vel por mais '+Math.floor(h)+'h';
+}
 function diImpCls(i){return i==='pos'?'di-pos':i==='neg'?'di-neg':'di-neu';}
 function diImpTxt(i){return i==='pos'?'\ud83d\udc4d Positivo':i==='neg'?'\ud83d\udc4e Negativo':'\u26aa Neutro';}
 
@@ -3235,7 +3253,8 @@ async function loadDiario(){
   try{
     if(!obrasDivisao.length){try{obrasDivisao=await sb.get('obras_divisao','?order=criado_em.desc')||[];}catch(e){}}
     const all=await sb.get('diario','?order=data.desc')||[];
-    diario=all.filter(r=>!r.reservado||isAdmin||r.comprador===currentUser);
+    // cada comprador ve apenas os proprios registros; admin ve todos
+    diario=isAdmin?all:all.filter(r=>r.comprador===currentUser);
     diarioCfg=await sb.get('diario_config','')||[];
     popDiarioFiltros();
     renderDiarioStats();renderDiario();
@@ -3250,7 +3269,10 @@ async function loadDiario(){
 
 function popDiarioFiltros(){
   const fc=document.getElementById('diFComp');
-  if(fc){const v=fc.value;fc.innerHTML='<option value="">Todos compradores</option>'+TEAM.map(t=>'<option>'+t.name+'</option>').join('');fc.value=v;}
+  if(fc){
+    if(!isAdmin){fc.style.display='none';fc.value='';}
+    else{fc.style.display='';const v=fc.value;fc.innerHTML='<option value="">Todos compradores</option>'+TEAM.map(t=>'<option>'+t.name+'</option>').join('');fc.value=v;}
+  }
   const fo=document.getElementById('diFObra');
   if(fo){const v=fo.value;const obras=[...new Set(diario.map(r=>r.obra_nome))].sort();
     fo.innerHTML='<option value="">Todas obras</option>'+obras.map(o=>'<option>'+o+'</option>').join('');fo.value=v;}
@@ -3258,7 +3280,7 @@ function popDiarioFiltros(){
 
 function renderDiarioStats(){
   const el=document.getElementById('diario-stats');if(!el)return;
-  const meus=isAdmin?diario:diario.filter(r=>r.comprador===currentUser);
+  const meus=diario;   // ja vem filtrado em loadDiario
   const ini=toISO(diSegundaDaSemana());
   const semana=meus.filter(r=>r.data>=ini).length;
   const pos=meus.filter(r=>r.impacto==='pos').length;
@@ -3303,7 +3325,7 @@ function renderDiario(){
   const agora=Date.now();
   c.innerHTML=lista.map(function(r){
     const t=diTag(r.tag);
-    const editavel=r.comprador===currentUser&&(agora-new Date(r.criado_em).getTime())<48*3600*1000;
+    const editavel=podeEditarDiario(r);
     return '<div class="di-card '+(r.impacto||'neu')+'">'+
       '<div class="di-top">'+
         '<span class="di-obra">'+r.obra_nome+'</span>'+
@@ -3316,14 +3338,42 @@ function renderDiario(){
         '<span>'+avEl(r.comprador)+' '+r.comprador+'</span>'+
         '<span>\u00b7 '+fmtBR(r.data)+'</span>'+
         (r.engenheiro?'<span>\u00b7 Eng. '+r.engenheiro+'</span>':'')+
-        '<span class="di-lock">\u00b7 '+(editavel?'edit\u00e1vel por 48h':'\ud83d\udd12 travado')+'</span>'+
+        '<span class="di-lock">\u00b7 '+(editavel?(horasRestantes(r)):'\ud83d\udd12 travado')+'</span>'+
+        (editavel?'<button class="di-edit" onclick="editarRegistroDiario('+r.id+')">\u270f\ufe0f editar</button>':'')+
       '</div></div>';
   }).join('');
+}
+
+// ── Editar um registro existente ──
+function editarRegistroDiario(id){
+  const r=diario.find(x=>x.id===id);
+  if(!r){toast('Registro n\u00e3o encontrado','err');return;}
+  if(!podeEditarDiario(r)){toast('Este registro j\u00e1 est\u00e1 travado','err');return;}
+  diEditId=id;
+  const sel=document.getElementById('diObra');
+  const obras=diMinhasObras();
+  const nomes=obras.map(o=>o.nome);
+  if(!nomes.includes(r.obra_nome))nomes.unshift(r.obra_nome);
+  sel.innerHTML=nomes.map(n=>'<option>'+n+'</option>').join('');
+  sel.value=r.obra_nome;
+  document.getElementById('diEng').value=r.engenheiro||'\u2014 n\u00e3o informado no cadastro';
+  diTagSel=r.tag||'';diImpSel=r.impacto||'neu';
+  document.getElementById('diTexto').value=r.texto||'';
+  document.getElementById('diReservado').checked=!!r.reservado;
+  renderDiTags();setImpacto(diImpSel);
+  document.getElementById('diTit').innerHTML='\u270f\ufe0f Editar registro';
+  document.getElementById('diBtnSalvar').textContent='Salvar altera\u00e7\u00f5es';
+  document.getElementById('diAvisoEdit').style.display='block';
+  openOv('ovDiario');
 }
 
 // ── Novo registro (FAB em qualquer tela) ──
 function abrirRegistroDiario(obraNome){
   if(!currentUser)return;
+  diEditId=null;
+  document.getElementById('diTit').innerHTML='\ud83d\udcd6 Registro no Di\u00e1rio';
+  document.getElementById('diBtnSalvar').textContent='Registrar';
+  document.getElementById('diAvisoEdit').style.display='none';
   const sel=document.getElementById('diObra');
   const obras=diMinhasObras();
   if(!obras.length){toast('Nenhuma obra ativa na sua carteira','err');return;}
@@ -3369,6 +3419,30 @@ async function salvarRegistroDiario(){
   const txt=document.getElementById('diTexto').value.trim();
   if(!txt){toast('Escreva o que aconteceu','err');return;}
   const o=obrasDivisao.find(x=>x.nome===obra);
+  // ── modo edicao ──
+  if(diEditId){
+    const antigo=diario.find(x=>x.id===diEditId);
+    if(!antigo||!podeEditarDiario(antigo)){toast('Registro travado','err');return;}
+    const novo={obra_nome:obra,engenheiro:o&&o.eng_ini?o.eng_ini:antigo.engenheiro,
+      tag:diTagSel,impacto:diImpSel,texto:txt,
+      reservado:document.getElementById('diReservado').checked};
+    const difs=[];
+    if(antigo.texto!==novo.texto)difs.push({campo:'texto',de:(antigo.texto||'').substring(0,60),para:novo.texto.substring(0,60)});
+    if(antigo.impacto!==novo.impacto)difs.push({campo:'impacto',de:diImpTxt(antigo.impacto),para:diImpTxt(novo.impacto)});
+    if(antigo.tag!==novo.tag)difs.push({campo:'tipo',de:(diTag(antigo.tag)||{lbl:'\u2014'}).lbl,para:(diTag(novo.tag)||{lbl:'\u2014'}).lbl});
+    if(antigo.obra_nome!==novo.obra_nome)difs.push({campo:'obra',de:antigo.obra_nome,para:novo.obra_nome});
+    if(!!antigo.reservado!==!!novo.reservado)difs.push({campo:'reservado',de:antigo.reservado?'sim':'nao',para:novo.reservado?'sim':'nao'});
+    if(!difs.length){closeOv('ovDiario');toast('Nada foi alterado');return;}
+    try{
+      await sb.patch('diario',diEditId,novo);
+      await audLog('editar','diario',diEditId,obra,difs);
+      closeOv('ovDiario');diEditId=null;
+      toast('Registro atualizado');
+      await loadDiario();atualizaFabDiario();
+      if(window.avalObraAtual)renderGabarito(window.avalObraAtual);
+    }catch(e){toast('Erro ao salvar: '+String(e.message||e).substring(0,50),'err');}
+    return;
+  }
   const reg={
     id:Date.now(), obra_nome:obra, comprador:currentUser,
     engenheiro:o&&o.eng_ini?o.eng_ini:'', data:today(), tag:diTagSel,
@@ -3675,8 +3749,9 @@ function renderAvaliacoes(){
   const fe=document.getElementById('avalFEng').value;
   const fs=document.getElementById('avalFStatus').value;
 
-  // Só obras não finalizadas entram no ciclo
+  // Só obras não finalizadas entram no ciclo; comprador vê apenas as suas
   let lista=obrasDivisao.filter(o=>o.status!=='finalizada');
+  if(!isAdmin)lista=lista.filter(o=>o.comprador===currentUser);
   lista=lista.filter(o=>{
     const av=getAvalObra(o.nome,ciclo);
     if(s&&!((o.nome||'')+' '+(o.eng_ini||'')+' '+(o.comprador||'')).toLowerCase().includes(s))return false;
@@ -4658,7 +4733,7 @@ function gerarRelatorioAuditoria(){
 
 // ── CONTROLE DE VERSAO E SESSAO ──
 // Marcador da build. Trocado a cada publicação.
-const APP_VER='2026.10.26.1615'; /*BUILD*/
+const APP_VER='2026.10.26.1655'; /*BUILD*/
 let sessaoIniciadaEm=Date.now();
 let ultimaChecagem=0;
 let avisoVersaoMostrado=false;
@@ -4751,7 +4826,7 @@ window.onload=async()=>{
     document.getElementById('btnResetSenhas').style.display=isAdmin?'inline-block':'none';
     document.getElementById('btnRelatorio').style.display=isAdmin?'inline-block':'none';
     document.getElementById('btnAcessos').style.display=isAdmin?'inline-block':'none';
-    const ba2=document.getElementById('btnAvaliacoes');if(ba2)ba2.style.display=isAdmin?'inline-block':'none';
+    const ba2=document.getElementById('btnAvaliacoes');if(ba2)ba2.style.display='inline-block';
     const be2=document.getElementById('btnEquipe');if(be2)be2.style.display=isAdmin?'inline-block':'none';
     const bau2=document.getElementById('btnAuditoria');if(bau2)bau2.style.display=isAdmin?'inline-block':'none';
     const bfo2=document.getElementById('btnForcar');if(bfo2)bfo2.style.display=isAdmin?'inline-block':'none';
