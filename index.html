@@ -659,7 +659,7 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
 <div class="overlay" id="ovNovoMapa"><div class="modal">
   <div class="modal-head"><h3>➕ Novo Mapa</h3><button class="modal-x" onclick="closeOv('ovNovoMapa')">×</button></div>
   <div class="modal-body">
-    <div class="f"><label>Nº do Mapa</label><input id="fNum" placeholder="Ex: MC-2025-001"></div>
+    <div class="f"><label>N&ordm; do Mapa <span style="font-size:10px;color:var(--muted)">(somente n&uacute;meros)</span></label><input id="fNum" inputmode="numeric" maxlength="10" placeholder="Ex: 147" oninput="soNumero(this)"></div>
     <div class="f"><label>Obra</label><select id="fObra" onchange="onObraChange()"><option value="">— Selecionar —</option></select></div>
     <div class="f"><label>Tipo</label><select id="fTipo" onchange="calcDl()"><option value="">— Selecionar —</option></select></div>
     <div class="f"><label>Descrição</label><input id="fDesc" placeholder="Ex: Argamassa AC-III"></div>
@@ -675,7 +675,7 @@ body.dark .av-btn.ativo{background:rgba(239,50,54,.18);}
   <div class="modal-head"><h3>✏️ Editar Mapa</h3><button class="modal-x" onclick="closeOv('ovEditMapa')">×</button></div>
   <div class="modal-body">
     <input type="hidden" id="eMId">
-    <div class="f"><label>Nº</label><input id="eMNum"></div>
+    <div class="f"><label>N&ordm; <span style="font-size:10px;color:var(--muted)">(somente n&uacute;meros)</span></label><input id="eMNum" inputmode="numeric" maxlength="10" oninput="soNumero(this)"></div>
     <div class="f"><label>Obra</label><select id="eMObra"></select></div>
     <div class="f"><label>Tipo</label><select id="eMTipo" onchange="calcEditDl()"></select></div>
     <div class="f"><label>Descrição</label><input id="eMDesc"></div>
@@ -992,7 +992,7 @@ Com <strong>apenas registros em aberto</strong>, os mapas conclu&iacute;dos e ob
     <div class="f"><label>Faturamento 1 *</label><input id="odFat1" placeholder="Empresa que fatura"></div>
     <div class="f"><label>Faturamento 2 (opcional)</label><input id="odFat2" placeholder="Segunda empresa (se houver)"></div>
     <div class="f" style="grid-column:span 2"><label>Endereço</label><input id="odEnd" placeholder="Rua, número, bairro..."></div>
-    <div class="f"><label>Tipo</label><select id="odTipo"><option>Casa</option><option>Reforma Casa</option><option>Apartamento</option><option>Cooperativa</option><option>Outros</option></select></div>
+    <div class="f"><label>Tipo</label><select id="odTipo"><option>Casa</option><option>Reforma Casa</option><option>Apartamento</option><option>Corporativo</option><option>Outros</option></select></div>
     <div class="f"><label>Cidade / Condomínio</label><input id="odCidade" placeholder="Ex: São Paulo / Cond. Europa"></div>
     <div class="f"><label>Coordenador</label><input id="odCoordenador" placeholder="Nome do coordenador"></div>
     <div class="f"><label>Apoio</label><input id="odApoio" placeholder="Nome do apoio"></div>
@@ -1134,7 +1134,7 @@ Com <strong>apenas registros em aberto</strong>, os mapas conclu&iacute;dos e ob
         </select>
         <select class="fsel" id="obrasDivFTipo" onchange="renderObrasDivisao()">
           <option value="">Todos tipos</option>
-          <option>Casa</option><option>Reforma Casa</option><option>Apartamento</option><option>Cooperativa</option><option>Outros</option>
+          <option>Casa</option><option>Reforma Casa</option><option>Apartamento</option><option>Corporativo</option><option>Outros</option>
         </select>
         <select class="fsel" id="obrasDivFStatus" onchange="renderObrasDivisao()">
           <option value="">Todos status</option>
@@ -1579,6 +1579,16 @@ function popObras(){
 }
 
 // ── DEADLINE ──
+// Nº do mapa aceita apenas digitos (mantem zeros a esquerda: 001, 02)
+function soNumero(el){
+  const antes=el.value;
+  const limpo=antes.replace(/\D/g,'');
+  if(antes!==limpo){
+    const pos=el.selectionStart-(antes.length-limpo.length);
+    el.value=limpo;
+    try{el.setSelectionRange(Math.max(0,pos),Math.max(0,pos));}catch(e){}
+  }
+}
 function calcDl(){
   const t=getTipo(document.getElementById('fTipo').value);
   const d=document.getElementById('fData').value;
@@ -1857,6 +1867,7 @@ async function addMapa(){
   const data=document.getElementById('fData').value;
   const resp=document.getElementById('fResp').value;
   if(!num||!obra||!tipo||!data){toast('Preencha Nº, Obra, Tipo e Data','err');return;}
+  if(!/^\d+$/.test(num)){toast('O Nº do mapa deve conter apenas números','err');return;}
   const prazo=calcDl();if(!prazo)return;
   try{
     const body={id:Date.now(),numero:num,obra,tipo,descricao:document.getElementById('fDesc').value.trim(),responsavel:resp,data_solicitacao:data,prazo,obs:document.getElementById('fObs').value.trim(),concluido:false,etapa:'nao_iniciado',motivo_suspenso:''};
@@ -1945,6 +1956,8 @@ function editMapa(id){
 }
 async function saveEditMapa(){
   const id=parseInt(document.getElementById('eMId').value);
+  const numEd=document.getElementById('eMNum').value.trim();
+  if(!/^\d+$/.test(numEd)){toast('O Nº do mapa deve conter apenas números','err');return;}
   const mOrig=mapas.find(x=>x.id===parseInt(document.getElementById('eMId').value));
   const dataSolicitacao=isAdmin?document.getElementById('eMData').value:(mOrig?mOrig.data_solicitacao:document.getElementById('eMData').value);
   const b={numero:document.getElementById('eMNum').value.trim(),obra:document.getElementById('eMObra').value,tipo:document.getElementById('eMTipo').value,descricao:document.getElementById('eMDesc').value.trim(),responsavel:document.getElementById('eMResp').value,data_solicitacao:dataSolicitacao,prazo:document.getElementById('eMPrazo').value,obs:document.getElementById('eMObs').value.trim()};
@@ -2882,7 +2895,13 @@ function editObraDiv(id){
   document.getElementById('odFat1').value=o.fat1||'';
   document.getElementById('odFat2').value=o.fat2||'';
   document.getElementById('odEnd').value=o.endereco||'';
-  document.getElementById('odTipo').value=o.tipo||'Casa';
+  // se a obra tiver um tipo antigo que saiu da lista, mantem como opcao
+  const _st=document.getElementById('odTipo');
+  _st.value=o.tipo||'Casa';
+  if(o.tipo&&_st.value!==o.tipo){
+    const _op=document.createElement('option');_op.textContent=o.tipo;
+    _st.appendChild(_op);_st.value=o.tipo;
+  }
   document.getElementById('odCidade').value=o.cidade||'';
   document.getElementById('odCoordenador').value=o.coordenador||'';
   document.getElementById('odApoio').value=o.apoio||'';
@@ -4757,7 +4776,7 @@ function gerarRelatorioAuditoria(){
 
 // ── CONTROLE DE VERSAO E SESSAO ──
 // Marcador da build. Trocado a cada publicação.
-const APP_VER='2026.10.26.1705'; /*BUILD*/
+const APP_VER='2026.10.29.1350'; /*BUILD*/
 let sessaoIniciadaEm=Date.now();
 let ultimaChecagem=0;
 let avisoVersaoMostrado=false;
