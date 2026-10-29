@@ -6197,7 +6197,7 @@ function gerarRelatorioAuditoria(){
 
 // ── CONTROLE DE VERSAO E SESSAO ──
 // Marcador da build. Trocado a cada publicação.
-const APP_VER='2026.10.29.1700'; /*BUILD*/
+const APP_VER='2026.10.29.1710'; /*BUILD*/
 let sessaoIniciadaEm=Date.now();
 let ultimaChecagem=0;
 let avisoVersaoMostrado=false;
@@ -6296,6 +6296,18 @@ window.onload=async()=>{
     const bfo2=document.getElementById('btnForcar');if(bfo2)bfo2.style.display=isAdmin?'inline-block':'none';
     sessaoIniciadaEm=Date.now();
     setTimeout(function(){checarAtualizacoes(true);},8000);
+    // mesma preparacao do login: sessao restaurada precisa ligar tudo
+    if(typeof iniciarChat==='function')iniciarChat();
+    const _bcSess=document.getElementById('btnChat');if(_bcSess)_bcSess.style.display='inline-block';
+    const _balSess=document.getElementById('btnAlarmes');if(_balSess)_balSess.style.display='inline-block';
+    if(typeof loadDiario==='function'){
+      loadDiario().then(function(){
+        if(typeof atualizaFabDiario==='function')atualizaFabDiario();
+        if(typeof mostrarFaixaAlarme==='function')mostrarFaixaAlarme();
+        if(typeof tituloOriginal!=='undefined')tituloOriginal=document.title;
+        if(typeof verificarAlarmes==='function')setTimeout(verificarAlarmes,2500);
+      }).catch(function(){});
+    }
     loadDash();
   }
 };
