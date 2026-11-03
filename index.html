@@ -4871,7 +4871,8 @@ async function apagarMsg(id){
   try{
     await sb.patch('mensagens',id,{apagada:true});
     m.apagada=true;
-    await audLog('excluir','mensagem',id,'para '+m.para,[{campo:'texto',de:(m.texto||'').slice(0,80),para:''}]);
+    // Conversa nao entra na Auditoria do portal. A mensagem continua
+    // na tabela do Supabase (marcada como apagada), e so la pode ser lida.
     renderChat();
     toast('Mensagem apagada para os dois');
   }catch(e){toast('Erro ao apagar','err');}
@@ -6073,6 +6074,7 @@ function audFiltrada(){
   let corte=null;
   if(per>0){corte=new Date();corte.setDate(corte.getDate()-per);}
   return auditoriaDB.filter(function(r){
+    if(r.entidade==='mensagem')return false;   // conversa nunca aparece aqui
     if(u&&r.usuario!==u)return false;
     if(a&&r.acao!==a)return false;
     if(en&&r.entidade!==en)return false;
@@ -6197,7 +6199,7 @@ function gerarRelatorioAuditoria(){
 
 // ── CONTROLE DE VERSAO E SESSAO ──
 // Marcador da build. Trocado a cada publicação.
-const APP_VER='2026.10.29.1710'; /*BUILD*/
+const APP_VER='2026.10.30.1345'; /*BUILD*/
 let sessaoIniciadaEm=Date.now();
 let ultimaChecagem=0;
 let avisoVersaoMostrado=false;
