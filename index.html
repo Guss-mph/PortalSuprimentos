@@ -318,6 +318,19 @@ body.dark .di-neu{background:#2A2F45;color:#9CA3AF;}
 .di-card .di-txt{font-size:13px;color:var(--text);line-height:1.55;}
 .di-card .di-meta{font-size:11px;color:var(--muted);margin-top:6px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
 .di-lock{font-size:10px;color:var(--muted);}
+th.ord{cursor:pointer;user-select:none;white-space:nowrap;}
+th.ord:hover{color:var(--text);}
+th.ord .seta{opacity:.28;margin-left:3px;font-size:9px;}
+th.ord.on{color:var(--red);}
+th.ord.on .seta{opacity:1;}
+.sim-box{display:none;margin-top:-4px;background:rgba(217,119,6,.10);border:1px solid rgba(217,119,6,.38);border-radius:8px;padding:10px 12px;}
+.sim-box.on{display:block;}
+.sim-box.dup{background:rgba(239,50,54,.10);border-color:rgba(239,50,54,.45);}
+.sim-tit{font-size:11.5px;font-weight:800;color:var(--yellow);margin-bottom:6px;}
+.sim-box.dup .sim-tit{color:var(--red);}
+.sim-li{font-size:12px;color:var(--text);padding:4px 0;border-top:1px solid var(--border);line-height:1.45;}
+.sim-li:first-of-type{border-top:none;}
+.sim-li .meta{font-size:10.5px;color:var(--muted);}
 .aviso-alheia{background:rgba(217,119,6,.12);border:1px solid rgba(217,119,6,.4);border-radius:7px;padding:9px 12px;font-size:11.5px;color:var(--yellow);line-height:1.5;}
 .tag-alheia{display:inline-block;margin-top:2px;font-size:9.5px;font-weight:700;letter-spacing:.2px;color:var(--yellow);background:var(--yellow-light);border-radius:3px;padding:1px 5px;white-space:nowrap;}
 body.dark .tag-alheia{background:rgba(217,119,6,.22);color:#FCD34D;}
@@ -1772,7 +1785,8 @@ Com <strong>apenas registros em aberto</strong>, os mapas conclu&iacute;dos e ob
   <div class="modal-head"><h3 id="obraDivTit">🏗 Nova Obra</h3><button class="modal-x" onclick="closeOv('ovObraDiv')">×</button></div>
   <div class="modal-body" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
     <input type="hidden" id="odId">
-    <div class="f" style="grid-column:span 2"><label>Nome da Obra *</label><input id="odNome" placeholder="Ex: Residencial João e Maria"></div>
+    <div class="f" style="grid-column:span 2"><label>Nome da Obra *</label><input id="odNome" placeholder="Ex: Residencial João e Maria" oninput="checarNomeObra()"></div>
+    <div class="sim-box" id="odSimilares" style="grid-column:span 2"></div>
     <div class="f"><label>Comprador *</label><select id="odComp"><option>Andressa</option><option>Gustavo</option><option>Gisele</option><option>Novaes</option><option>Henrique</option></select></div>
     <div class="f"><label>Ano</label><input type="number" id="odAno" placeholder="2026"></div>
     <div class="f"><label>Faturamento 1 *</label><input id="odFat1" placeholder="Empresa que fatura"></div>
@@ -2773,6 +2787,80 @@ function renderMCStats(){
     <div class="stat-c"><div class="sl">✅ Em dia</div><div class="sv c-green">${ok}</div></div>
     <div class="stat-c"><div class="sl">✔ Concluídos</div><div class="sv c-blue">${c}</div></div>`;
 }
+// ══ Ordenacao das tabelas de Mapas ══
+let mcOrd ={col:'',dir:1};   // tabela de ativos
+let mcOrdC={col:'',dir:1};   // tabela de concluidos
+const MC_COLS=[
+  {id:'numero',      lbl:'Nº'},
+  {id:'obra',        lbl:'Obra'},
+  {id:'tipo',        lbl:'Tipo'},
+  {id:'responsavel', lbl:'Responsável'},
+  {id:'solicitado',  lbl:'Solicitado'},
+  {id:'entrega',     lbl:'Entrega'},
+  {id:'status',      lbl:'Status'},
+  {id:'etapa',       lbl:'Etapa'},
+];
+const ORD_STATUS={vencido:0,critico:1,atencao:2,ok:3,concluido:4};
+const ORD_ETAPA ={nao_iniciado:0,em_cotacao:1,balizando:2,suspenso:3,finalizado:4};
+
+// numero pode vir como "147", "021" ou "002 - Obra": compara pelo valor
+function chaveNum(v){
+  const d=String(v||'').match(/\d+/);
+  return d?parseInt(d[0],10):Number.MAX_SAFE_INTEGER;
+}
+function txtCmp(a,b){
+  return String(a||'').localeCompare(String(b||''),'pt-BR',{sensitivity:'base',numeric:true});
+}
+function valorCol(m,col){
+  switch(col){
+    case 'numero':      return chaveNum(m.numero);
+    case 'obra':        return m.obra||'';
+    case 'tipo':        return m.tipo||'';
+    case 'responsavel': return m.responsavel||'';
+    case 'solicitado':  return m.data_solicitacao||'';
+    case 'entrega':     return m.prazo||'';
+    case 'status':      return ORD_STATUS[getMSt(m)]!==undefined?ORD_STATUS[getMSt(m)]:9;
+    case 'etapa':       return ORD_ETAPA[m.etapa||'nao_iniciado']!==undefined?ORD_ETAPA[m.etapa||'nao_iniciado']:9;
+  }
+  return '';
+}
+function aplicaOrdem(lista,est){
+  if(!est.col)return lista;
+  const copia=lista.slice();
+  copia.sort(function(a,b){
+    const va=valorCol(a,est.col), vb=valorCol(b,est.col);
+    let r;
+    if(typeof va==='number'&&typeof vb==='number')r=va-vb;
+    else r=txtCmp(va,vb);
+    if(r===0)r=chaveNum(a.numero)-chaveNum(b.numero);   // desempate estavel
+    return r*est.dir;
+  });
+  return copia;
+}
+function theadMC(est,fn){
+  return '<thead><tr>'+MC_COLS.map(function(c){
+    const ativo=est.col===c.id;
+    const seta=ativo?(est.dir===1?'▲':'▼'):'⇅';
+    return '<th class="ord'+(ativo?' on':'')+'" onclick="'+fn+'(\''+c.id+'\')" title="Ordenar por '+c.lbl+'">'+
+      c.lbl+'<span class="seta">'+seta+'</span></th>';
+  }).join('')+'<th></th></tr></thead>';
+}
+function ordenarMC(col){
+  if(mcOrd.col===col)mcOrd.dir=-mcOrd.dir; else {mcOrd.col=col;mcOrd.dir=1;}
+  renderMapas();
+}
+function ordenarMCConcl(col){
+  if(mcOrdC.col===col)mcOrdC.dir=-mcOrdC.dir; else {mcOrdC.col=col;mcOrdC.dir=1;}
+  const aberto=document.querySelector('#mcTable .concl-body.open')!==null;
+  renderMapas();
+  if(aberto){
+    const b=document.querySelector('#mcTable .concl-body');
+    if(b){b.classList.add('open');
+      const t=document.querySelector('#mcTable .concl-toggle span:last-child');
+      if(t)t.textContent='▴';}
+  }
+}
+
 function renderMapas(){
   const s=document.getElementById('mcSearch').value.toLowerCase();
   const r=document.getElementById('mcFResp').value;
@@ -2803,9 +2891,9 @@ function renderMapas(){
       (ec.finalizado?`<span class="etapa-pill ep-green">✅ Finalizado <span class="ep-count">${ec.finalizado}</span></span>`:'');
   }
   if(!f.length){c.innerHTML='<div class="empty">Nenhum mapa encontrado</div>';return;}
-  const emAnd=f.filter(m=>!m.concluido);
-  const concl=f.filter(m=>m.concluido);
-  c.innerHTML=`<table><thead><tr><th>Nº</th><th>Obra</th><th>Tipo</th><th>Responsável</th><th>Solicitado</th><th>Entrega</th><th>Status</th><th>Etapa</th><th></th></tr></thead><tbody>${emAnd.map(m=>{
+  const emAnd=aplicaOrdem(f.filter(m=>!m.concluido),mcOrd);
+  const concl=aplicaOrdem(f.filter(m=>m.concluido),mcOrdC);
+  c.innerHTML=`<table>${theadMC(mcOrd,'ordenarMC')}<tbody>${emAnd.map(m=>{
     const s=getMSt(m);const d=m.concluido?null:bizLeft(m.prazo);
     const t=getTipo(m.tipo);const cor=t?getCor(t.cor_key):COR.blue;
     const td=t?t.dias:5;
@@ -2835,7 +2923,7 @@ function renderMapas(){
   ${concl.length>0?`<button class="concl-toggle" onclick="var b=this.nextElementSibling;b.classList.toggle('open');this.querySelector('span:last-child').textContent=b.classList.contains('open')?'▴':'▾'">
     <span>🗂 Ver concluídos (${concl.length})</span><span style="transition:transform .2s">▾</span>
   </button>
-  <div class="concl-body"><table><tbody>${concl.map(m=>{
+  <div class="concl-body"><table>${theadMC(mcOrdC,'ordenarMCConcl')}<tbody>${concl.map(m=>{
     const t2=getTipo(m.tipo);const cor2=t2?getCor(t2.cor_key):COR.blue;
     const e2=ETAPA[m.etapa||'nao_iniciado']||ETAPA.nao_iniciado;
     return '<tr class="concl-row">'
@@ -3868,6 +3956,7 @@ function renderObrasDivisao(){
 }
 
 function openObraDiv(){
+  setTimeout(function(){var _b=document.getElementById('odSimilares');if(_b){_b.className='sim-box';_b.innerHTML='';}},0);
   if(!isAdmin){toast('Apenas administradores podem cadastrar obras','err');return;}
   document.getElementById('odId').value='';
   document.getElementById('odNome').value='';
@@ -3892,6 +3981,7 @@ function openObraDiv(){
 }
 
 function editObraDiv(id){
+  setTimeout(function(){var _b=document.getElementById('odSimilares');if(_b){_b.className='sim-box';_b.innerHTML='';}},0);
   const o=obrasDivisao.find(x=>x.id===id);if(!o)return;
   // Não-admin só edita suas próprias obras
   if(!isAdmin&&o.comprador!==currentUser){toast('Você só pode editar suas próprias obras','err');return;}
@@ -3927,11 +4017,91 @@ function editObraDiv(id){
   openOv('ovObraDiv');
 }
 
+// ── Alerta de obra com nome parecido, para nao duplicar cadastro ──
+const PALAVRAS_GENERICAS=['e','de','da','do','das','dos','em','com','casa','apto','apartamento',
+  'reforma','obra','edificio','residencial','cobertura','sitio','loft','studio','condominio',
+  'cond','rua','av','avenida','sr','sra','dr','dra','familia','terreno','chacara','fazenda'];
+
+function normNomeObra(t){
+  return String(t||'').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+}
+function tokensObra(t){
+  return normNomeObra(t).split(' ').filter(function(x){
+    return x.length>=4 && PALAVRAS_GENERICAS.indexOf(x)<0;
+  });
+}
+// Coeficiente de Dice sobre pares de letras: 1 = identico
+function parecenca(a,b){
+  a=normNomeObra(a); b=normNomeObra(b);
+  if(!a||!b)return 0;
+  if(a===b)return 1;
+  const pares=function(x){const r=[];for(let i=0;i<x.length-1;i++)r.push(x.slice(i,i+2));return r;};
+  const A=pares(a), B=pares(b);
+  if(!A.length||!B.length)return 0;
+  const usado=new Array(B.length).fill(false);
+  let acertos=0;
+  A.forEach(function(p){
+    for(let i=0;i<B.length;i++){ if(!usado[i]&&B[i]===p){usado[i]=true;acertos++;break;} }
+  });
+  return 2*acertos/(A.length+B.length);
+}
+function obrasParecidas(nome,idAtual){
+  const n=normNomeObra(nome);
+  if(n.length<4)return [];
+  const tk=tokensObra(nome);
+  return (obrasDivisao||[]).filter(function(o){return String(o.id)!==String(idAtual);})
+    .map(function(o){
+      const igual=normNomeObra(o.nome)===n;
+      const sim=parecenca(nome,o.nome);
+      const comuns=tokensObra(o.nome).filter(function(t){return tk.indexOf(t)>=0;});
+      let motivo='';
+      if(igual)motivo='nome igual';
+      else if(comuns.length)motivo='tem '+comuns.map(function(c){return '"'+c+'"';}).join(' e ');
+      else if(sim>=0.74)motivo='escrita parecida';
+      return {o:o,sim:sim,igual:igual,motivo:motivo};
+    })
+    .filter(function(x){return x.motivo;})
+    .sort(function(a,b){return (b.igual-a.igual)||(b.sim-a.sim);})
+    .slice(0,5);
+}
+function checarNomeObra(){
+  const el=document.getElementById('odSimilares');
+  const inp=document.getElementById('odNome');
+  if(!el||!inp)return [];
+  const idAtual=document.getElementById('odId').value;
+  const achados=obrasParecidas(inp.value,idAtual);
+  if(!achados.length){el.className='sim-box';el.innerHTML='';return [];}
+  const temIgual=achados.some(function(x){return x.igual;});
+  el.className='sim-box on'+(temIgual?' dup':'');
+  el.innerHTML='<div class="sim-tit">'+(temIgual
+      ? '⛔ Já existe uma obra com este nome'
+      : '⚠️ Já existe obra parecida — confira antes de criar')+'</div>'+
+    achados.map(function(x){
+      return '<div class="sim-li"><b>'+x.o.nome+'</b> <span class="meta">· '+x.motivo+'</span>'+
+        '<div class="meta">'+(x.o.comprador||'sem comprador')+
+        (x.o.tipo?' · '+x.o.tipo:'')+(x.o.cidade?' · '+x.o.cidade:'')+
+        (x.o.status?' · '+x.o.status:'')+'</div></div>';
+    }).join('');
+  return achados;
+}
+
 async function saveObraDiv(){
   const idV=document.getElementById('odId').value;
   const nome=document.getElementById('odNome').value.trim();
   // Admin precisa de nome; não-admin só precisa salvar detalhes
   if(isAdmin&&!nome){toast('Informe o nome da obra','err');return;}
+  // nome identico ao de outra obra: bloqueia, porque e o que gera cadastro duplicado
+  if(isAdmin){
+    const iguais=obrasParecidas(nome,idV).filter(function(x){return x.igual;});
+    if(iguais.length){
+      checarNomeObra();
+      toast('J\u00e1 existe uma obra chamada "'+iguais[0].o.nome+'". Use a existente ou diferencie o nome.','err');
+      const inp=document.getElementById('odNome');if(inp)inp.focus();
+      return;
+    }
+  }
   // Monta body diferente para admin e comprador
   let body;
   if(isAdmin){
@@ -6199,7 +6369,7 @@ function gerarRelatorioAuditoria(){
 
 // ── CONTROLE DE VERSAO E SESSAO ──
 // Marcador da build. Trocado a cada publicação.
-const APP_VER='2026.10.30.1345'; /*BUILD*/
+const APP_VER='2026.11.05.1215'; /*BUILD*/
 let sessaoIniciadaEm=Date.now();
 let ultimaChecagem=0;
 let avisoVersaoMostrado=false;
