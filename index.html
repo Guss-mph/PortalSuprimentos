@@ -294,13 +294,38 @@ body.dark .aud-dif{background:#20243A;}
 .fab-diario{position:fixed;bottom:104px;right:32px;width:62px;height:62px;border-radius:50%;background:#B45309;color:#fff;border:none;font-size:26px;cursor:pointer;box-shadow:0 6px 20px rgba(180,83,9,.45);display:none;align-items:center;justify-content:center;z-index:201;transition:transform .15s;}
 .fab-diario.show{display:flex;}
 .fab-diario:hover{transform:scale(1.08);}
-.fab-menu{position:fixed;bottom:176px;right:32px;z-index:202;display:none;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px;box-shadow:0 12px 32px rgba(0,0,0,.22);min-width:238px;}
+.fab-menu{position:fixed;bottom:178px;right:32px;z-index:260;display:none;flex-direction:column;gap:6px;
+  background-color:#FFFFFF;color:#141414;border:1px solid #D8DCE4;border-radius:16px;padding:8px;
+  box-shadow:0 18px 44px rgba(0,0,0,.30),0 2px 8px rgba(0,0,0,.14);width:272px;
+  -webkit-backdrop-filter:none !important;backdrop-filter:none !important;
+  animation:fabMenuIn .14s ease-out;}
+@keyframes fabMenuIn{from{opacity:0;transform:translateY(6px) scale(.97);}to{opacity:1;transform:none;}}
 .fab-menu.show{display:flex;}
-.fab-menu .ti{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);padding:2px 6px 4px;}
-.fab-menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text);}
-.fab-menu button:hover{border-color:#B45309;background:var(--card);}
-.fab-menu button .ic{font-size:18px;}
-.fab-menu button .sb{display:block;font-size:11px;font-weight:400;color:var(--muted);margin-top:1px;}
+.fab-menu .ti{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#5A6373;padding:4px 8px 6px;}
+.fab-menu button{display:flex;align-items:flex-start;gap:11px;width:100%;text-align:left;
+  background-color:#F4F6F9;border:1px solid #E1E5EC;border-radius:11px;padding:11px 12px;cursor:pointer;
+  font-family:inherit;font-size:13.5px;font-weight:600;color:#141414;line-height:1.3;
+  -webkit-backdrop-filter:none !important;backdrop-filter:none !important;transition:background-color .12s,border-color .12s;}
+.fab-menu button:hover{border-color:#B45309;background-color:#FDF3E7;}
+.fab-menu button .ic{font-size:19px;line-height:1.15;flex:0 0 auto;}
+.fab-menu button .sb{display:block;font-size:11px;font-weight:400;color:#56606F;margin-top:2px;}
+/* escuro */
+body.dark .fab-menu{background-color:#1B2033;color:#E8EAF0;border-color:#343A52;
+  box-shadow:0 18px 44px rgba(0,0,0,.6),0 2px 8px rgba(0,0,0,.4);}
+body.dark .fab-menu .ti,body.dark .fab-menu button .sb{color:#A2ABC2;}
+body.dark .fab-menu button{background-color:#242B42;border-color:#39415C;color:#E8EAF0;}
+body.dark .fab-menu button:hover{border-color:#D97A1F;background-color:#2E2415;}
+/* alto contraste */
+body.tema-contraste .fab-menu{background-color:#FFFFFF;border:2px solid #000;}
+body.tema-contraste .fab-menu button{background-color:#FFFFFF;border:2px solid #000;color:#000;}
+body.tema-contraste .fab-menu .ti,body.tema-contraste .fab-menu button .sb{color:#000;}
+body.tema-contraste.dark .fab-menu{background-color:#000;border-color:#FFF;}
+body.tema-contraste.dark .fab-menu button{background-color:#000;border-color:#FFF;color:#FFF;}
+body.tema-contraste.dark .fab-menu .ti,body.tema-contraste.dark .fab-menu button .sb{color:#FFF;}
+/* celular: ocupa a largura, acima do botao */
+@media(max-width:560px){
+  .fab-menu{right:16px;left:16px;width:auto;bottom:160px;}
+}
 .fab-dot{position:absolute;top:4px;right:4px;width:14px;height:14px;border-radius:50%;background:var(--red);border:2px solid var(--surface);display:none;}
 .fab-dot.on{display:block;}
 .dq-abas{display:flex;gap:4px;border-bottom:2px solid var(--border);margin-bottom:18px;}
@@ -643,6 +668,8 @@ body.glass .concl-toggle{background:var(--surface);-webkit-backdrop-filter:blur(
   body.glass #glassBg{display:none !important;}
   body.glass{background:#fff !important;}
   body.glass *{-webkit-backdrop-filter:none !important;backdrop-filter:none !important;}
+  body.glass .fab-menu{background-color:#FFFFFF !important;}
+  body.glass.dark .fab-menu{background-color:#1B2033 !important;}
   body.glass #printArea,body.glass #printArea *{background-color:transparent;}
 }
 /* o modo glass pede fonte um pouco mais forte para compensar o fundo vivo */
@@ -2319,7 +2346,7 @@ Com <strong>apenas registros em aberto</strong>, os mapas conclu&iacute;dos e ob
 <div class="fab-menu" id="fabMenuDiario">
   <div class="ti">Registrar no Di&aacute;rio</div>
   <button onclick="fabEscolher('obra')"><span class="ic">&#127959;&#65039;</span><span>Sobre uma obra<span class="sb">Engenheiro, prazo, escopo</span></span></button>
-  <button onclick="fabEscolher('equipe')"><span class="ic">&#128101;</span><span>Sobre a equipe<span class="sb">Restrito &mdash; s&oacute; quem tem permiss&atilde;o v&ecirc;</span></span></button>
+  <button onclick="fabEscolher('equipe')"><span class="ic">&#128101;</span><span>Sobre a equipe<span class="sb">Restrito a quem tem permiss&atilde;o</span></span></button>
 </div>
 <button class="fab fab-diario" id="fabDiario" onclick="abrirRegistroDiario()" title="Registrar no Diário">&#128214;<span class="fab-dot" id="fabDiarioDot"></span></button>
 <button class="fab fab-diario" id="fabDiario" onclick="abrirRegistroDiario()" title="Registrar no Diário">&#128214;<span class="fab-dot" id="fabDiarioDot"></span></button>
@@ -6894,7 +6921,7 @@ function gerarRelatorioAuditoria(){
 
 // ── CONTROLE DE VERSAO E SESSAO ──
 // Marcador da build. Trocado a cada publicação.
-const APP_VER='2026.11.26.0959'; /*BUILD*/
+const APP_VER='2026.11.26.1031'; /*BUILD*/
 let sessaoIniciadaEm=Date.now();
 let ultimaChecagem=0;
 let avisoVersaoMostrado=false;
