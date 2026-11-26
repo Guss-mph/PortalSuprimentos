@@ -1732,7 +1732,8 @@ body.tema-minimal[class*="pal-"] .logo-bar{background:var(--text) !important;}
     <div class="f" id="mbDiarioWrap" style="display:none;"><label>Di&aacute;rio de Suprimentos</label>
       <select id="mbVeDiario">
         <option value="0">N&atilde;o v&ecirc;</option>
-        <option value="1">V&ecirc; e registra sobre a equipe</option>
+        <option value="1">Registra &mdash; v&ecirc; s&oacute; os pr&oacute;prios</option>
+        <option value="2">V&ecirc; tudo da equipe</option>
       </select>
       <div style="font-size:10.5px;color:var(--muted);margin-top:4px;">Quem n&atilde;o v&ecirc; nem sabe que a aba existe.</div>
     </div>
@@ -2133,8 +2134,8 @@ Com <strong>apenas registros em aberto</strong>, os mapas conclu&iacute;dos e ob
   <!-- ABA EQUIPE -->
   <div id="diBlocoEq" style="display:none;">
     <div class="dq-reservado" style="margin-bottom:16px;">
-      &#128274; <b>Registro restrito.</b> S&oacute; quem tem permiss&atilde;o no painel Equipe enxerga esta aba. Os compradores n&atilde;o veem o que &eacute; escrito aqui.
-      Escreva com data e fato, sem adjetivo &mdash; um dia isso pode sustentar uma conversa formal.
+      <span id="deqAviso">&#128274; <b>Registro restrito.</b> S&oacute; quem tem permiss&atilde;o no painel Equipe enxerga esta aba. Os compradores n&atilde;o veem o que &eacute; escrito aqui.
+      Escreva com data e fato, sem adjetivo &mdash; um dia isso pode sustentar uma conversa formal.</span>
     </div>
 
     <div class="stats-row" id="deq-stats"></div>
@@ -4517,6 +4518,17 @@ function podeDiarioEq(){
   const m=(equipeDB||[]).find(function(x){return x.nome===currentUser;});
   return !!(m&&m.ve_diario);
 }
+// Quem enxerga o que os outros escreveram (senao, so os proprios registros)
+function veDiarioTudo(){
+  const m=(equipeDB||[]).find(function(x){return x.nome===currentUser;});
+  return !!(m&&m.ve_diario&&m.ve_diario_todos);
+}
+// Unico ponto de leitura: tudo que a tela mostra passa por aqui
+function deqVisiveis(){
+  if(!podeDiarioEq())return [];
+  if(veDiarioTudo())return diarioEq;
+  return diarioEq.filter(function(r){return r.autor===currentUser;});
+}
 function cicloMes(){
   const d=new Date();
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
@@ -4545,7 +4557,9 @@ function trocarAbaDiario(qual){
 async function loadDiarioEq(){
   if(!podeDiarioEq()){diarioEq=[];return;}
   try{
-    diarioEq=await sb.get('diario_equipe','?order=data.desc')||[];
+    const filtro=veDiarioTudo()?'?order=data.desc'
+      :'?autor=eq.'+encodeURIComponent(currentUser)+'&order=data.desc';
+    diarioEq=await sb.get('diario_equipe',filtro)||[];
     popDeqFiltros();renderDiarioEqStats();renderDiarioEq();
   }catch(e){
     console.warn('diario equipe:',e.message);
@@ -4563,18 +4577,23 @@ function popDeqFiltros(){
 }
 
 function renderDiarioEqStats(){
+  const av=document.getElementById('deqAviso');
+  if(av)av.innerHTML=veDiarioTudo()
+    ? '\ud83d\udd12 <b>Registro restrito.</b> S\u00f3 quem tem permiss\u00e3o no painel Equipe enxerga esta aba. Os compradores n\u00e3o veem o que \u00e9 escrito aqui. Escreva com data e fato, sem adjetivo \u2014 um dia isso pode sustentar uma conversa formal.'
+    : '\ud83d\udd12 <b>Estes s\u00e3o os seus registros.</b> Voc\u00ea v\u00ea e edita apenas o que voc\u00ea mesmo escreveu. Escreva com data e fato, sem adjetivo \u2014 um dia isso pode sustentar uma conversa formal.';
   const el=document.getElementById('deq-stats');if(!el)return;
   const ini=iniMes();
-  const mes=diarioEq.filter(function(r){return r.data>=ini;}).length;
-  const pos=diarioEq.filter(function(r){return r.impacto==='pos';}).length;
-  const neg=diarioEq.filter(function(r){return r.impacto==='neg';}).length;
-  const comReg=TEAM.filter(function(t){return diarioEq.some(function(r){return r.pessoa===t.name&&r.data>=ini;});}).length;
+  const vis=deqVisiveis();
+  const mes=vis.filter(function(r){return r.data>=ini;}).length;
+  const pos=vis.filter(function(r){return r.impacto==='pos';}).length;
+  const neg=vis.filter(function(r){return r.impacto==='neg';}).length;
+  const comReg=TEAM.filter(function(t){return vis.some(function(r){return r.pessoa===t.name&&r.data>=ini;});}).length;
   el.innerHTML=
     '<div class="stat-c" style="border-left:4px solid #B45309"><div class="sl">Este mês</div><div class="sv" style="color:#B45309">'+mes+'</div></div>'+
     '<div class="stat-c" style="border-left:4px solid var(--green)"><div class="sl">Positivos</div><div class="sv c-green">'+pos+'</div></div>'+
     '<div class="stat-c" style="border-left:4px solid var(--red)"><div class="sl">Negativos</div><div class="sv c-red">'+neg+'</div></div>'+
     '<div class="stat-c"><div class="sl">Pessoas no mês</div><div class="sv c-text">'+comReg+'/'+TEAM.length+'</div></div>'+
-    '<div class="stat-c"><div class="sl">Total no ciclo</div><div class="sv c-text">'+diarioEq.length+'</div></div>';
+    '<div class="stat-c"><div class="sl">'+(veDiarioTudo()?'Total de registros':'Meus registros')+'</div><div class="sv c-text">'+vis.length+'</div></div>';
 }
 
 function renderDiarioEq(){
@@ -4582,7 +4601,7 @@ function renderDiarioEq(){
   const bu=(document.getElementById('deqFBusca').value||'').toLowerCase();
   const fp=document.getElementById('deqFPessoa').value;
   const fi=document.getElementById('deqFImp').value;
-  let lista=diarioEq.slice();
+  let lista=deqVisiveis().slice();
   if(fp)lista=lista.filter(function(r){return r.pessoa===fp;});
   if(fi)lista=lista.filter(function(r){return r.impacto===fi;});
   if(bu)lista=lista.filter(function(r){return ((r.pessoa||'')+' '+(r.texto||'')+' '+(r.ref||'')).toLowerCase().includes(bu);});
@@ -4629,6 +4648,8 @@ function abrirRegistroEq(pessoa){
 function editarRegistroEq(id){
   const r=diarioEq.find(function(x){return x.id===id;});
   if(!r)return;
+  if(r.autor!==currentUser){toast('Só quem escreveu pode editar','err');return;}
+  if(Date.now()-new Date(r.criado_em).getTime()>=48*3600*1000){toast('Passou das 48h — registro travado','err');return;}
   deqEditId=id;
   document.getElementById('deqTit').innerHTML='✏️ Editar registro';
   document.getElementById('deqBtnSalvar').textContent='Salvar alterações';
@@ -4689,6 +4710,8 @@ async function salvarRegistroEq(){
 async function excluirRegistroEq(id){
   const r=diarioEq.find(function(x){return x.id===id;});
   if(!r)return;
+  if(r.autor!==currentUser){toast('Só quem escreveu pode excluir','err');return;}
+  if(Date.now()-new Date(r.criado_em).getTime()>=48*3600*1000){toast('Passou das 48h — registro travado','err');return;}
   if(!confirm('Excluir este registro sobre '+r.pessoa+'?\n\nA exclusão fica na Auditoria.'))return;
   try{
     await sb.del('diario_equipe',id);
@@ -4703,9 +4726,10 @@ function abrirRevisaoEquipe(){renderRevisaoEquipe();openOv('ovDiarioEqMes');}
 function renderRevisaoEquipe(){
   const el=document.getElementById('deqMesLista');if(!el)return;
   const ini=iniMes();
+  const vis=deqVisiveis();
   el.innerHTML=TEAM.map(function(t){
-    const doMes=diarioEq.filter(function(r){return r.pessoa===t.name&&r.data>=ini;});
-    const ult=diarioEq.filter(function(r){return r.pessoa===t.name;}).sort(function(a,b){return b.data.localeCompare(a.data);})[0];
+    const doMes=vis.filter(function(r){return r.pessoa===t.name&&r.data>=ini;});
+    const ult=vis.filter(function(r){return r.pessoa===t.name;}).sort(function(a,b){return b.data.localeCompare(a.data);})[0];
     return '<div class="dq-pes">'+avEl(t.name)+
       '<div class="nm">'+t.name+'<div class="sub">'+(ult?'último: '+fmtBR(ult.data):'nunca registrado')+'</div></div>'+
       (doMes.length
@@ -4731,7 +4755,7 @@ function renderDeqFicha(){
   const el=document.getElementById('deqFicha');if(!el)return;
   const pes=document.getElementById('deqFPessoa').value;
   if(!pes){el.innerHTML='';return;}
-  const todos=diarioEq.filter(function(r){return r.pessoa===pes;});
+  const todos=deqVisiveis().filter(function(r){return r.pessoa===pes;});
   if(!todos.length){
     el.innerHTML='<div class="deq-ficha"><div class="fh">'+avEl(pes,30,11)+'<span class="nm">'+pes+'</span></div>'+
       '<div class="fsub">Nenhum registro ainda. Use a <b>Revisão do mês</b> ou o botão flutuante 📖.</div></div>';
@@ -4776,7 +4800,7 @@ function renderDeqFicha(){
 
 // ── evidencias por criterio ──
 function deqEvidencias(pessoa,critIdx){
-  return diarioEq.filter(function(r){
+  return deqVisiveis().filter(function(r){
     if(r.pessoa!==pessoa)return false;
     const t=deqTag(r.tag);
     return t&&t.crits.includes(critIdx);
@@ -4785,16 +4809,17 @@ function deqEvidencias(pessoa,critIdx){
 
 // ── PDF por pessoa ──
 function gerarRelatorioEquipe(){
-  if(!diarioEq.length){toast('Nenhum registro para imprimir','err');return;}
+  const vis=deqVisiveis();
+  if(!vis.length){toast('Nenhum registro para imprimir','err');return;}
   const hoje=new Date().toLocaleDateString('pt-BR');
-  const pessoas=[...new Set(diarioEq.map(function(r){return r.pessoa;}))].sort();
+  const pessoas=[...new Set(vis.map(function(r){return r.pessoa;}))].sort();
   let html='<div class="print-header"><div>'+
     '<div class="print-title">MpH Engenharia — Portal de Suprimentos</div>'+
     '<div class="print-sub">Diário de Suprimentos — ciclo '+cicloAtual()+'/'+(parseInt(cicloAtual())+1)+'</div>'+
     '<div style="font-size:10px;color:#B45309;margin-top:3px;">USO INTERNO — documento restrito</div>'+
     '</div><div class="print-date">Gerado em '+hoje+' por '+currentUser+'</div></div>';
   pessoas.forEach(function(nome){
-    const regs=diarioEq.filter(function(r){return r.pessoa===nome;}).sort(function(a,b){return a.data.localeCompare(b.data);});
+    const regs=vis.filter(function(r){return r.pessoa===nome;}).sort(function(a,b){return a.data.localeCompare(b.data);});
     const pos=regs.filter(function(r){return r.impacto==='pos';}).length;
     const neg=regs.filter(function(r){return r.impacto==='neg';}).length;
     html+='<div class="print-section" style="page-break-inside:avoid;">'+
@@ -5253,10 +5278,10 @@ async function renderDiarioEqBanner(){
   if(bm)bm.innerHTML='\ud83d\udcd6 Di\u00e1rio';
   const dia=new Date().getDate();
   if(dia<22){el.style.display='none';return;}
-  if(!diarioEq.length){try{diarioEq=await sb.get('diario_equipe','?order=data.desc')||[];}catch(e){el.style.display='none';return;}}
+  if(!diarioEq.length){try{await loadDiarioEq();}catch(e){el.style.display='none';return;}}
   const ini=iniMes();
   const falta=TEAM.filter(function(t){
-    return !diarioEq.some(function(r){return r.pessoa===t.name&&r.data>=ini;});
+    return !deqVisiveis().some(function(r){return r.pessoa===t.name&&r.data>=ini;});
   });
   if(!falta.length){el.style.display='none';return;}
   el.style.display='block';
@@ -6174,7 +6199,7 @@ function openMembroForm(){
   document.getElementById('mbAtivoWrap').style.display='none';
   document.getElementById('mbDelBtn').style.display='none';
   document.getElementById('membroFormTit').textContent='Novo Membro';
-  const w=document.getElementById('mbDiarioWrap');if(w)w.style.display=podeDiarioEq()?'':'none';
+  const w=document.getElementById('mbDiarioWrap');if(w)w.style.display=veDiarioTudo()?'':'none';
   paletaSel=0;renderPaleta();
   openOv('ovMembroForm');
 }
@@ -6186,12 +6211,12 @@ function editMembro(id){
   document.getElementById('mbNome').readOnly=true;
   document.getElementById('mbNivel').value=m.nivel||'Comprador Pleno';
   document.getElementById('mbAdmin').value=m.admin?'1':'0';
-  document.getElementById('mbVeDiario').value=m.ve_diario?'1':'0';
+  document.getElementById('mbVeDiario').value=m.ve_diario?(m.ve_diario_todos?'2':'1'):'0';
   document.getElementById('mbAtivo').value=m.ativo?'1':'0';
   document.getElementById('mbAtivoWrap').style.display='';
   document.getElementById('mbDelBtn').style.display='inline-block';
   document.getElementById('membroFormTit').textContent='Editar — '+m.nome;
-  const w2=document.getElementById('mbDiarioWrap');if(w2)w2.style.display=podeDiarioEq()?'':'none';
+  const w2=document.getElementById('mbDiarioWrap');if(w2)w2.style.display=veDiarioTudo()?'':'none';
   const idx=PALETA.findIndex(p=>p.cor===m.cor);
   paletaSel=idx>=0?idx:0;renderPaleta();
   openOv('ovMembroForm');
@@ -6208,9 +6233,13 @@ async function saveMembro(){
     nivel:document.getElementById('mbNivel').value,
     cor:p.cor,borda:p.borda,
     admin:document.getElementById('mbAdmin').value==='1',
-    ve_diario:document.getElementById('mbVeDiario').value==='1',
     ativo:document.getElementById('mbAtivo').value==='1',
   };
+  // so quem ve tudo concede ou tira a permissao do Diario de Suprimentos
+  if(veDiarioTudo()){
+    body.ve_diario=document.getElementById('mbVeDiario').value!=='0';
+    body.ve_diario_todos=document.getElementById('mbVeDiario').value==='2';
+  }
   try{
     if(idV){
       const alvo=equipeDB.find(x=>x.id===parseInt(idV));
@@ -6740,6 +6769,7 @@ function audFiltrada(){
   return auditoriaDB.filter(function(r){
     if(r.entidade==='mensagem')return false;   // conversa nunca aparece aqui
     if(r.entidade==='diario_equipe'&&!podeDiarioEq())return false;  // registro restrito
+    if(r.entidade==='diario_equipe'&&!veDiarioTudo()&&r.usuario!==currentUser)return false;
     if(u&&r.usuario!==u)return false;
     if(a&&r.acao!==a)return false;
     if(en&&r.entidade!==en)return false;
@@ -6864,7 +6894,7 @@ function gerarRelatorioAuditoria(){
 
 // ── CONTROLE DE VERSAO E SESSAO ──
 // Marcador da build. Trocado a cada publicação.
-const APP_VER='2026.11.24.1439'; /*BUILD*/
+const APP_VER='2026.11.26.0959'; /*BUILD*/
 let sessaoIniciadaEm=Date.now();
 let ultimaChecagem=0;
 let avisoVersaoMostrado=false;
